@@ -1,0 +1,240 @@
+package com.gamecentre.classicgames.tank;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.util.Log;
+
+import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
+import com.gamecentre.classicgames.utils.CONST;
+
+public class Bullet extends GameObjects {
+
+    private float vx,vy;
+    private final Bitmap[] bitmap;
+    private final Bitmap[] dbitmap;
+    private int direction;
+    private final Sprite sprite;
+    private final Sprite dsprite;
+    private int frame;
+    private int frame_delay;
+    private final int DEFAULT_SPEED = 25;
+    private boolean fromPlayer;
+    private boolean explode = true;
+    private float speed = 1;
+
+    public Bullet(ObjectType type, int x, int y, boolean fromPlayer) {
+        super(x,y);
+        this.fromPlayer = fromPlayer;
+        direction = CONST.Direction.UP;
+        sprite = SpriteObjects.getInstance().getData(type);
+        Bitmap bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y ,sprite.w*4,sprite.h);
+        bitmap = new Bitmap[4];
+        for(int i = 0; i < 4; i++){
+            bitmap[i] = Bitmap.createBitmap(bm,i*sprite.w,0, sprite.w, sprite.h);
+        }
+
+        dsprite = SpriteObjects.getInstance().getData(ObjectType.ST_DESTROY_BULLET);
+        Bitmap dbm = Bitmap.createBitmap(TankView.graphics, dsprite.x, dsprite.y ,dsprite.w,dsprite.h*dsprite.frame_count);
+        dbitmap = new Bitmap[dsprite.frame_count];
+        for(int i = 0; i < dsprite.frame_count; i++){
+            dbitmap[i] = Bitmap.createBitmap(dbm,0,i*dsprite.h, dsprite.w, dsprite.h);
+        }
+        this.vx = DEFAULT_SPEED;
+        this.vy = DEFAULT_SPEED;
+        super.w = sprite.w;
+        super.h = sprite.h;
+        frame_delay = dsprite.frame_time;
+        frame = 0;
+    }
+
+    public Bullet(Bullet bullet,int x, int y) {
+        super(x,y);
+        this.fromPlayer = bullet.fromPlayer();
+        this.bitmap = bullet.getBitmap();
+        this.sprite = SpriteObjects.getInstance().getData(ObjectType.ST_BULLET);
+
+        this.dbitmap = bullet.getDBitmap();
+        this.dsprite = SpriteObjects.getInstance().getData(ObjectType.ST_DESTROY_BULLET);
+
+        this.x = x;
+        this.y = y;
+        this.vx = DEFAULT_SPEED*bullet.getSpeed();
+        this.vy = DEFAULT_SPEED*bullet.getSpeed();
+        this.direction = bullet.getDirection();
+        super.w = sprite.w;
+        super.h = sprite.h;
+        frame_delay = dsprite.frame_time;
+    }
+
+    public Bitmap[] getBitmap() {
+        return bitmap;
+    }
+
+    public Bitmap[] getDBitmap() {
+        return dbitmap;
+    }
+
+    public void setXY(int x,int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void setSpeed(float speed) {
+        vx = DEFAULT_SPEED*speed;
+        vy = DEFAULT_SPEED*speed;
+        this.speed = speed;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public boolean fromPlayer() {
+        return fromPlayer;
+    }
+
+    public void setPlayer(boolean player) {
+        fromPlayer = player;
+    }
+
+//    protected int[] setCollissionRect(int dir) {
+//        getRect();
+//        int rl,rt,rr,rb;
+//        switch (dir) {
+//            case CONST.Direction.UP:
+//                rect.left = rect.left+2;
+//                rect.top = rect.top-4;
+//                rr = rect.right-2;
+//                rb = rect.top-2;
+//                break;
+//            case CONST.Direction.DOWN:
+//                rect.left = rect.left+2;
+//                rect.top = rect.bottom+2;
+//                rect.top = rect.right-2;
+//                rect.top = rect.bottom+4;
+//                break;
+//            case CONST.Direction.LEFT:
+//                rect.left = rect.left-4;
+//                rt = rect.top+2;
+//                rr = rect.left-2;
+//                rb = rect.bottom-2;
+//                break;
+//            case CONST.Direction.RIGHT:
+//                rect.left = rect.right+2;
+//                rt = rect.top+2;
+//                rr = rect.right+4;
+//                rb = rect.bottom-2;
+//                break;
+//            default:
+//                rl = 0;rt=0;rr=0;rb=0;
+//        }
+//
+//        cRct.set(rl,rt,rr,rb);
+//        return new int[]{rl,rt,rr,rb};
+//
+//    }
+
+    protected boolean collides_with(GameObjects targ) {
+        rect = getRect();
+        Rect r = new Rect();
+        r.left = rect.left;
+        r.right = rect.right;
+        r.top = rect.top;
+        r.bottom = rect.bottom;
+        if(!(targ instanceof Enemy)) {
+            switch (direction) {
+                case CONST.Direction.UP:
+                case CONST.Direction.DOWN:
+                    r.left -= 2;
+                    r.right += 2;
+                    break;
+                case CONST.Direction.LEFT:
+                case CONST.Direction.RIGHT:
+                    r.bottom += 2;
+                    r.top -= 2;
+                    break;
+            }
+        }
+        return Rect.intersects(r,targ.getRect());
+    }
+
+    public void move() {
+        if(!destroyed) {
+            if(collides_with_wall()){
+                if(fromPlayer) {
+                    SoundManager.playSound(Sounds.TANK.STEEL, 1, 1);
+                }
+                setDestroyed();
+                return;
+            }
+            switch (direction) {
+                case CONST.Direction.UP:
+                    y -= vy;
+                    if(y < 0)y=0;
+                    break;
+                case CONST.Direction.DOWN:
+                    y += vy;
+                    if(y > TankView.HEIGHT)y=TankView.HEIGHT;
+                    break;
+                case CONST.Direction.LEFT:
+                    x -= vx;
+                    if(x < 0)x=0;
+                    break;
+                case CONST.Direction.RIGHT:
+                    x += vx;
+                    if(x > TankView.WIDTH)x=TankView.WIDTH;
+                    break;
+            }
+        }
+    }
+
+    public void move(int dir) {
+        direction = dir;
+    }
+
+//    public boolean collidesWith(TankGameObjects targ) {
+//
+//    }
+
+
+    public void setDestroyed() {
+        super.setDestroyed();
+        frame = 0;
+        frame_delay = dsprite.frame_time;
+        explode = true;
+    }
+
+    public void setDestroyed(boolean explode) {
+        setDestroyed();
+        super.recycle();
+        this.explode = explode;
+    }
+
+    public void draw(Canvas canvas) {
+        if(!destroyed){
+            canvas.drawBitmap(bitmap[direction], x - (float) sprite.w / 2, y - (float) sprite.h / 2, null);
+        }
+        else if(!recycle){
+            if (frame < dsprite.frame_count) {
+                canvas.drawBitmap(dbitmap[frame], x - (int) (dsprite.w / 2), y - (int) (dsprite.h / 2), null);
+                if(frame_delay <= 0) {
+                    frame = frame + 1;
+                    frame_delay = dsprite.frame_time;
+                }
+                else{
+                    --frame_delay;
+                }
+            } else if (frame == dsprite.frame_count) {
+                super.recycle();
+            }
+        }
+    }
+}

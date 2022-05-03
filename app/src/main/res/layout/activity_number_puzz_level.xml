@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context=".numberpuzzle.NumberPuzzLevelActivity">
+
+    <RelativeLayout
+        android:id="@+id/level"
+        android:layout_width="match_parent"
+        android:layout_height="500sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="130dp">
+
+        <Button
+            android:id="@+id/num_puzz3"
+            android:layout_width="100sp"
+            android:layout_height="50sp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="159dp"
+            android:layout_marginTop="55dp"
+            android:background="@drawable/num_puzz3" />
+
+        <Button
+            android:id="@+id/num_puzz4"
+            android:layout_width="100sp"
+            android:layout_height="50sp"
+            android:layout_below="@+id/num_puzz3"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="155dp"
+            android:layout_marginTop="66dp"
+            android:background="@drawable/num_puzz4" />
+
+        <Button
+            android:id="@+id/num_puzz5"
+            android:layout_width="100sp"
+            android:layout_height="50sp"
+            android:layout_below="@+id/num_puzz4"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="155dp"
+            android:layout_marginTop="66dp"
+            android:background="@drawable/num_puzz5" />
+
+        <Button
+            android:id="@+id/num_puzz6"
+            android:layout_width="100sp"
+            android:layout_height="50sp"
+            android:layout_below="@+id/num_puzz5"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="155dp"
+            android:layout_marginTop="66dp"
+            android:background="@drawable/num_puzz6" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/backBtn"
+        android:layout_width="80sp"
+        android:layout_height="50sp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="11dp"
+        android:background="@drawable/back"
+        android:onClick="go_back"/>
+
+</RelativeLayout>
