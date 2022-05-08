@@ -34,8 +34,6 @@ public class ServerConnectionThread extends Thread{
                 socketListener.start();
                 WifiDirectManager.svSender = new ServerSenderThread(socket, CONST.GAME_NAME);
                 WifiDirectManager.svSender.start();
-                ServerSenderThread sendGameName = new ServerSenderThread(socket, CONST.GAME_NAME);
-                sendGameName.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }

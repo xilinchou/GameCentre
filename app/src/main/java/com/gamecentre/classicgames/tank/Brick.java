@@ -16,6 +16,7 @@ public class Brick extends GameObjects{
     Bitmap currentBitmap;
     int W, H;
     int dstate = 0;
+    private int drwx, drwy;
 
     public Brick(int x, int y) {
         super(x, y);
@@ -48,6 +49,8 @@ public class Brick extends GameObjects{
         W = super.w;
         H = super.h;
         getRect();
+        drwx = super.x;
+        drwy = super.y;
     }
 
     public void collidsWithBullet(Bullet bullet) {
@@ -62,56 +65,23 @@ public class Brick extends GameObjects{
 
     public boolean collidsWithBullet(int dir) {
         ++dstate;
-        getRect();
-
-        switch (dir) {
-            case CONST.Direction.UP:
-                super.h -= H/2;
-                rect.bottom -= H/2;
-                if(rect.bottom - rect.top < H/2) {
-                    return  false;
-                }
-                if(dstate == 1){
-                    currentBitmap = d1bitmaps.get(dir);
-                }
-                break;
-            case CONST.Direction.DOWN:
-                super.h -= H/2;
-                rect.top += H/2;
-                y += H/2;
-                if(rect.bottom - rect.top < H/2) {
-                    return  false;
-                }
-                if(dstate == 1){
-                    currentBitmap = d1bitmaps.get(dir);
-                }
-                break;
-            case CONST.Direction.LEFT:
-                super.w -= W/2;
-                rect.right -= W/2;
-                if(rect.right - rect.left < W/2) {
-                    return  false;
-                }
-                if(dstate == 1){
-                    currentBitmap = d1bitmaps.get(dir);
-                }
-                break;
-            case CONST.Direction.RIGHT:
-                super.w -= W/2;
-                rect.left += W/2;
-                x += W/2;
-                if(rect.right - rect.left < W/2) {
-                    return  false;
-                }
-                if(dstate == 1){
-                    currentBitmap = d1bitmaps.get(dir);
-                }
-                break;
+        if(dstate > 1) {
+            return  false;
+        }
+        if(dstate == 1){
+            currentBitmap = d1bitmaps.get(dir);
+        }
+        if(dir == CONST.Direction.DOWN) {
+            drwy += H/2;
+        }
+        else if(dir == CONST.Direction.RIGHT) {
+            drwx += W/2;
         }
         return true;
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(currentBitmap,x,y,null);
+//        canvas.drawBitmap(currentBitmap,x,y,null);
+        canvas.drawBitmap(currentBitmap,drwx,drwy,null);
     }
 }

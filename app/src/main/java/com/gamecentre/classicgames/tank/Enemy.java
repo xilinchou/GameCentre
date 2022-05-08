@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
@@ -20,6 +21,10 @@ public class Enemy extends Tank{
     private  float bulletSpeed = 1;
     protected int reloadTmr = (int)(0.2*TankView.TO_SEC);
     protected int reload_time = 0;
+    public boolean hasBonus = false;
+    private int lifeFrame = 0;
+    private String killScore;
+    private boolean killed = false;
 
     public Enemy(ObjectType type, int x, int y) {
         super(type, x, y, 0);
@@ -31,22 +36,38 @@ public class Enemy extends Tank{
         change_dir_time = (int)(Math.random()*30 + 10);
         direction = CONST.Direction.DOWN;
         if(type == ObjectType.ST_TANK_B) {
-            this.vx += 3;
-            this.vy += 3;
+            this.vx = DEFAULT_SPEED*1.1f;
+            this.vy = DEFAULT_SPEED*1.1f;
+            killScore = "200";
         }
-        else if(type == ObjectType.ST_TANK_A) {
-            this.vx -= 2;
-            this.vy -= 2;
+
+        if(type == ObjectType.ST_TANK_A) {
+            this.vx = DEFAULT_SPEED*0.7f;
+            this.vy = DEFAULT_SPEED*0.7f;
+            killScore = "100";
+        }
+
+        if(type == ObjectType.ST_TANK_D) {
+            killScore = "400";
         }
 
         if(type == ObjectType.ST_TANK_C) {
-            bulletSpeed = 1.5f;
+            bulletSpeed = 1.15f;
             reloadTmr = (int)(0.8*TankView.TO_SEC);
+            killScore = "300";
         }
+
         else {
             reloadTmr = (int)(1*TankView.TO_SEC);
         }
+
+
 //        moving = true;
+    }
+
+    public Enemy(ObjectType type, int group, int x, int y) {
+        this(type, x, y);
+        this.group = group;
     }
 
     public void setTarget(Point targ) {
@@ -65,6 +86,51 @@ public class Enemy extends Tank{
         freezeTmr = FreezeTime;
     }
 
+    public void changeDirection() {
+        if(TankView.freeze) {
+            return;
+        }
+        if(dir_time >= change_dir_time) {
+            dir_time = 0;
+            change_dir_time = (int)(Math.random()*30 + 10);
+            int new_direction;
+
+            float d = (float)Math.random();
+            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : 0.5) && target.x > 0 && target.y > 0) {
+                int dx = (int)(target.x - x);
+                int dy = (int)(target.y - y);
+
+                d = (float)Math.random();
+
+                if(Math.abs(dx) > Math.abs(dy))
+                    new_direction = (d < 0.5) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
+                else
+                    new_direction = (d < 0.5) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
+            }
+            else {
+                new_direction = (int)(Math.random()*4)%4;
+            }
+
+            if(new_direction != direction) {
+                direction = new_direction;
+
+                int px_tile = (int)((x/tile_x)*tile_x);
+                int py_tile = (int)((y/tile_y)*tile_y);
+
+                if(x-px_tile < tile_x/TileScale) x = px_tile;
+                else if(px_tile + tile_x - x < tile_x/TileScale) x = px_tile+tile_x;
+
+                if(y-py_tile < tile_y/TileScale) y = py_tile;
+                else if(py_tile + tile_y - y < tile_y/TileScale) y = py_tile+tile_y;
+            }
+
+
+        }
+        else {
+            dir_time++;
+        }
+    }
+
     public int getDirection() {
         return direction;
     }
@@ -78,56 +144,34 @@ public class Enemy extends Tank{
         }
         getRect();
 
-        if(dir_time >= change_dir_time) {
-            dir_time = 0;
-            change_dir_time = (int)(Math.random()*30 + 10);
-
-            float d = (float)Math.random();
-            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : 0.5) && target.x > 0 && target.y > 0) {
-                int dx = (int)(target.x - x);
-                int dy = (int)(target.y - y);
-
-                d = (float)Math.random();
-
-                if(Math.abs(dx) > Math.abs(dy))
-                    direction = (d < 0.65) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
-                else
-                    direction = (d < 0.65) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
-            }
-            else {
-                direction = (int)(Math.random()*4)%4;
-            }
-
-            int px_tile = (int)((x/tile_x)*tile_x);
-            int py_tile = (int)((y/tile_y)*tile_y);
-
-            if(x-px_tile < tile_x/TileScale) x = px_tile;
-            else if(px_tile + tile_x - x < tile_x/TileScale) x = px_tile+tile_x;
-
-            if(y-py_tile < tile_y/TileScale) y = py_tile;
-            else if(py_tile + tile_y - y < tile_y/TileScale) y = py_tile+tile_y;
-        }
-        else {
-            dir_time++;
-        }
-
-
         switch (direction) {
             case CONST.Direction.UP:
-                if(collision || rect.top <= 1)return;
+                if(collision || y <= 0)return;
                 y -= vy;
+                if(y < 0){
+                    y = 0;
+                }
                 break;
             case CONST.Direction.DOWN:
-                if(collision || rect.bottom >= TankView.HEIGHT)return;
+                if(collision || y >= TankView.HEIGHT - h)return;
                 y += vy;
+                if(y >= TankView.HEIGHT - h){
+                    y = TankView.HEIGHT - h;
+                }
                 break;
             case CONST.Direction.LEFT:
-                if(collision || rect.left < 1)return;
+                if(collision || x <= 0)return;
                 x -= vx;
+                if(x < 0) {
+                    x = 0;
+                }
                 break;
             case CONST.Direction.RIGHT:
-                if(collision || rect.right > TankView.WIDTH)return;
+                if(collision || x >= TankView.WIDTH - w)return;
                 x += vx;
+                if(x > TankView.WIDTH - w) {
+                    x = TankView.WIDTH - w;
+                }
                 break;
         }
     }
@@ -135,7 +179,7 @@ public class Enemy extends Tank{
     public void fire() {
 
 
-        if(reload_time > 0 || TankView.freeze || bullets.size() == MaxBullet || isDestroyed()) {
+        if(reload_time > 0 || TankView.freeze || bullets.size() == MaxBullet || isDestroyed() || respawn) {
             return;
         }
         int bx=0,by=0;
@@ -143,17 +187,21 @@ public class Enemy extends Tank{
             case CONST.Direction.UP:
                 bx = x+(int) sprite.w/2;
                 by = y;
+                by = (int) ((by / tile_y) * tile_y) + tile_y;
                 break;
             case CONST.Direction.DOWN:
                 bx = x+(int) sprite.w/2;
                 by = y+ sprite.h;
+                by = (int) ((by / tile_y) * tile_y) - tile_y;
                 break;
             case CONST.Direction.LEFT:
                 bx = x;
+                bx = (int) ((bx / tile_x) * tile_x) + tile_x;
                 by = y+(int) sprite.h/2;
                 break;
             case CONST.Direction.RIGHT:
                 bx = x+ sprite.w;
+                bx = (int) ((bx / tile_x) * tile_x) - tile_x;
                 by = y+(int) sprite.h/2;
                 break;
         }
@@ -179,9 +227,9 @@ public class Enemy extends Tank{
     }
 
 
-    public void collidsWithBullet(Bullet bullet) {
+    public boolean collidsWithBullet(Bullet bullet) {
         if(isDestroyed() || respawn) {
-            return;
+            return false;
         }
         if(super.collides_with(bullet)) {
 //            if(shield) {
@@ -198,10 +246,22 @@ public class Enemy extends Tank{
 //                bullet.setDestroyed();
 //                return;
 //            }
-            setDestroyed();
+            if(hasBonus) {
+                TankView.bonus.setBonus((int) (Math.random() * 8));
+            }
             bullet.setDestroyed();
-
+            if(group == 1) {
+                killed = true;
+                setDestroyed();
+                return true;
+            }
+            else {
+                --group;
+                SoundManager.playSound(Sounds.TANK.STEEL);
+                return false;
+            }
         }
+        return false;
     }
 
     public boolean canBreakWall() {
@@ -253,6 +313,44 @@ public class Enemy extends Tank{
         }
     }
 
+
+    public void setModel(MTank model, float scale) {
+        this.x = (int) (model.x * scale);
+        this.y = (int) (model.y * scale);
+        this.direction = model.dirction;
+//        this.setShield(model.shield);
+//        this.setBoat(model.boat);
+//        this.armour = model.armour;
+        lives = model.lives;
+        this.group = model.group;
+        this.typeVal = model.typeVal;
+
+        if(model.tDestroyed) {
+            setDestroyed();
+        }
+
+        for(int i = 0; i < bullets.size(); i++) {
+            if(!(bullets.get(i).isDestroyed())) {
+                bullets.set(i,null);
+            }
+        }
+
+        while(bullets.remove(null));
+
+        for(int[] b:model.bullets) {
+            bullet.move(direction);
+//            bullet.setSpeed(b[2]);
+            bullet.setPlayer(false);
+            if(b[3] == 1) {
+                bullet.setDestroyed();
+            }
+
+            bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
+            bullet.destroyed = false;
+        }
+    }
+
+
     public void draw(Canvas canvas) {
         Bitmap bm;
         int bx, by, bw, bh;
@@ -272,7 +370,13 @@ public class Enemy extends Tank{
             }
         }
         else if(!destroyed) {
-            canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * typeVal + frame).get(4*group+direction),x,y,null);
+            if(hasBonus) {
+                lifeFrame = (lifeFrame + 1)%3;
+            }
+            else{
+                lifeFrame = 0;
+            }
+            canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * typeVal + frame).get(4*(lifeFrame>0?0:group)+direction),x,y,null);
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;
                 frame_delay = sprite.frame_time;
@@ -295,6 +399,9 @@ public class Enemy extends Tank{
         else if(!recycle) {
             if (frame < dsprite.frame_count) {
                 canvas.drawBitmap(dbitmap[frame], x - (int) (w / 2), y - (int) (h / 2), null);
+                if(killed){
+                    drawText(canvas,killScore);
+                }
                 if(frame_delay <= 0) {
                     frame = frame + 1;
                     frame_delay = dsprite.frame_time;
@@ -303,6 +410,7 @@ public class Enemy extends Tank{
                     --frame_delay;
                 }
             } else if (frame == dsprite.frame_count) {
+                killed = false;
                 super.recycle();
 //                respawn();
             }

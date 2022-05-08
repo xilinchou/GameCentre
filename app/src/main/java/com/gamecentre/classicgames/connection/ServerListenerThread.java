@@ -2,7 +2,6 @@ package com.gamecentre.classicgames.connection;
 
 import android.os.Bundle;
 import android.os.Message;
-import android.util.Log;
 
 import com.gamecentre.classicgames.model.Game;
 import com.gamecentre.classicgames.utils.CONST;
@@ -20,8 +19,8 @@ public class ServerListenerThread extends Thread{
 
     private Socket hostThreadSocket;
     private boolean RUN = true;
-    ObjectInputStream objectInputStream;
-    InputStream inputStream = null;
+    ObjectInputStream ois;
+    InputStream is = null;
     BufferedInputStream bis;
 
     ServerListenerThread(Socket soc) {
@@ -31,9 +30,9 @@ public class ServerListenerThread extends Thread{
     @Override
     public void run() {
         try{
-            inputStream = hostThreadSocket.getInputStream();
-            bis = new BufferedInputStream(inputStream);
-            objectInputStream = new ObjectInputStream(bis);
+            is = hostThreadSocket.getInputStream();
+            bis = new BufferedInputStream(is);
+            ois = new ObjectInputStream(is);
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,7 +41,7 @@ public class ServerListenerThread extends Thread{
             try {
                 Object gameObject;
                 Bundle data = new Bundle();
-                gameObject = objectInputStream.readObject();
+                gameObject = ois.readObject();
                 if (gameObject != null) {
                     if (gameObject instanceof PlayerInfo) {
 //                        data.putSerializable(CONST.PLAYER_INFO, (PlayerInfo) gameObject);
@@ -59,9 +58,7 @@ public class ServerListenerThread extends Thread{
                     WifiDirectManager.serverHandler.sendMessage(msg);
                 }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }

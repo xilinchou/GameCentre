@@ -43,11 +43,7 @@ public class ClientConnectionThread extends Thread{
                         clientListener.start();
                         PlayerInfo playerInfo = new PlayerInfo(userName);
                         WifiDirectManager.clSender = new ClientSenderThread(socket, playerInfo);
-//                        ClientSenderThread sendUserName = new ClientSenderThread(socket);
                         WifiDirectManager.clSender.start();
-                        ClientSenderThread sendUserName = new ClientSenderThread(socket, playerInfo);
-//                        ClientSenderThread sendUserName = new ClientSenderThread(socket);
-                        sendUserName.start();
                     }
                 }
             } catch (UnknownHostException e) {

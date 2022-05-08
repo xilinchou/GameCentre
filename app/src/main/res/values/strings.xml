@@ -30,4 +30,19 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="game_over">GAME\nOVER</string>
+    <string name="hi_score_txt">HI-SCORE</string>
+    <string name="player2_txt">II-PLAYER</string>
+    <string name="player1_txt">I-PLAYER</string>
+    <string name="pts">PTS</string>
+    <string name="nextTxt">Next &gt;&gt;</string>
+    <string name="retryTxt">Retry &gt;&gt;</string>
+    <string name="menuTxt">&lt;&lt; Menu</string>
+    <string name="pauseTxt">PAUSE</string>
+    <string name="end_gameTxt">END GAME</string>
+    <string name="continueTxt">PLAY</string>
+    <string name="enable_sound_txt">Enable Sound</string>
+    <string name="enable_vibration_txt">Enable Vibration</string>
+    <string name="save_txt">Save</string>
+    <string name="cancel_txt">Cancel</string>
 </resources>

@@ -2,19 +2,23 @@ package com.gamecentre.classicgames.tank;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -27,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.gamecentre.classicgames.model.Game;
+import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.model.TankGameModel;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
@@ -38,13 +43,13 @@ import com.gamecentre.classicgames.pingpong.Pong;
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.utils.RemoteMessageListener;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
-import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 
@@ -68,7 +73,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     private TankView.State mCurrentState = TankView.State.Running;
     private TankView.State mLastState = TankView.State.Stopped;
     private boolean started = false;
-    public Context context;
+    public static Context context;
+
+    public static TankView instance;
 
     public static int WIDTH;
     public static int HEIGHT;
@@ -92,6 +99,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     /** Flag that marks this view as initialized */
     private boolean mInitialized = false;
 
+    protected boolean updatingRemote = false;
+    protected boolean drawing = false;
+
     /** Preferences loaded at startup */
     private int mTankSpeedModifier;
 
@@ -99,13 +109,15 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     private int mLivesModifier;
 
     /** Starts a new round when set to true */
-    private boolean mNewRound = true;
+    public static boolean mNewRound = true;
 
     /** Keeps the game thread alive */
     private boolean mContinue = true;
 
     /** Mutes sounds when true */
-    private boolean mMuted = false;
+    private boolean mSound = false;
+    private static boolean mVibrate = false;
+    private static Vibrator mVibrator;
 
     private Player P2, P1;
     private Eagle eagle;
@@ -113,7 +125,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     public static Sprite tankSprite;
     public Drawable eCountImg;
     public Bitmap eCountBm;
-    private ArrayList<Enemy> Enemies = new ArrayList<>();
+    private ArrayList<Enemy> Enemies;
     private ArrayList<ArrayList<GameObjects>> levelObjects;
     private ArrayList<Bush> levelBushes;
     public static Bonus bonus;
@@ -122,9 +134,37 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     private final int MAX_ENEMIES = 4;
     private final int[][] eaglePos = {{11,25},{11,24},{11,23},{12,23},{13,23},{14,23},{14,24},{14,25}};
 
-    public static ArrayList<ArrayList<Bitmap>> curtain;
+    private  Bitmap curtain;
+    public static int tile_dim;
+    private int curtainFrame = 0;
+    private int curtainFrameTmr = 0;
+    private int curtainFrameTime = (int)(0.01*TO_SEC);
+    private boolean closingCurtain = false;
+    private boolean openingCurtain = false;
+    private boolean movingCurting = true;
+    private boolean curtainPause = false;
+    private int curtainPauseTmr;
+    private int curtainPauseTime = (int)(0.4*TO_SEC);
+    Paint curtainPaint = new Paint();
+    Rect curtainTRect;
+    Rect curtainBRect;
 
-    public static ArrayList<Game> gameModel;
+    public static boolean gameover = false;
+    public static boolean stageComplete = false;
+
+    private int scoreFrame;
+    private int enemyFrame;
+    private int scoreFrameTmr;
+    private int scoreFrameTime = (int)(0.05*TO_SEC);
+    private boolean showingScore = false;
+
+    private int showScoreDelay = (int)(2*TO_SEC);
+    private int showScoreTmr = 0;
+
+    private int newStageTmr = (int)(2*TO_SEC);
+
+
+    public static LinkedList<Game> gameModel;
 
 
     public static boolean freeze = false;
@@ -138,6 +178,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     private boolean drawStarted = false;
     private boolean startSound = false;
+
+    public static Typeface typeface;
+    public static Paint txtPaint;
 
     /** Touch boxes for various functions. These are assigned in initialize() */
     private Rect mPauseTouchBox;
@@ -164,6 +207,8 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     /** Redraws the screen according to FPS */
     private TankView.RefreshHandler mRedrawHandler = new TankView.RefreshHandler();
 
+//    private TankView.RemoteUpdateHandler mRemoteUpdateHandler = new TankView.RemoteUpdateHandler();
+
     /** Flags indicating who is a player */
     private boolean twoPlayers = false;
 
@@ -186,6 +231,35 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
     }
 
+
+    class RemoteUpdateHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            while(true) {
+                if (gameModel != null && !gameModel.isEmpty()) {
+                    updatingRemote = true;
+                    TankView.this.getRemoteUpdate();
+                    updatingRemote = false;
+                }
+            }
+        }
+    }
+
+    Thread tRemoteHandler = new Thread() {
+        @Override
+        public void run(){
+            while (true){
+                //we can't update the UI from here so we'll signal our handler and it will do it for us.
+//                mRemoteUpdateHandler.sendMessage(null);
+                if (gameModel != null && !gameModel.isEmpty() && !drawing) {
+                    updatingRemote = true;
+                    TankView.this.getRemoteUpdate();
+                    updatingRemote = false;
+                }
+            }
+        }
+    };
+
     /**
      * Creates a new PongView within some context
      * @param context
@@ -194,12 +268,22 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     public TankView(Context context, AttributeSet attrs) {
         super(context, attrs);
         TankView.this.context = context;
+        instance = this;
         constructView();
     }
 
     public TankView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        instance = this;
         constructView();
+    }
+
+    public static TankView getInstance() {
+        return instance;
+    }
+
+    public Context getTankViewContext() {
+        return context;
     }
 
     /**
@@ -212,11 +296,8 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         MessageRegister.getInstance().setButtonListener(this);
 
         Context ctx = this.getContext();
-        SharedPreferences settings = ctx.getSharedPreferences("GameSettings", 0);
-//        loadPreferences( PreferenceManager.getDefaultSharedPreferences(ctx) );
+        SharedPreferences settings = ctx.getSharedPreferences("TankSettings", 0);
         loadPreferences(settings);
-        loadSFX();
-//        loadGameObjects();
 
     }
 
@@ -264,6 +345,8 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
         SpriteObjects.getInstance().insert(ObjectType.ST_TANKS_LOGO, 0, 260, 406, 72, 1, 200, false);
 
+        SpriteObjects.getInstance().insert(ObjectType.ST_CURTAIN, 928, 224, 16, 16, 1, 200, false);
+
 
 
     }
@@ -282,12 +365,12 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     protected void loadPreferences(SharedPreferences prefs) {
-        Context ctx = getContext();
-        Resources r = ctx.getResources();
 
-        mTankSpeedModifier = Math.max(0, prefs.getInt(Pong.PREF_BALL_SPEED, 0));
-        mMuted = prefs.getBoolean(Pong.PREF_MUTED, mMuted);
-        mLivesModifier = Math.max(0, prefs.getInt(Pong.PREF_LIVES, 2));
+        mSound = prefs.getBoolean(TankMenuActivity.PREF_MUTED, mSound);
+        SoundManager.enableSound(mSound);
+
+        mVibrate = prefs.getBoolean(TankMenuActivity.PREF_VIBRATE, mVibrate);
+        mVibrator = (Vibrator) (context.getSystemService(Context.VIBRATOR_SERVICE));
 
     }
 
@@ -350,18 +433,19 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         SCALE = getResources().getDisplayMetrics().density;
 
         ViewGroup.LayoutParams params = TankView.this.getLayoutParams();
-        int dim = (int)(TankView.this.getHeight()*0.98);
+        int dim = (int)(TankView.this.getHeight()*0.95);
         Log.d("LAYOOUT", String.valueOf(dim));
-        dim = (int)(dim/13)*13;
+        dim = (int)(dim/52f)*52;
         params.width = dim;//(int)(32*13*SCALE);
         params.height = dim;//(int)(32*13*SCALE);
 //        TankView.this.setLayoutParams(params);
         TankView.this.layout(0,0,dim,dim);
 
-
+//        ((TankActivity)context).boarder.layout(0,0,(int)(dim*0.8),(int)(dim*0.8));
 
         WIDTH = TankView.this.getWidth();//*RESIZE;
         HEIGHT = TankView.this.getHeight();//*RESIZE;
+        tile_dim = (int)(HEIGHT/26);
         Log.d("VIEW DIM", WIDTH + " " + HEIGHT);
         Log.d("VIEW SCALE", String.valueOf(SCALE));
 
@@ -369,6 +453,15 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         Bitmap test = Bitmap.createBitmap(graphics,0,0,32,32);
         int h = test.getHeight();
         RESIZE  = dim/(h*13f);
+
+//        TankView.typeface = Typeface.createFromAsset(TankView.context.getAssets(),"prstartk.ttf");
+        TankView.typeface = Typeface.createFromAsset(TankView.context.getAssets(),"arialbd.ttf");
+        TankView.txtPaint = new Paint();
+        txtPaint.setTypeface(TankView.typeface);
+        txtPaint.setColor(Color.WHITE);
+//        txtPaint.setStyle(Paint.Style.STROKE);
+        txtPaint.setTextSize(10*SCALE);
+
 
         loadGameObjects();
 
@@ -388,57 +481,32 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         Sprite sprite = SpriteObjects.getInstance().getData(ObjectType.ST_LEFT_ENEMY);
         eCountBm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
         eCountImg = new BitmapDrawable(context.getResources(), eCountBm);
-        getEnemyCountView();
+//        getEnemyCountView();
 
         sprite = SpriteObjects.getInstance().getData(ObjectType.ST_FLAG);
         bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
         Drawable d = new BitmapDrawable(context.getResources(), bm);
-        TankActivity.P1StatusImg.setBackground(d);
+        ((TankActivity)context).P1StatusImg.setBackground(d);
 
         sprite = SpriteObjects.getInstance().getData(ObjectType.ST_STAGE_STATUS);
         bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
         d = new BitmapDrawable(context.getResources(), bm);
-        TankActivity.StageFlag.setBackground(d);
+        ((TankActivity)context).StageFlag.setBackground(d);
 
-//        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
-//        curtain = new ArrayList<>();
-//        for(int row = 0; row < 26; row++) {
-//            ArrayList <Bitmap> colBm = new ArrayList<>();
-//            for(int col = 0; col < 26; col++) {
-//                bm = Bitmap.createBitmap(new int[]{Color.BLACK},16, 16, conf);
-//                colBm.add(bm);
-//            }
-//            curtain.add(colBm);
-//        }
+        sprite = SpriteObjects.getInstance().getData(ObjectType.ST_CURTAIN);
+        bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
+        curtain = Bitmap.createScaledBitmap(bm,WIDTH,bm.getHeight(),false);
+        curtainPaint.setColor(Color.GRAY);
+        curtainPaint.setStyle(Paint.Style.FILL);
+        curtainTRect = new Rect();
+        curtainBRect = new Rect();
 
-    }
+        ((TankActivity)context).scoreView.setVisibility(View.INVISIBLE);
 
-    private void getEnemyCountView() {
-        enemyCount = new ArrayList<>();
-        int Rows = TankActivity.enemyCount.getChildCount();
-        for(int row = 0; row < Rows; row++) {
-            LinearLayout current_row =  (LinearLayout)TankActivity.enemyCount.getChildAt(row);
-            int Cols = current_row.getChildCount();
-            ArrayList<ImageView> colCount = new ArrayList<>();
-            for(int col = 0; col < Cols; col++) {
-                ImageView card = (ImageView) current_row.getChildAt(col);
-                card.setBackground(eCountImg);
-                colCount.add(card);
-            }
-            enemyCount.add(colCount);
-        }
-    }
+        resetScoreView();
 
-
-
-    /**
-     * Reset the paddles/touchboxes/framespersecond/ballcounter for the next round.
-     */
-    private void nextRound() {
-        drawStarted = false;
-        startSound = false;
         if(twoPlayers) {
-            gameModel = new ArrayList<>();
+            gameModel = new LinkedList<>();
             if(WifiDirectManager.getInstance().isServer()) {
                 P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 , getHeight() / 2 , 1);
                 P2 = new Player(ObjectType.ST_PLAYER_2, getWidth() / 2, getHeight() / 2, 2);
@@ -452,17 +520,71 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
             P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 - 100, getHeight() / 2 - 100, 1);
             Log.d("PLAYERS", "ONE PLAYER");
         }
+        Enemies = new ArrayList<>();
         bonus = new Bonus();
-        level = 17;
+        tRemoteHandler.start();
+    }
+
+    public void retryStage() {
+        if(twoPlayers) {
+            gameModel = new LinkedList<>();
+            if(WifiDirectManager.getInstance().isServer()) {
+                P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 , getHeight() / 2 , 1);
+                P2 = new Player(ObjectType.ST_PLAYER_2, getWidth() / 2, getHeight() / 2, 2);
+            }
+            else {
+                P2 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 , getHeight() / 2 , 2);
+                P1 = new Player(ObjectType.ST_PLAYER_2, getWidth() / 2, getHeight() / 2, 1);
+            }
+        }
+        else {
+            P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 - 100, getHeight() / 2 - 100, 1);
+        }
+
+        bonus = new Bonus();
+        mNewRound = true;
+        --level;
+    }
+
+    /**
+     * Reset the paddles/touchboxes/framespersecond/ballcounter for the next round.
+     */
+    private void nextRound() {
+        drawStarted = false;
+        startSound = false;
+        bonus.reset();
+
+        ((TankActivity)context).scoreView.setVisibility(View.INVISIBLE);
+
+        Enemy.lives = 20;
+        getEnemyCountView();
+        Enemies.clear();
+
+
+        level++;
         clearLevel();
         loadLevel(level);
-        TankActivity.StageTxt.setText(String.valueOf(level));
-    }
+        ((TankActivity)context).StageTxt.setText(String.valueOf(level));
 
-    private void clearLevel() {
-        levelObjects = null;
-    }
+        closingCurtain = true;
+        openingCurtain = false;
+        curtainFrame = 0;
+        curtainFrameTmr = curtainFrameTime;
 
+        ((TankActivity)context).gameOverTxt.setVisibility(View.INVISIBLE);
+        ((TankActivity)context).gameOverTxt.setY(HEIGHT);
+        gameover = false;
+        stageComplete = false;
+        ((TankActivity)context).enableControls();
+
+        resetScoreView();
+
+        P1.respawn();
+        P1.resetKills();
+        P1.clearBullets();
+        P1.stageScore = 0;
+        showingScore = false;
+    }
 
     /**
      * The main loop. Call this to update the game state.
@@ -504,6 +626,173 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         update();
     }
 
+    private void displayGameOver() {
+        ((TankActivity)context).gameOverTxt.setVisibility(View.VISIBLE);
+        ((TankActivity)context).gameOverTxt.animate().setDuration(2000);
+        ((TankActivity)context).gameOverTxt.animate().y(HEIGHT/2);
+    }
+
+    private void resetScoreView() {
+        ((TankActivity)context).p1Score.setText(String.valueOf(0));
+
+        ((TankActivity)context).p1AScore.setText(String.valueOf(0));
+        ((TankActivity)context).p1BScore.setText(String.valueOf(0));
+        ((TankActivity)context).p1CScore.setText(String.valueOf(0));
+        ((TankActivity)context).p1DScore.setText(String.valueOf(0));
+
+        ((TankActivity)context).p1ACount.setText(String.valueOf(0));
+        ((TankActivity)context).p1BCount.setText(String.valueOf(0));
+        ((TankActivity)context).p1CCount.setText(String.valueOf(0));
+        ((TankActivity)context).p1DCount.setText(String.valueOf(0));
+        ((TankActivity)context).p1Count.setText(String.valueOf(0));
+
+        ((TankActivity)context).p2Score.setText(String.valueOf(0));
+
+        ((TankActivity)context).p2AScore.setText(String.valueOf(0));
+        ((TankActivity)context).p2BScore.setText(String.valueOf(0));
+        ((TankActivity)context).p2CScore.setText(String.valueOf(0));
+        ((TankActivity)context).p2DScore.setText(String.valueOf(0));
+
+        ((TankActivity)context).p2ACount.setText(String.valueOf(0));
+        ((TankActivity)context).p2BCount.setText(String.valueOf(0));
+        ((TankActivity)context).p2CCount.setText(String.valueOf(0));
+        ((TankActivity)context).p2DCount.setText(String.valueOf(0));
+        ((TankActivity)context).p2Count.setText(String.valueOf(0));
+
+        scoreFrame = 0;
+
+
+    }
+
+    private void showScores() {
+        if(enemyFrame >= 5 && stageComplete) {
+//            if(--newStageTmr <= 0){
+//                mNewRound = true;
+//                newStageTmr = (int) (2 * TO_SEC);
+//            }
+            return;
+        }
+        if(!showingScore) {
+            ((TankActivity) context).p1Score.setText(String.valueOf(P1.totalScore += P1.stageScore));
+            ((TankActivity) context).stageScore.setText(String.valueOf(level));
+            ((TankActivity) context).scoreView.setVisibility(View.VISIBLE);
+            showingScore = true;
+            scoreFrameTmr = scoreFrameTime;
+            enemyFrame = 0;
+            Log.d("SCORES", "Showing scores");
+
+        }
+
+        if(scoreFrameTmr <= 0) {
+            int killCount;
+
+            switch (enemyFrame) {
+                case 0:
+                    killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
+                    if (killCount < P1.kills[enemyFrame]) {
+                        killCount++;
+                        ((TankActivity) context).p1AScore.setText(String.valueOf(killCount*100));
+                        ((TankActivity) context).p1ACount.setText(String.valueOf(killCount));
+                        SoundManager.playSound(Sounds.TANK.SCORE);
+                    } else {
+                        enemyFrame++;
+                    }
+                    break;
+                case 1:
+                    killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
+                    if (killCount < P1.kills[enemyFrame]) {
+                        killCount++;
+                        ((TankActivity) context).p1BScore.setText(String.valueOf(killCount*200));
+                        ((TankActivity) context).p1BCount.setText(String.valueOf(killCount));
+                        SoundManager.playSound(Sounds.TANK.SCORE);
+                    } else {
+                        enemyFrame++;
+                    }
+                    break;
+                case 2:
+                    killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
+                    if (killCount < P1.kills[enemyFrame]) {
+                        killCount++;
+                        ((TankActivity) context).p1CScore.setText(String.valueOf(killCount*300));
+                        ((TankActivity) context).p1CCount.setText(String.valueOf(killCount));
+                        SoundManager.playSound(Sounds.TANK.SCORE);
+                    } else {
+                        enemyFrame++;
+                    }
+                    break;
+                case 3:
+                    killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
+                    if (killCount < P1.kills[enemyFrame]) {
+                        killCount++;
+                        ((TankActivity) context).p1DScore.setText(String.valueOf(killCount*400));
+                        ((TankActivity) context).p1DCount.setText(String.valueOf(killCount));
+                        SoundManager.playSound(Sounds.TANK.SCORE);
+                    } else {
+                        enemyFrame++;
+                    }
+                    break;
+
+                case 4:
+
+                    ((TankActivity) context).p1Count.setText(String.valueOf(P1.totalKills));
+                    SoundManager.playSound(Sounds.TANK.PAUSE);
+                    enemyFrame++;
+                    break;
+            }
+            scoreFrameTmr = scoreFrameTime;
+        }
+        else {
+            --scoreFrameTmr;
+        }
+    }
+
+    private void clearLevel() {
+        levelObjects = null;
+    }
+
+
+    private void moveCurtain() {
+        if(curtainPause && --curtainPauseTmr > 0) {
+            if(curtainPauseTmr == 1) {
+                ((TankActivity)context).curtainTxt.setVisibility(View.INVISIBLE);
+            }
+            return;
+        }
+        if(movingCurting && (closingCurtain || openingCurtain)){
+            if(curtainFrame < 13){
+                if (curtainFrameTmr <= 0) {
+                    curtainFrame++;
+                    curtainFrameTmr = curtainFrameTime;
+                }
+                else {
+                    curtainFrameTmr--;
+                }
+            }
+        }
+    }
+
+    private void getEnemyCountView() {
+        enemyCount = new ArrayList<>();
+        int Rows = ((TankActivity)context).enemyCount.getChildCount();
+        for(int row = 0; row < Rows; row++) {
+            LinearLayout current_row =  (LinearLayout)((TankActivity)context).enemyCount.getChildAt(row);
+            int Cols = current_row.getChildCount();
+            ArrayList<ImageView> colCount = new ArrayList<>();
+            for(int col = 0; col < Cols; col++) {
+                ImageView card = (ImageView) current_row.getChildAt(col);
+                card.setBackground(eCountImg);
+                colCount.add(card);
+            }
+            enemyCount.add(colCount);
+        }
+    }
+
+
+
+
+
+
+
     public boolean isStarted(){
         return started;
     }
@@ -514,8 +803,8 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         t1.collidesWithObject(t2);
     }
 
-    private void checkCollisionPlayer(Player p, ArrayList<Enemy> enemies) {
-        for(Tank e:enemies){
+    private void checkCollisionPlayer(Player p) {
+        for(Enemy e:Enemies){
             if(!e.isDestroyed() && p.collidesWithObject(e)) {
                 return;
             }
@@ -555,30 +844,28 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     }
 
-    private void checkCollisionEnemy(Player P1, ArrayList<Enemy> enemies) {
-        for(int e1 = 0; e1 < enemies.size(); e1++) {
-            if(enemies.get(e1).collidesWithObject(P1)) {
+    private void checkCollisionEnemy(Player P1) {
+        for(int e1 = 0; e1 < Enemies.size(); e1++) {
+            if(Enemies.get(e1).collidesWithObject(P1)) {
                 continue;
             }
-            else if(enemies.get(e1).collidesWithObject(eagle)) {
+            else if(Enemies.get(e1).collidesWithObject(eagle)) {
                 continue;
             }
             else {
-                for (int e2 = 0; e2 < enemies.size(); e2++) {
+                for (int e2 = 0; e2 < Enemies.size(); e2++) {
 //                    if (e1 == e2) {
 //                        continue;
 //                    }
-                    if (e1!=e2 && enemies.get(e1).collidesWithObject(enemies.get(e2))) {
+                    if (e1!=e2 && Enemies.get(e1).collidesWithObject(Enemies.get(e2))) {
                         break;
                     }
                     else {
                         boolean stop = false;
                         for(int i = 0; i < levelObjects.size(); i++){
-//                        for(ArrayList<GameObjects> rowObjs:levelObjects) {
                             for(int j = 0; j < levelObjects.get(i).size(); j++){
-//                            for(GameObjects obj:rowObjs) {
                                 if(levelObjects.get(i).get(j) != null && (levelObjects.get(i).get(j) instanceof Brick || levelObjects.get(i).get(j) instanceof StoneWall || (levelObjects.get(i).get(j) instanceof Water && !enemyBoat))) {
-                                    if(enemies.get(e1).collidesWithObject(levelObjects.get(i).get(j))) {
+                                    if(Enemies.get(e1).collidesWithObject(levelObjects.get(i).get(j))) {
                                         stop = true;
                                         break;
                                     }
@@ -596,11 +883,29 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
     }
 
-    private void checkCollisionPlayerBullet(Player p, ArrayList<Enemy> enemies) {
+    private void checkCollisionPlayerBullet(Player p) {
         for(Bullet pbullet:p.getBullets()){
             if(!pbullet.isDestroyed()) {
-                for (Enemy e : enemies) {
-                    e.collidsWithBullet(pbullet);
+                for (Enemy e : Enemies) {
+                    if(e.collidsWithBullet(pbullet)) {
+                        ++p.totalKills;
+                        if(e.type == ObjectType.ST_TANK_A) {
+                            ++p.kills[0];
+                            p.stageScore += 100;
+                        }
+                        else if(e.type == ObjectType.ST_TANK_B) {
+                            ++p.kills[1];
+                            p.stageScore += 200;
+                        }
+                        else if(e.type == ObjectType.ST_TANK_C) {
+                            ++p.kills[2];
+                            p.stageScore += 300;
+                        }
+                        else if(e.type == ObjectType.ST_TANK_D) {
+                            ++p.kills[3];
+                            p.stageScore += 400;
+                        }
+                    }
                     for(Bullet ebullet:e.getBullets()) {
                         if(!pbullet.isDestroyed() && !ebullet.isDestroyed()) {
                             if (pbullet.collides_with(ebullet)) {
@@ -668,8 +973,8 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
     }
 
-    private void checkCollisionEnemyBullet(Tank p, ArrayList<Enemy> enemies) {
-        for(Enemy e:enemies) {
+    private void checkCollisionEnemyBullet(Player p) {
+        for(Enemy e:Enemies) {
             for(Bullet bullet: e.getBullets()) {
                 if(!bullet.isDestroyed()) {
                     p.collidsWithBullet(bullet);
@@ -768,6 +1073,31 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     private void doGameLogic(){
+        if((Enemy.lives <= 0 && Enemies.size() <= 0) && !stageComplete) {
+            ((TankActivity) context).nxtBtn.setText(R.string.nextTxt);
+            stageComplete = true;
+            enemyFrame = 0;
+            showScoreTmr = showScoreDelay;
+        }
+        else if((P1.lives <= 0 || (eagle != null && eagle.isDestroyed())) & !gameover ) {
+            ((TankActivity) context).nxtBtn.setText(R.string.retryTxt);
+            gameover = true;
+            enemyFrame = 0;
+            ((TankActivity)context).disableControls();
+            SoundManager.playSound(Sounds.TANK.GAMEOVER);
+            displayGameOver();
+            showScoreTmr = showScoreDelay;
+        }
+
+        if((gameover || stageComplete) && showScoreTmr <= 0) {
+            showScores();
+        }
+        else if ((gameover || stageComplete) && !showingScore) {
+            --showScoreTmr;
+        }
+        if(showingScore) {
+            return;
+        }
 //        checkCollisionTwoTanks(P1,P2);
         if(drawStarted && !startSound) {
             SoundManager.playSound(Sounds.TANK.GAMESTART,1,3);
@@ -776,6 +1106,19 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
 
         sendToWifi();
+        moveCurtain();
+        if(movingCurting && curtainFrame >= 13) {
+            closingCurtain = false;
+            openingCurtain = true;
+            curtainFrame = 0;
+            curtainPauseTmr = curtainPauseTime;
+            curtainPause = true;
+            ((TankActivity)context).curtainTxt.setText(new StringBuilder().append("STAGE ").append(level).toString());
+            ((TankActivity)context).curtainTxt.setVisibility(View.VISIBLE);
+        }
+        if(movingCurting && curtainFrame >= 12 && openingCurtain) {
+            movingCurting = false;
+        }
 
         if(freeze && freezeTmr > 0) {
             --freezeTmr;
@@ -795,58 +1138,62 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
             protectEagle = false;
         }
 
-        for(int i = 0; i < Enemies.size(); i++) {
-            if(Enemies.get(i).recycle) {
-                Enemies.set(i,null);
-            }
-        }
+//        getRemoteUpdate();
 
-        // Remove all recycled enemy
-        while(Enemies.remove(null));
-
-        generateEnemy();
-
-        bonus.setBonus((int)(Math.random()*8));
-
-        checkCollisionPlayer(P1,Enemies);
-        checkCollisionPlayerBullet(P1, Enemies);
-        checkCollisionPlayerWithBonus(P1,bonus);
-        checkCollisionEnemyBullet(P1, Enemies);
-
-        P1.update();
-
-        // Get target
-        int min_dist = TankView.HEIGHT + TankView.WIDTH;
-        Rect pRect = P1.getRect();
-        Point targ = new Point();
-        for(Enemy e: Enemies) {
-
-            if(e.type == ObjectType.ST_TANK_A || e.type == ObjectType.ST_TANK_D) {
-                int dx = (int)(e.x - P1.x);
-                int dy = (int)(e.y - P1.y);
-                int dist = dx + dy;
-                if(dist < min_dist) {
-                    min_dist = dist;
-                    targ.x = (int)(P1.x + P1.w/2);
-                    targ.y = (int)(P1.y + P1.h/2);
+        if(!twoPlayers || (twoPlayers && WifiDirectManager.getInstance().isServer())) {
+            for (int i = 0; i < Enemies.size(); i++) {
+                if (Enemies.get(i).recycle) {
+                    Enemies.set(i, null);
                 }
             }
-            int dx = e.getRect().left - eagle.getRect().left;
-            int dy = e.getRect().top - eagle.getRect().top;
-            int dist = dx + dy;
-            if(dist < min_dist) {
-                min_dist = dist;
-                targ.x = (int)(eagle.x + eagle.w/2);
-                targ.y = (int)(eagle.y + eagle.h/2);
+            // Remove all recycled enemy
+            while (Enemies.remove(null)) ;
+
+            generateEnemy();
+
+            checkCollisionPlayer(P1);
+            checkCollisionPlayerBullet(P1);
+            checkCollisionPlayerWithBonus(P1, bonus);
+            checkCollisionEnemyBullet(P1);
+
+            P1.update();
+
+            // Get target
+            int min_dist = TankView.HEIGHT + TankView.WIDTH;
+            Rect pRect = P1.getRect();
+            Point targ = new Point();
+            for (Enemy e : Enemies) {
+
+                if (e.type == ObjectType.ST_TANK_A || e.type == ObjectType.ST_TANK_D) {
+                    int dx = (int) (e.x - P1.x);
+                    int dy = (int) (e.y - P1.y);
+                    int dist = dx + dy;
+                    if (dist < min_dist) {
+                        min_dist = dist;
+                        targ.x = (int) (P1.x + P1.w / 2);
+                        targ.y = (int) (P1.y + P1.h / 2);
+                    }
+                }
+                int dx = e.getRect().left - eagle.getRect().left;
+                int dy = e.getRect().top - eagle.getRect().top;
+                int dist = dx + dy;
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    targ.x = (int) (eagle.x + eagle.w / 2);
+                    targ.y = (int) (eagle.y + eagle.h / 2);
+                }
+                e.setTarget(targ);
             }
-            e.setTarget(targ);
-        }
 
-        checkCollisionEnemy(P1,Enemies);
+            for (Enemy e : Enemies) {
+                e.changeDirection();
+            }
 
-        for(Enemy e: Enemies) {
-            e.update();
-        }
+            checkCollisionEnemy(P1);
+
+            for (Enemy e : Enemies) {
+                e.update();
+            }
 
 //        if(twoPlayers && gameModel.size() > 0) {
 //            for(int i = 0; !gameModel.isEmpty(); i++) {
@@ -864,27 +1211,74 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 //            while(gameModel.remove(null));
 //
 //        }
+        }
+    }
 
+    private void getRemoteUpdate() {
 
+        if(twoPlayers && !gameModel.isEmpty()){
+            TankGameModel model = (TankGameModel) gameModel.removeFirst();
+//        TankGameModel model = (TankGameModel) message;
+            Log.d("P2 ==> ", model.mPlayer.x + " " + model.mPlayer.y + " " + model.mPlayer.dirction);
+            float scale = (float) TankView.this.getHeight() / model.height;
+
+            P2.setModel(model.mPlayer, scale);
+
+            if (!WifiDirectManager.getInstance().isServer()) {
+                for (int i = 0; i < Enemies.size(); i++) {
+                    if (!Enemies.get(i).isDestroyed() || Enemies.get(i).recycle) {
+                        Enemies.set(i, null);
+                    }
+                }
+                while (Enemies.remove(null)) ;
+
+                for (MTank me : model.mEnemies) {
+                    Enemy e = new Enemy(ObjectType.ST_TANK_A, 0, 0);
+                    e.setModel(me, scale);
+                    Enemies.add(e);
+                }
+            }
+        }
     }
 
     public void sendToWifi() {
-//        if(WifiDirectManager.getInstance().isServer()) {
-        Gson gson = new Gson();
+        if(twoPlayers) {
             TankGameModel model = new TankGameModel();
-            model.loadEnemies(Enemies);
+            if(WifiDirectManager.getInstance().isServer()) {
+                model.loadEnemies(Enemies);
+                model.loadLevelObjects(levelObjects);
+            }
             model.loadPlayer(P1);
-            model.loadLevelObjects(levelObjects);
-//        WifiDirectManager.getInstance().sendMessage(model);
-
-            WifiDirectManager.getInstance().sendMessage(gson.fromJson(gson.toJson(model), TankGameModel.class));
-//        }
+            WifiDirectManager.getInstance().sendMessage(model);
+//            Gson gson = new Gson();
+//            WifiDirectManager.getInstance().sendMessage(gson.fromJson(gson.toJson(model), TankGameModel.class));
+        }
     }
 
     public void generateEnemy() {
-//        level = 0;
         ++new_enemy_time;
         if(new_enemy_time > genEnemyTime) {
+            int group = 1;
+            float g1 = groupProb(0.6f,0.1f);
+            float g2 = groupProb(0.2f,0.2f);
+            float g3 = groupProb(0.15f,0.3f);
+            float g4 = groupProb(0.05f,0.4f);
+
+            float g = (float)(Math.random());
+            if(g < g1) {
+                group = 1;
+            }
+            else if(g < g1+g2) {
+                group = 2;
+            }
+            else if(g < g1+g2+g3) {
+                group = 3;
+            }
+            else if(g <= g1+g2+g3+g4) {
+                group = 4;
+            }
+
+
             float e = (float)(Math.random());
             int type = (e < 0.2 + LPROB*level)? 3 : (int)(Math.random()*3)%3;
             ObjectType tank_type = ObjectType.ST_TANK_A;
@@ -904,12 +1298,15 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
             }
 
             if(Enemies.size() < MAX_ENEMIES && Enemy.lives > 0) {
-                Enemy enemy = new Enemy(tank_type, 0, 0);
+                Enemy enemy = new Enemy(tank_type,group, 0, 0);
                 int p = (int) (Math.random() * 3) % 3;
 //                int px = p * 6*enemy.w;
 //                px = (px > TankView.WIDTH - enemy.w) ? (int) (TankView.WIDTH - enemy.w) : px;
                 enemy.x = p * 6*enemy.w;
                 enemy.y = 0;
+                if(Math.random() < 0.2) {
+                    enemy.hasBonus = true;
+                }
                 Enemies.add(enemy);
                 --Enemy.lives;
                 int row = (int)(Math.ceil((Enemy.lives+1.0)/2));
@@ -920,15 +1317,25 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
     }
 
+    private float groupProb(float min, float max) {
+        return (min - max)*level/NUM_LEVELS + min;
+    }
+
 
 
     @Override
     public void onDraw(Canvas canvas) {
+
+        if(showingScore) {
+            return;
+        }
         super.onDraw(canvas);
 
         if(!mInitialized) {
             return;
         }
+
+        drawing = true;
 
         for(ArrayList<GameObjects>rowsObjs:levelObjects) {
             for(GameObjects obj:rowsObjs) {
@@ -941,14 +1348,16 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         if(P1 != null) {
             P1.draw(canvas);
         }
-        if(P2 != null) {
+        if(P2 != null && !updatingRemote) {
             P2.draw(canvas);
         }
 
         eagle.draw(canvas);
 
-        for(Tank e:Enemies) {
-            e.draw(canvas);
+        if(!twoPlayers || (twoPlayers && !updatingRemote)){
+            for (Tank e : Enemies) {
+                e.draw(canvas);
+            }
         }
 
         for(Bush bush:levelBushes) {
@@ -958,7 +1367,34 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
         bonus.draw(canvas);
 
+        if(movingCurting) {
+            if(openingCurtain) {
+                curtainTRect.left = 0;
+                curtainTRect.top = 0;
+                curtainTRect.right = WIDTH;
+                curtainTRect.bottom = tile_dim*(13-curtainFrame);
+
+                curtainBRect.left = 0;
+                curtainBRect.top = tile_dim*(12+curtainFrame);
+                curtainBRect.right = WIDTH;
+                curtainBRect.bottom = HEIGHT;
+            }
+            else if(closingCurtain) {
+                curtainTRect.left = 0;
+                curtainTRect.top = 0;
+                curtainTRect.right = WIDTH;
+                curtainTRect.bottom = tile_dim*(curtainFrame);
+
+                curtainBRect.left = 0;
+                curtainBRect.top = tile_dim*(26-curtainFrame);
+                curtainBRect.right = WIDTH;
+                curtainBRect.bottom = HEIGHT;
+            }
+            canvas.drawRect(curtainTRect,curtainPaint);
+            canvas.drawRect(curtainBRect,curtainPaint);
+        }
         drawStarted = true;
+        drawing = false;
 
     }
 
@@ -998,18 +1434,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         if(!mInitialized || P2 == null) {
             return;
         }
-//        gameModel.add(message);
-
-        TankGameModel model = (TankGameModel) message;
-        Log.d("P2 ==> ", model.mPlayer.x + " " + model.mPlayer.y + " " + model.mPlayer.dirction);
-        float scale = (float) TankView.this.getHeight() / model.height;
-//        P2.x = (int) (model.mPlayer.x * scale);
-//        P2.y = (int) (model.mPlayer.y * scale);
-//        P2.direction = model.mPlayer.dirction;
-//        P2.setShield(model.mPlayer.shield);
-//        P2.setBoat(model.mPlayer.boat);
-//        P2.armour = model.mPlayer.armour;
-        P2.setModel(model.mPlayer,scale);
+        gameModel.add(message);
     }
 
     @Override
@@ -1027,10 +1452,10 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     if(m.getX() < 0) {
                         P1.move(CONST.Direction.LEFT);
                     }
-                    else if(m.getX() > TankActivity.upBtn.getWidth()) {
+                    else if(m.getX() > ((TankActivity)context).upBtn.getWidth()) {
                         P1.move(CONST.Direction.RIGHT);
                     }
-                    else if(m.getY() > TankActivity.upBtn.getHeight()) {
+                    else if(m.getY() > ((TankActivity)context).upBtn.getHeight()) {
                         P1.move(CONST.Direction.DOWN);
                     }
                     else {
@@ -1041,7 +1466,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     if(m.getX() < 0) {
                         P1.move(CONST.Direction.LEFT);
                     }
-                    else if(m.getX() > TankActivity.dwnBtn.getWidth()) {
+                    else if(m.getX() > ((TankActivity)context).dwnBtn.getWidth()) {
                         P1.move(CONST.Direction.RIGHT);
                     }
                     else if(m.getY() < 0) {
@@ -1055,10 +1480,10 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     if(m.getY() < 0) {
                         P1.move(CONST.Direction.UP);
                     }
-                    else if(m.getY() > TankActivity.lftBtn.getHeight()) {
+                    else if(m.getY() > ((TankActivity)context).lftBtn.getHeight()) {
                         P1.move(CONST.Direction.DOWN);
                     }
-                    else if(m.getX() > TankActivity.lftBtn.getWidth()) {
+                    else if(m.getX() > ((TankActivity)context).lftBtn.getWidth()) {
                         P1.move(CONST.Direction.RIGHT);
                     }
                     else {
@@ -1069,7 +1494,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     if(m.getY() < 0) {
                         P1.move(CONST.Direction.UP);
                     }
-                    else if(m.getY() > TankActivity.rtBtn.getHeight()) {
+                    else if(m.getY() > ((TankActivity)context).rtBtn.getHeight()) {
                         P1.move(CONST.Direction.DOWN);
                     }
                     else if(m.getX() < 0) {
@@ -1080,7 +1505,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     }
                     break;
                 case R.id.shootBtn:
-                    P1.starShooting();;
+                    P1.startShooting();
                     break;
             }
 //        }
@@ -1092,8 +1517,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 P1.stopMoving();
             }
         }
-        if(v.getId() == R.id.shootBtn) {
-            P1.fire();
+        if(m.getAction() == MotionEvent.ACTION_DOWN && v.getId() == R.id.shootBtn) {
+            TankView.vibrate();
+//            P1.fire();
         }
     }
 
@@ -1129,8 +1555,20 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     public void pause() {
-        mLastState = mCurrentState;
-        mCurrentState = TankView.State.Stopped;
+//        mLastState = mCurrentState;
+//        mCurrentState = TankView.State.Stopped;
+
+        if (mCurrentState != TankView.State.Stopped) {
+            mLastState = mCurrentState;
+            mCurrentState = TankView.State.Stopped;
+            ((TankActivity)context).disableControls();
+            ((TankActivity)context).pauseBtn.setText(R.string.continueTxt);
+        } else {
+            mCurrentState = mLastState;
+            mLastState = TankView.State.Stopped;
+            ((TankActivity)context).enableControls();
+            ((TankActivity)context).pauseBtn.setText(R.string.pauseTxt);
+        }
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -1139,6 +1577,32 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     public void setPlayerControl(boolean twoPlayers) {
         this.twoPlayers = twoPlayers;
+    }
+
+    public static void vibrate() {
+        if(!mVibrate) {
+            return;
+        }
+        // Vibrate for 100 milliseconds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            //deprecated in API 26
+            mVibrator.vibrate(100);
+        }
+    }
+
+    public static void vibrate(int time) {
+        if(!mVibrate) {
+            return;
+        }
+        // Vibrate for time milliseconds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator.vibrate(VibrationEffect.createOneShot(time, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            //deprecated in API 26
+            mVibrator.vibrate(time);
+        }
     }
 
     public void resume() {
@@ -1155,15 +1619,32 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
      */
     public void release() {
         SoundManager.cleanup();
+        showingScore = false;
+        mInitialized = false;
+
+        P2 = null;
+        P1 = null;
+        eagle = null;
+        tankBitmap = null;
+        tankSprite = null;
+        eCountImg = null;
+        eCountBm = null;
+        Enemies = null;
+        levelObjects = null;
+        levelBushes = null;
+        bonus = null;
+        gameModel = null;
+        level = 0;
+
     }
 
     public void toggleMuted() {
-        this.setMuted(!mMuted);
+        this.setMuted(!mSound);
     }
 
     public void setMuted(boolean b) {
         // Set the in-memory flag
-        mMuted = b;
+        mSound = b;
 
         // Grab a preference editor
         Context ctx = this.getContext();
@@ -1181,7 +1662,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     private void playSound(int rid) {
-        if(mMuted == true) return;
+        if(mSound == true) return;
         mPool.play(rid, 0.2f, 0.2f, 1, 0, 1.0f);
     }
 }

@@ -12,7 +12,7 @@ public class GameObjects implements Serializable {
     public int w,h;
     protected Rect rect;
     protected boolean destroyed = false;
-    protected boolean recycle = false;
+    public boolean recycle = false;
 
     public GameObjects(int x, int y, int w, int h){
         this.x = x;
@@ -77,6 +77,12 @@ public class GameObjects implements Serializable {
         else {
             return false;
         }
+    }
+
+    protected void drawText(Canvas canvas, String text) {
+//        canvas.drawText(text,(int)(x+w/2),(int)(y+h/2),TankView.txtPaint);
+//        canvas.drawText(text,(int)(x),(int)(y),TankView.txtPaint);
+        canvas.drawText(text,(int)(x),(int)(y+h/2),TankView.txtPaint);
     }
 
     protected void draw(Canvas canvas) {

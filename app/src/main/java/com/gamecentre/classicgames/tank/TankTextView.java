@@ -28,7 +28,5 @@ public class TankTextView extends androidx.appcompat.widget.AppCompatTextView {
     public void init() {
         Typeface tf = Typeface.createFromAsset(this.getContext().getAssets(),"prstartk.ttf");
         setTypeface(tf);
-//        setTypeface(tf , Typeface.BOLD);
-
     }
 }

@@ -1,26 +1,22 @@
 package com.gamecentre.classicgames.connection;
 
-import com.gamecentre.classicgames.model.Game;
-
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class ClientSenderThread extends Thread{
 
-    private Socket hostThreadSocket;
+    private final Socket hostThreadSocket;
 //    Object message;
     public static boolean isActive = true;
     private boolean firstMsg = true;
-    OutputStream outputStream;
-    ObjectOutputStream objectOutputStream;
-    BufferedOutputStream bos;
-    private LinkedList<Object> messages;
+    private OutputStream os;
+    private ObjectOutputStream oos;
+    private BufferedOutputStream bos;
+    private final LinkedList<Object> messages;
     private boolean RUN = true;
 
     public ClientSenderThread(Socket socket, Object message) {
@@ -41,14 +37,14 @@ public class ClientSenderThread extends Thread{
         if (hostThreadSocket.isConnected()) {
             try {
                 if (isActive) {
-                    outputStream = hostThreadSocket.getOutputStream();
-                    bos = new BufferedOutputStream(outputStream);
-                    objectOutputStream = new ObjectOutputStream(bos);
+                    os = hostThreadSocket.getOutputStream();
+                    bos = new BufferedOutputStream(os);
+                    oos = new ObjectOutputStream(os);
 
                     while(RUN) {
                         while (!messages.isEmpty()) {
-                            objectOutputStream.writeObject(messages.removeFirst());
-                            objectOutputStream.flush();
+                            oos.writeObject(messages.removeFirst());
+                            oos.flush();
                         }
                     }
                 }
@@ -65,9 +61,9 @@ public class ClientSenderThread extends Thread{
 
     public void disconnect() {
         RUN = false;
-        if(objectOutputStream != null) {
+        if(oos != null) {
             try {
-                objectOutputStream.close();
+                oos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -23,7 +23,7 @@ public class Tank extends GameObjects {
     protected final Sprite sprite;
     protected final Sprite dsprite;
     protected final Sprite spsprite;
-    protected final float DEFAULT_SPEED = 9;
+    protected float DEFAULT_SPEED = TankView.tile_dim*0.3f;
     protected int armour = 0;
     protected int frame;
     protected int frame_delay;
@@ -33,7 +33,7 @@ public class Tank extends GameObjects {
     protected int MaxBullet = 1;
 //    protected boolean[] collision = new boolean[4];
     protected Bullet bullet;
-    protected boolean respawn = true;
+    public boolean respawn = true;
     protected final int FreezeTime = (int)(8*TankView.TO_SEC);
     protected final int ShieldTime = (int)(10*TankView.TO_SEC);
     protected final int BoatTime = (int)(3*TankView.TO_SEC);
@@ -43,10 +43,10 @@ public class Tank extends GameObjects {
     protected boolean freeze, shield, boat, slip;
     protected int freezeTmr, shieldTmr, boatTmr, iceTmr;
     public ObjectType type;
-    protected int typeVal;
-    protected int group = 1;
+    public int typeVal;
+    public int group = 1;
     protected int starCount = 0;
-    protected int tile_x, tile_y;
+    public int tile_x, tile_y;
     protected boolean collision;
     protected Rect cRct;
     protected final int TileScale = 2;
@@ -94,13 +94,17 @@ public class Tank extends GameObjects {
         mShield = new Shield(x,y);
         mBoat = new Boat(x,y,this.type==ObjectType.ST_PLAYER_1?1:2);
 
-        this.vx = DEFAULT_SPEED;
-        this.vy = DEFAULT_SPEED;
-        bullet = new Bullet(ObjectType.ST_BULLET,0,0,player>0);
         super.w = sprite.w;
         super.h = sprite.h;
         tile_x = (int)(w/2);
         tile_y = (int)(h/2);
+
+//        DEFAULT_SPEED = TankView.tile_dim/3f;
+
+        this.vx = DEFAULT_SPEED;
+        this.vy = DEFAULT_SPEED;
+        bullet = new Bullet(ObjectType.ST_BULLET,0,0,player>0);
+
 
         frame = 0;
         freeze = false;
@@ -155,7 +159,7 @@ public class Tank extends GameObjects {
         shooting = false;
     }
 
-    public void starShooting() {
+    public void startShooting() {
         shooting = true;
     }
 
@@ -198,6 +202,10 @@ public class Tank extends GameObjects {
 //    public void setReloadTime(int t) {
 //        ReloadTime = t;
 //    }
+
+    public void clearBullets() {
+        bullets.clear();
+    }
 
     public void loseLife() {
         --lives;
@@ -376,28 +384,30 @@ public class Tank extends GameObjects {
 
     }
 
-    public void collidsWithBullet(Bullet bullet) {
+    public boolean collidsWithBullet(Bullet bullet) {
         if(isDestroyed()) {
-            return;
+            return false;
         }
         if(super.collides_with(bullet)) {
             if(shield) {
                 bullet.setDestroyed();
-                return;
+                return true;
             }
             if(boat) {
                 boat = false;
                 bullet.setDestroyed();
-                return;
+                return true;
             }
             if(armour >= 3) {
                 armour = 2;
                 bullet.setDestroyed();
-                return;
+                return true;
             }
             setDestroyed();
             bullet.setDestroyed();
+            return true;
         }
+        return false;
     }
 
     public ArrayList<Bullet> getBullets() {

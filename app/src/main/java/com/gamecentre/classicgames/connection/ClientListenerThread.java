@@ -2,15 +2,12 @@ package com.gamecentre.classicgames.connection;
 
 import android.os.Bundle;
 import android.os.Message;
-import android.util.Log;
 
 import com.gamecentre.classicgames.model.Game;
 import com.gamecentre.classicgames.utils.CONST;
-import com.gamecentre.classicgames.utils.MessageRegister;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
 import java.io.BufferedInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -20,8 +17,8 @@ public class ClientListenerThread extends Thread{
 
     Socket socket;
     private boolean RUN = true;
-    ObjectInputStream objectInputStream;
-    InputStream inputStream = null;
+    ObjectInputStream ois;
+    InputStream is = null;
     BufferedInputStream bis;
 
     ClientListenerThread(Socket soc) {
@@ -31,9 +28,9 @@ public class ClientListenerThread extends Thread{
     @Override
     public void run() {
         try {
-            inputStream = socket.getInputStream();
-            bis = new BufferedInputStream(inputStream);
-            objectInputStream = new ObjectInputStream(bis);
+            is = socket.getInputStream();
+            bis = new BufferedInputStream(is);
+            ois = new ObjectInputStream(is);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,7 +38,7 @@ public class ClientListenerThread extends Thread{
             try {
 
                 Bundle data = new Bundle();
-                Object serverObject = (Object) objectInputStream.readObject();
+                Object serverObject = (Object) ois.readObject();
                 if (serverObject != null) {
                     if (serverObject instanceof String) {
 //                        data.putSerializable(CONST.STRING_INFO, (String) serverObject);

@@ -3,6 +3,7 @@ package com.gamecentre.classicgames.sound;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -17,7 +18,7 @@ public class SoundManager
 
     private SoundManager()
     {
-        playSound = true;
+
     }
 
     static synchronized public SoundManager getInstance()
@@ -100,5 +101,10 @@ public class SoundManager
         mSoundPoolMap.clear();
         mAudioManager.unloadSoundEffects();
         _instance = null;
+    }
+
+    public static void enableSound(boolean enable) {
+        playSound = enable;
+        Log.d("PLAY SOUND", String.valueOf(playSound));
     }
 }

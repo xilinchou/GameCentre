@@ -22,7 +22,6 @@ import androidx.core.app.ActivityCompat;
 import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ClientListenerThread;
 import com.gamecentre.classicgames.connection.ClientSenderThread;
-import com.gamecentre.classicgames.connection.ConnectionManager;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.connection.ServerSenderThread;
 import com.gamecentre.classicgames.model.Game;
@@ -52,7 +51,6 @@ public class WifiDirectManager implements WifiP2pManager.ConnectionInfoListener,
     private WifiP2pDevice connectedDevice = null;
 
     TextView conStateView = null;
-
 
     public static WifiDirectManager getInstance() {
         return instance;
@@ -317,9 +315,15 @@ public class WifiDirectManager implements WifiP2pManager.ConnectionInfoListener,
     }
 
     private void terminateTask() {
-        if(task != null) {
-            task.cancel(true);
-            task = null;
+//        if(task != null) {
+//            task.cancel(true);
+//            task = null;
+//        }
+        if(svSender != null) {
+            svSender.disconnect();
+        }
+        if(clSender != null) {
+            clSender.disconnect();
         }
     }
 

@@ -21,7 +21,7 @@ public class Bullet extends GameObjects {
     private final Sprite dsprite;
     private int frame;
     private int frame_delay;
-    private final int DEFAULT_SPEED = 25;
+    private final float DEFAULT_SPEED = TankView.tile_dim*0.7f;
     private boolean fromPlayer;
     private boolean explode = true;
     private float speed = 1;
@@ -43,6 +43,7 @@ public class Bullet extends GameObjects {
         for(int i = 0; i < dsprite.frame_count; i++){
             dbitmap[i] = Bitmap.createBitmap(dbm,0,i*dsprite.h, dsprite.w, dsprite.h);
         }
+//        DEFAULT_SPEED = TankView.tile_dim*1.5f;
         this.vx = DEFAULT_SPEED;
         this.vy = DEFAULT_SPEED;
         super.w = sprite.w;
@@ -62,12 +63,14 @@ public class Bullet extends GameObjects {
 
         this.x = x;
         this.y = y;
-        this.vx = DEFAULT_SPEED*bullet.getSpeed();
-        this.vy = DEFAULT_SPEED*bullet.getSpeed();
+//        DEFAULT_SPEED = TankView.tile_dim*1.5f;
+        this.vx = (DEFAULT_SPEED*bullet.getSpeed());
+        this.vy = (DEFAULT_SPEED*bullet.getSpeed());
         this.direction = bullet.getDirection();
         super.w = sprite.w;
         super.h = sprite.h;
         frame_delay = dsprite.frame_time;
+        destroyed = bullet.isDestroyed();
     }
 
     public Bitmap[] getBitmap() {
@@ -88,8 +91,10 @@ public class Bullet extends GameObjects {
     }
 
     public void setSpeed(float speed) {
-        vx = DEFAULT_SPEED*speed;
-        vy = DEFAULT_SPEED*speed;
+        vx = (DEFAULT_SPEED*speed);
+        vy = (DEFAULT_SPEED*speed);
+
+        Log.d("SPEED", String.valueOf(DEFAULT_SPEED)+" "+vx);
         this.speed = speed;
     }
 
@@ -149,20 +154,30 @@ public class Bullet extends GameObjects {
         r.right = rect.right;
         r.top = rect.top;
         r.bottom = rect.bottom;
-        if(!(targ instanceof Enemy)) {
+//        if(!(targ instanceof Enemy)) {
             switch (direction) {
                 case CONST.Direction.UP:
+                    r.left -= TankView.tile_dim/2;
+                    r.right += TankView.tile_dim/2;
+                    r.bottom += TankView.tile_dim/2;
+                    break;
                 case CONST.Direction.DOWN:
-                    r.left -= 2;
-                    r.right += 2;
+                    r.left -= TankView.tile_dim/2;
+                    r.right += TankView.tile_dim/2;
+                    r.top -= TankView.tile_dim/2;
                     break;
                 case CONST.Direction.LEFT:
+                    r.bottom += TankView.tile_dim/2;
+                    r.top -= TankView.tile_dim/2;
+                    r.right += TankView.tile_dim/2;
+                    break;
                 case CONST.Direction.RIGHT:
-                    r.bottom += 2;
-                    r.top -= 2;
+                    r.bottom += TankView.tile_dim/2;
+                    r.top -= TankView.tile_dim/2;
+                    r.left -= TankView.tile_dim/2;
                     break;
             }
-        }
+//        }
         return Rect.intersects(r,targ.getRect());
     }
 
@@ -227,7 +242,7 @@ public class Bullet extends GameObjects {
                 canvas.drawBitmap(dbitmap[frame], x - (int) (dsprite.w / 2), y - (int) (dsprite.h / 2), null);
                 if(frame_delay <= 0) {
                     frame = frame + 1;
-                    frame_delay = dsprite.frame_time;
+                    frame_delay = 0;//dsprite.frame_time;
                 }
                 else{
                     --frame_delay;

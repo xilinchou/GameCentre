@@ -3,6 +3,7 @@ package com.gamecentre.classicgames.tank;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
@@ -17,7 +18,7 @@ public class Player extends Tank{
     protected int frame;
     protected int frame_delay;
     public int lives = 3;
-    protected int reloadTmr = (int)(0.2*TankView.TO_SEC);
+    protected int reloadTmr = (int)(0.1*TankView.TO_SEC);
     protected int reload_time = 0;
     protected int MaxBullet = 1;
     protected int starCount = 0;
@@ -28,6 +29,11 @@ public class Player extends Tank{
     private int level = 0;
     private  float bulletSpeed = 1;
     private boolean boat = false;
+    public int[] kills;
+    public int totalKills;
+    public int totalScore;
+    public int stageScore;
+    boolean killed = false;
 
 
 
@@ -35,6 +41,7 @@ public class Player extends Tank{
         super(type, x, y, player);
 
         direction = CONST.Direction.UP;
+
         if(type == ObjectType.ST_PLAYER_1) {
             this.group = 5;
             super.x = (int)(4*(TankView.WIDTH/13));
@@ -49,7 +56,12 @@ public class Player extends Tank{
         shield = true;
         shieldTmr = ShieldTime/2;
         iceTmr = 0;
-        TankActivity.P1StatusTxt.setText(String.valueOf(lives));
+        kills = new int[]{0,0,0,0};
+        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        changeDirection(direction);
+        totalScore = 0;
+        stageScore = 0;
+        totalKills = 0;
     }
 
     public void move() {
@@ -68,20 +80,33 @@ public class Player extends Tank{
             SoundManager.playSound(Sounds.TANK.BACKGROUND,0.1f, 0);
             switch (direction) {
                 case CONST.Direction.UP:
-                    if(rect.top <= 1)return;
+                    if(y <= 0)return;
                     y -= vy;
+                    if(y < 0){
+                        y = 0;
+                    }
                     break;
                 case CONST.Direction.DOWN:
-                    if(rect.bottom >= TankView.HEIGHT)return;
+                    if(y >= TankView.HEIGHT - h)return;
                     y += vy;
+                    if(y > TankView.HEIGHT - h){
+                        y = TankView.HEIGHT - h;
+                    }
+
                     break;
                 case CONST.Direction.LEFT:
-                    if(rect.left < 1)return;
+                    if(x <= 0)return;
                     x -= vx;
+                    if(x < 0) {
+                        x = 0;
+                    }
                     break;
                 case CONST.Direction.RIGHT:
-                    if(rect.right > TankView.WIDTH)return;
+                    if(x >= TankView.WIDTH - w)return;
                     x += vx;
+                    if(x > TankView.WIDTH - w) {
+                        x = TankView.WIDTH - w;
+                    }
                     break;
             }
 
@@ -132,6 +157,11 @@ public class Player extends Tank{
         int[] r = setCollissionRect(direction);
     }
 
+    public void resetKills() {
+        kills = new int[] {0,0,0,0};
+        totalKills = 0;
+    }
+
     public void changeDirection(int dir) {
         if(iceTmr > 0) {
             newDirection = dir;
@@ -169,7 +199,8 @@ public class Player extends Tank{
     }
 
     public void fire() {
-        if(!shooting) {
+//        Log.d("Tile", tile_x+" "+tile_y);
+        if(!shooting || respawn || isDestroyed()) {
             return;
         }
         if(bullets.size() == MaxBullet) {
@@ -178,22 +209,27 @@ public class Player extends Tank{
         if(MaxBullet > 1 && reload_time > 0) {
             return;
         }
+
         int bx=0,by=0;
         switch (direction) {
             case CONST.Direction.UP:
                 bx = x+(int) sprite.w/2;
                 by = y;
+                by = (int) ((by / tile_y) * tile_y) + tile_y;
                 break;
             case CONST.Direction.DOWN:
                 bx = x+(int) sprite.w/2;
                 by = y+ sprite.h;
+                by = (int) ((by / tile_y) * tile_y) - tile_y;
                 break;
             case CONST.Direction.LEFT:
                 bx = x;
+                bx = (int) ((bx / tile_x) * tile_x) + tile_x;
                 by = y+(int) sprite.h/2;
                 break;
             case CONST.Direction.RIGHT:
                 bx = x+ sprite.w;
+                bx = (int) ((bx / tile_x) * tile_x) - tile_x;
                 by = y+(int) sprite.h/2;
                 break;
         }
@@ -202,7 +238,9 @@ public class Player extends Tank{
         bullet.setPlayer(true);
         bullets.add((new Bullet(bullet,bx,by)));
         SoundManager.playSound(Sounds.TANK.FIRE);
-        reload_time = reloadTmr;
+        if(MaxBullet > 1){
+            reload_time = reloadTmr;
+        }
     }
 
 //    public void setReloadTime(int t) {
@@ -211,6 +249,10 @@ public class Player extends Tank{
 
     public void loseLife() {
         --lives;
+        if(lives < 0) {
+            lives = 0;
+        }
+        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
     }
 
     public boolean isAlive() {
@@ -223,9 +265,11 @@ public class Player extends Tank{
 
     public void setDestroyed() {
         super.setDestroyed();
+        killed = true;
+        TankView.vibrate(500);
 //        frame = 0;
 //        frame_delay = dsprite.frame_time;
-        loseLife();
+//        loseLife();
     }
 
     public void setFreeze() {
@@ -260,6 +304,7 @@ public class Player extends Tank{
 
     public int collidsWithBonus(Bonus b) {
         if(b.isOn() && super.collides_with(b)) {
+            stageScore += 500;
             SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
             int bonus = b.getBonus();
             switch (bonus) {
@@ -275,7 +320,7 @@ public class Player extends Tank{
                     break;
                 case Bonus.TANK:
                     ++lives;
-                    TankActivity.P1StatusTxt.setText(String.valueOf(lives));
+                    ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
                     break;
                 case Bonus.STAR:
                     ++starCount;
@@ -286,7 +331,7 @@ public class Player extends Tank{
                     if(starCount >= 3) {
                         breakWall = true;
                     }
-                    bulletSpeed = 1.5f;
+                    bulletSpeed = 1.3f;
                     if(starCount >= 2) {
                         MaxBullet = 2;
                     }
@@ -296,8 +341,8 @@ public class Player extends Tank{
                         vx = DEFAULT_SPEED*1.35f;
                     }
                     vy *= 1.2;
-                    if(vy > DEFAULT_SPEED*1.3){
-                        vy = DEFAULT_SPEED*1.3f;
+                    if(vy > DEFAULT_SPEED*1.35){
+                        vy = DEFAULT_SPEED*1.35f;
                     }
                     if(armour >= 3){
                         armour = 3;
@@ -305,7 +350,7 @@ public class Player extends Tank{
                     }
                     break;
                 case Bonus.GUN:
-                    bulletSpeed = 1.5f;
+                    bulletSpeed = 1.3f;
                     breakWall = true;
                     vx *= 1.3;
                     vy *= 1.3;
@@ -336,29 +381,34 @@ public class Player extends Tank{
         return -1;
     }
 
-    public void collidsWithBullet(Bullet bullet) {
+    public boolean collidsWithBullet(Bullet bullet) {
         if(isDestroyed()){
-            return;
+            return false;
         }
         if(super.collides_with(bullet)) {
             if(shield) {
                 bullet.setDestroyed(false);
-                return;
+                return true;
             }
             if(boat) {
                 boat = false;
                 bullet.setDestroyed(false);
-                return;
+                return true;
             }
             if(armour >= 3) {
                 armour = 2;
+                clearBush = false;
+                breakWall = false;
                 starCount = 2;
                 bullet.setDestroyed();
-                return;
+                return true;
             }
             setDestroyed();
             bullet.setDestroyed();
+
+            return true;
         }
+        return false;
     }
 
     public ArrayList<Bullet> getBullets() {
@@ -366,7 +416,13 @@ public class Player extends Tank{
     }
 
     public void respawn() {
+        if(!killed) {
+            respawn(!killed);
+            killed = false;
+            return;
+        }
         respawn = true;
+        killed = false;
         starCount = 0;
         armour = 0;
         bulletSpeed = 1;
@@ -374,7 +430,10 @@ public class Player extends Tank{
         breakWall = false;
         destroyed = false;
         shield = true;
-        shieldTmr = ShieldTime;
+        vx = DEFAULT_SPEED;
+        vy = DEFAULT_SPEED;
+        MaxBullet = 1;
+        shieldTmr = ShieldTime/2;
         direction = CONST.Direction.UP;
         if(this.type == ObjectType.ST_PLAYER_1) {
             x = (int) (4 * (TankView.WIDTH / 13));
@@ -384,11 +443,30 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        TankActivity.P1StatusTxt.setText(String.valueOf(lives));
+        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        changeDirection(direction);
+    }
+
+    public void respawn(boolean restart) {
+        respawn = true;
+        destroyed = false;
+        shield = true;
+        shieldTmr = ShieldTime/2;
+        direction = CONST.Direction.UP;
+        if(this.type == ObjectType.ST_PLAYER_1) {
+            x = (int) (4 * (TankView.WIDTH / 13));
+        }
+        else {
+            x = (int)(8*(TankView.WIDTH/13));
+        }
+        y = TankView.HEIGHT - h;
+        frame = 0;
+        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        changeDirection(direction);
     }
 
     public void update() {
-        if(reload_time > 0) {
+        if(MaxBullet > 1 && reload_time > 0) {
             --reload_time;
         }
 
@@ -437,11 +515,28 @@ public class Player extends Tank{
         this.setBoat(model.boat);
         this.armour = model.armour;
         this.lives = model.lives;
+        if(model.tDestroyed) {
+            setDestroyed();
+        }
+
+        for(int i = 0; i < bullets.size(); i++) {
+            if(!bullets.get(i).isDestroyed() || bullets.get(i).recycle) {
+                bullets.set(i,null);
+            }
+        }
+
+        while(bullets.remove(null));
+
         for(int[] b:model.bullets) {
-            bullet.move(b[3]);
-            bullet.setSpeed(b[2]);
+            bullet.move(direction);
+//            bullet.setSpeed(b[2]);
             bullet.setPlayer(true);
+            if(b[3] == 1) {
+                bullet.setDestroyed();
+            }
+
             bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
+            bullet.destroyed = false;
         }
     }
 
@@ -496,7 +591,9 @@ public class Player extends Tank{
                     --frame_delay;
                 }
             } else if (frame == dsprite.frame_count) {
-                respawn();
+                if(lives > 0) {
+                    respawn();
+                }
             }
         }
 

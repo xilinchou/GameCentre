@@ -20,6 +20,8 @@ public class Sounds {
         public static final int GAMESTART = 7;
         public static final int SCORE = 8;
         public static final int STEEL = 9;
+        public static final int POWERUP = 10;
+        public static final int PAUSE = 11;
     }
 
 }

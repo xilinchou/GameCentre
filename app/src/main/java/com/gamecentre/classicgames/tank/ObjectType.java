@@ -43,5 +43,7 @@ public enum ObjectType {
 
     ST_TANKS_LOGO,
 
+    ST_CURTAIN,
+
     ST_NONE
 }

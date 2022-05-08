@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.util.Log;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 
 import java.util.ArrayList;
 
@@ -19,6 +21,7 @@ public class Bonus extends GameObjects {
     private boolean on = false;
     private int blinkTmr = BLINKRATE;
     private int bonusTmr = 200;
+    private int scoreTmr;
 
     public static final int GRENADE = 0;
     public static final int HELMET = 1;
@@ -44,18 +47,19 @@ public class Bonus extends GameObjects {
     }
 
     public void setBonus(int bonus) {
-        if(bonusTmr > 0){
-            --bonusTmr;
-            return;
-        }
+//        if(bonusTmr > 0){
+//            --bonusTmr;
+//            return;
+//        }
         this.bonus = bonus;
         this.x = (int)(Math.random()*TankView.WIDTH- bitmaps.get(0).getWidth());
         this.y = (int)(Math.random()*TankView.HEIGHT- bitmaps.get(0).getHeight());
+        SoundManager.playSound(Sounds.TANK.POWERUP);
         if(bonus >= 0 && bonus <= 7) {
             bonusBm = bitmaps.get(bonus);
             on = true;
         }
-        bonusTmr = 200;
+//        bonusTmr = 200;
     }
 
     public int getBonus() {
@@ -67,6 +71,11 @@ public class Bonus extends GameObjects {
         bonus = -1;
         on = false;
         bonusTmr = 200;
+        scoreTmr = 5;
+    }
+
+    public void reset() {
+        on = false;
     }
     public boolean isOn() {
         return on;
@@ -96,6 +105,10 @@ public class Bonus extends GameObjects {
                 }
                 canvas.drawBitmap(bonusBm, x, y, null);
             }
+        }
+        else if(scoreTmr > 0) {
+            drawText(canvas,"500");
+            --scoreTmr;
         }
     }
 }
