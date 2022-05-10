@@ -16,6 +16,33 @@
         android:background="@drawable/tnklogo"
         android:layout_marginTop="54dp" />
 
+    <Button
+        android:id="@+id/inviteBtn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignTop="@+id/PStatus"
+        android:layout_alignBottom="@+id/PStatus"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="38dp"
+        android:layout_toEndOf="@+id/PStatus"
+        android:background="@drawable/tnk_invite" />
+
+    <com.gamecentre.classicgames.tank.TankTextView
+        android:id="@+id/ivName"
+        android:layout_width="100sp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/inviteBtn"
+        android:layout_marginStart="19dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/inviteBtn"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:textColor="@color/white"
+        android:textSize="10sp"/>
+
     <LinearLayout
         android:id="@+id/PStatus"
         android:layout_width="150dp"
@@ -31,7 +58,7 @@
             android:id="@+id/tnkP1menu"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:text="1 Player"
             android:textAlignment="center"
@@ -43,7 +70,7 @@
             android:id="@+id/tnkP2menu"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:text="2 Players"
             android:textAlignment="center"
@@ -55,7 +82,7 @@
             android:id="@+id/tnkExitmenu"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="15dp"
             android:layout_weight="1"
             android:text="Exit"
             android:textAlignment="center"

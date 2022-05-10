@@ -28,7 +28,7 @@ import com.gamecentre.classicgames.utils.WifiDialogListener;
 import com.gamecentre.classicgames.wifidirect.WifiDialog;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
-public class TankActivity extends AppCompatActivity implements View.OnTouchListener, WifiDialogListener {
+public class TankActivity extends AppCompatActivity implements View.OnTouchListener {
 
     public Button upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, menuBtn, nxtBtn;
     public LinearLayout enemyCount;
@@ -61,7 +61,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_tank);
-        MessageRegister.getInstance().setwifiDialogListener(this);
+
 
         mTankView = findViewById(R.id.tankView);
 //        boarder = findViewById(R.id.boarder);
@@ -71,8 +71,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         boolean two_Players = b.getBoolean(TankMenuActivity.TWO_PLAYERS, false);
         mTankView.setPlayerControl(two_Players);
         if(two_Players) {
-            // Two players
-            WifiDirectManager.getInstance().initialize(this);
             twoPlayers = true;
         }
         else {
@@ -124,9 +122,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         endGameBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                Intent i = new Intent(TankActivity.this, TankMenuActivity.class);
-                TankActivity.this.startActivity(i);
-                TankActivity.this.finish();
+                endGame();
                 return true;
             }
         });
@@ -136,7 +132,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     mTankView.pause();
-                    SoundManager.playSound(Sounds.TANK.PAUSE);
                 }
                 return true;
             }
@@ -216,10 +211,10 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         };
         SoundManager.loadSounds(sounds);
 
-        if(!twoPlayers) {
-            mTankView.update();
-        }
-
+//        if(!twoPlayers) {
+//            mTankView.update();
+//        }
+//        mTankView.update();
         first_start = true;
     }
 
@@ -233,24 +228,13 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
     protected void onResume() {
         super.onResume();
-        if(twoPlayers) {
-            WifiDirectManager.getInstance().registerBReceiver();
-
-            if(first_start){
-                WifiDialog wd = new WifiDialog(this);
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.copyFrom(wd.getWindow().getAttributes());
-                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-                wd.show();
-                wd.getWindow().setAttributes(lp);
-
-                first_start = false;
-            }
-        }
-        if(mTankView.isStarted() || !twoPlayers) {
-            mTankView.resume();
-        }
+        mTankView.resume();
+//        if(twoPlayers) {
+////            WifiDirectManager.getInstance().registerBReceiver();
+//        }
+//        if(mTankView.isStarted() || !twoPlayers) {
+//            mTankView.resume();
+//        }
     }
 
     public void enableControls() {
@@ -259,6 +243,13 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn.setEnabled(true);
         rtBtn.setEnabled(true);
         lftBtn.setEnabled(true);
+    }
+
+
+    public void endGame() {
+        Intent i = new Intent(TankActivity.this, TankMenuActivity.class);
+        TankActivity.this.startActivity(i);
+        TankActivity.this.finish();
     }
 
     public void disableControls() {
@@ -278,10 +269,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         return mTankView;
     }
 
-    @Override
-    public void onWifiDilogClosed() {
-        this.getView().update(true);
-    }
+
 
     protected void onDestroy() {
         super.onDestroy();
@@ -292,8 +280,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     protected void onPause() {
         super.onPause();
-        if(twoPlayers) {
-            WifiDirectManager.getInstance().unregisterBReceiver();
-        }
+//        if(twoPlayers) {
+//            WifiDirectManager.getInstance().unregisterBReceiver();
+//        }
     }
 }

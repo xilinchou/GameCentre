@@ -16,9 +16,11 @@ public class MTank implements Serializable {
     public int armour;
     public int lives;
     public boolean boat,shield;
-    public boolean tDestroyed;
+    public boolean tDestroyed, respawn;
     public ArrayList<int[]>bullets;
     public int typeVal, group;
+    public int id;
+    public boolean hasBonus = false;
 
     public  MTank(ObjectType type, int x, int y, int dirction) {
         this.x = x;
@@ -38,6 +40,7 @@ public class MTank implements Serializable {
         armour = p.armour;
         lives = p.lives;
         tDestroyed = p.isDestroyed();
+        respawn = p.respawn;
 
 
         bullets = new ArrayList<>();
@@ -56,12 +59,17 @@ public class MTank implements Serializable {
         y = e.y;
         type = e.type;
         dirction = e.getDirection();
+        tDestroyed = e.isDestroyed();
 //        boat = p.hasBoat();
 //        shield = p.hasShield();
 //        armour = p.armour;
         lives = e.lives;
         typeVal = e.typeVal;
         group = e.group;
+        respawn = e.respawn;
+        id = e.id;
+        hasBonus = e.hasBonus;
+
 
 
 

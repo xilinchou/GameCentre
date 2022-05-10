@@ -38,12 +38,12 @@ public class ClientConnectionThread extends Thread{
                     socket = new Socket(dstAddress, dstPort);
                     if (socket.isConnected()) {
                         Log.d("CLIENT CONNECTION", "CONNECTED");
-                        serverStarted = true;
                         clientListener = new ClientListenerThread(socket);
                         clientListener.start();
                         PlayerInfo playerInfo = new PlayerInfo(userName);
                         WifiDirectManager.clSender = new ClientSenderThread(socket, playerInfo);
                         WifiDirectManager.clSender.start();
+                        serverStarted = true;
                     }
                 }
             } catch (UnknownHostException e) {

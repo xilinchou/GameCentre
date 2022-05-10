@@ -11,20 +11,30 @@ import com.gamecentre.classicgames.tank.Player;
 import com.gamecentre.classicgames.tank.StoneWall;
 import com.gamecentre.classicgames.tank.TankView;
 import com.gamecentre.classicgames.tank.Water;
+import com.gamecentre.classicgames.utils.CONST;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class TankGameModel extends Game implements Serializable {
     public ArrayList<MTank> mEnemies = new ArrayList<>();
-    public int[][] lObjects = new int[26][26];;
+    public int[][] lObjects = new int[26][26];
     public MTank mPlayer;
     public int height = TankView.HEIGHT;
+    public boolean gameOver = false;
+    public boolean stageComplete = false;
+    public boolean pause = false;
+    public boolean end_game = false;
+    public boolean eagleDestroyed;
+    public boolean mlevelInfo = false;
+    public int mlevel = 0;
 
     public void loadEnemies(ArrayList<Enemy> enemies) {
         for(Enemy enemy:enemies) {
 //            mEnemies.add(new MTank(enemy.type,enemy.x,enemy.y,enemy.getDirection()));
-            mEnemies.add(new MTank(enemy));
+            if(!enemy.recycle){
+                mEnemies.add(new MTank(enemy));
+            }
         }
     }
 
@@ -54,24 +64,20 @@ public class TankGameModel extends Game implements Serializable {
                     int dim = height/26;
                     Brick b = (Brick)lo.get(row).get(col);
                     Rect r = b.getRect();
-                    if(b.w == b.h) {
+                    if(b.dstate == 0) {
                         lObjects[row][col] = 5;
                     }
-                    else if(b.w < b.h) {
-                        if(r.left%dim == 0) {
-                            lObjects[row][col] = 6;
-                        }
-                        else {
-                            lObjects[row][col] = 7;
-                        }
+                    else if(b.dir == CONST.Direction.UP) {
+                        lObjects[row][col] = 6;
                     }
-                    else {
-                        if(r.top%dim == 0) {
-                            lObjects[row][col] = 8;
-                        }
-                        else {
-                            lObjects[row][col] = 9;
-                        }
+                    else if (b.dir == CONST.Direction.DOWN){
+                        lObjects[row][col] = 7;
+                    }
+                    else if(b.dir == CONST.Direction.LEFT) {
+                        lObjects[row][col] = 8;
+                    }
+                    else if (b.dir == CONST.Direction.RIGHT){
+                        lObjects[row][col] = 9;
                     }
                 }
             }

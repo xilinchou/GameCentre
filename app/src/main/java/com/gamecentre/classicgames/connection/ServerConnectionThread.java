@@ -27,13 +27,13 @@ public class ServerConnectionThread extends Thread{
         if (serverSocket == null) {
             try {
                 serverSocket = new ServerSocket(SocketServerPORT);
-                serverStarted = true;
                 socket = serverSocket.accept();
                 Log.d("SERVER CONNECTION", "CONNECTED");
                 socketListener = new ServerListenerThread(socket);
                 socketListener.start();
                 WifiDirectManager.svSender = new ServerSenderThread(socket, CONST.GAME_NAME);
                 WifiDirectManager.svSender.start();
+                serverStarted = true;
             } catch (IOException e) {
                 e.printStackTrace();
             }

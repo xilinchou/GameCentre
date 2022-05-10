@@ -15,8 +15,8 @@ public class Brick extends GameObjects{
     ArrayList<Bitmap>d2bitmaps;
     Bitmap currentBitmap;
     int W, H;
-    int dstate = 0;
-    private int drwx, drwy;
+    public int dstate = 0;
+    public int drwx, drwy, dir;
 
     public Brick(int x, int y) {
         super(x, y);
@@ -65,6 +65,7 @@ public class Brick extends GameObjects{
 
     public boolean collidsWithBullet(int dir) {
         ++dstate;
+        this.dir = dir;
         if(dstate > 1) {
             return  false;
         }

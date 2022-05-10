@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
@@ -25,9 +26,13 @@ public class Enemy extends Tank{
     private int lifeFrame = 0;
     private String killScore;
     private boolean killed = false;
+    public  int id;
+    private static int nxtId = 0;
 
     public Enemy(ObjectType type, int x, int y) {
         super(type, x, y, 0);
+        nxtId++;
+        id = nxtId;
         target = new Point();
         target.x = TankView.WIDTH/2;
         target.y = TankView.HEIGHT/2;
@@ -61,7 +66,7 @@ public class Enemy extends Tank{
             reloadTmr = (int)(1*TankView.TO_SEC);
         }
 
-
+        frame = 0;
 //        moving = true;
     }
 
@@ -321,9 +326,13 @@ public class Enemy extends Tank{
 //        this.setShield(model.shield);
 //        this.setBoat(model.boat);
 //        this.armour = model.armour;
+        destroyed = model.tDestroyed;
         lives = model.lives;
         this.group = model.group;
         this.typeVal = model.typeVal;
+        this.respawn = model.respawn;
+        this.id = model.id;
+        this.hasBonus = model.hasBonus;
 
         if(model.tDestroyed) {
             setDestroyed();
@@ -336,6 +345,10 @@ public class Enemy extends Tank{
         }
 
         while(bullets.remove(null));
+
+//        if(bullets.size() >= MaxBullet) {
+//            return;
+//        }
 
         for(int[] b:model.bullets) {
             bullet.move(direction);
@@ -376,6 +389,8 @@ public class Enemy extends Tank{
             else{
                 lifeFrame = 0;
             }
+            frame %= sprite.frame_count;
+            Log.d("DRAWE", sprite.frame_count+" "+typeVal+" "+frame);
             canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * typeVal + frame).get(4*(lifeFrame>0?0:group)+direction),x,y,null);
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;

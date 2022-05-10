@@ -245,6 +245,13 @@ public class WifiDirectManager implements WifiP2pManager.ConnectionInfoListener,
         return null;
     }
 
+    public String getDeviceName() {
+        if(connectedDevice != null) {
+            return connectedDevice.deviceName;
+        }
+        return null;
+    }
+
     public boolean isConnected() {
         switch (connectedDevice.status){
             case WifiP2pDevice.CONNECTED:

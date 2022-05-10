@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -41,6 +42,12 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         setContentView(R.layout.activity_wifi);
 
         playerListView = findViewById(R.id.search_list);
@@ -107,7 +114,6 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
 //                    dismiss();
 //                }
                 MessageRegister.getInstance().registerWifiDialog();
-//                ((PingPongActivity)activity).getView().update(true);
                 dismiss();
                 break;
             default:

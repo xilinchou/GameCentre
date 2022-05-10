@@ -62,6 +62,7 @@ public class Player extends Tank{
         totalScore = 0;
         stageScore = 0;
         totalKills = 0;
+        frame = 0;
     }
 
     public void move() {
@@ -515,6 +516,7 @@ public class Player extends Tank{
         this.setBoat(model.boat);
         this.armour = model.armour;
         this.lives = model.lives;
+        this.respawn = model.respawn;
         if(model.tDestroyed) {
             setDestroyed();
         }
@@ -559,7 +561,8 @@ public class Player extends Tank{
             }
         }
         else if(!destroyed) {
-
+            frame %= sprite.frame_count;
+            Log.d("DRAWP", sprite.frame_count+" "+typeVal+" "+frame);
             canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * armour + frame).get(4*group+direction),x,y,null);
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;

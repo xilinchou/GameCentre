@@ -1,5 +1,6 @@
 package com.gamecentre.classicgames.tank;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -32,7 +33,13 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
         setContentView(R.layout.activity_tank_settings);
         yes = (Button) findViewById(R.id.saveBtn);
         no = (Button) findViewById(R.id.cancelBtn);
@@ -78,7 +85,7 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
                 else{
                     editor.putBoolean(TankMenuActivity.PREF_VIBRATE,false);
                 }
-                editor.commit();
+                editor.apply();
                 dismiss();
                 break;
             case R.id.cancelBtn:
