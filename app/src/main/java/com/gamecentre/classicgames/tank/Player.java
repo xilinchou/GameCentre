@@ -34,6 +34,7 @@ public class Player extends Tank{
     public int totalScore;
     public int stageScore;
     boolean killed = false;
+    public int gotBonus = 0;
 
 
 
@@ -57,7 +58,11 @@ public class Player extends Tank{
         shieldTmr = ShieldTime/2;
         iceTmr = 0;
         kills = new int[]{0,0,0,0};
-        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        if (this.type == ObjectType.ST_PLAYER_1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        } else {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+        }
         changeDirection(direction);
         totalScore = 0;
         stageScore = 0;
@@ -255,7 +260,11 @@ public class Player extends Tank{
         if(lives < 0) {
             lives = 0;
         }
-        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        if (this.type == ObjectType.ST_PLAYER_1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        } else {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+        }
     }
 
     public boolean isAlive() {
@@ -310,6 +319,7 @@ public class Player extends Tank{
             stageScore += 500;
             SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
             int bonus = b.getBonus();
+            gotBonus = bonus;
             switch (bonus) {
                 case Bonus.GRENADE:
                     break;
@@ -323,7 +333,11 @@ public class Player extends Tank{
                     break;
                 case Bonus.TANK:
                     ++lives;
-                    ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+                    if (this.type == ObjectType.ST_PLAYER_1) {
+                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+                    } else {
+                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+                    }
                     break;
                 case Bonus.STAR:
                     ++starCount;
@@ -378,7 +392,9 @@ public class Player extends Tank{
                     boatTmr = BoatTime;
                     break;
             }
-            b.clearBonus();
+            if(player == 1) {
+                b.clearBonus();
+            }
             return bonus;
         }
         return -1;
@@ -452,7 +468,11 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        if (this.type == ObjectType.ST_PLAYER_1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        } else {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+        }
         changeDirection(direction);
     }
 
@@ -470,7 +490,11 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        ((TankActivity)(TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        if (this.type == ObjectType.ST_PLAYER_1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        } else {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+        }
         changeDirection(direction);
     }
 
@@ -523,7 +547,14 @@ public class Player extends Tank{
         this.setShield(model.shield);
         this.setBoat(model.boat);
         this.armour = model.armour;
-        this.lives = model.lives;
+        if(model.lives != this.lives){
+            this.lives = model.lives;
+            if (this.type == ObjectType.ST_PLAYER_1) {
+                ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(this.lives));
+            } else {
+                ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(this.lives));
+            }
+        }
         this.respawn = model.respawn;
         if(!destroyed && model.tDestroyed) {
             setDestroyed();
@@ -626,9 +657,13 @@ public class Player extends Tank{
                 else{
                     --frame_delay;
                 }
-            } else if (frame == dsprite.frame_count) {
+            } else if (frame >= dsprite.frame_count) {
                 if(lives > 0) {
                     respawn();
+                }
+                else{
+                    this.x = 1000;
+                    this.y = 1000;
                 }
             }
         }

@@ -33,6 +33,7 @@ public class Bonus extends GameObjects {
     public static final int GUN = 6;
     public static final int BOAT = 7;
     public static boolean available = false;
+    public static int id = 0;
 
     public Bonus() {
         super(0,0);
@@ -56,6 +57,7 @@ public class Bonus extends GameObjects {
         this.bonus = bonus;
         this.x = (int)(Math.random()*TankView.WIDTH- bitmaps.get(0).getWidth());
         this.y = (int)(Math.random()*TankView.HEIGHT- bitmaps.get(0).getHeight());
+        id++;
         SoundManager.playSound(Sounds.TANK.POWERUP);
         if(bonus >= 0 && bonus <= 7) {
             bonusBm = bitmaps.get(bonus);
@@ -65,7 +67,13 @@ public class Bonus extends GameObjects {
 //        bonusTmr = 200;
     }
 
-    public void setBonus(int x, int y, int b, boolean av, boolean cl) {
+    public void setBonus(int x, int y, int b, boolean av, boolean cl, int id) {
+        if(Bonus.id > id){
+            return;
+        }
+
+        Bonus.id = id;
+
         if(b == -1) {
             return;
         }

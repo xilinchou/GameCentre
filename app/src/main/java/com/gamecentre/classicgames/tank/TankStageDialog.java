@@ -114,7 +114,7 @@ public class TankStageDialog extends Dialog implements android.view.View.OnClick
         int level = (int)(v.getTag());
 
         if(twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
-            // TODO
+
             Toast toast = Toast.makeText(activity.getApplicationContext(),
                     "Wait for player 1 to select stage!",
                     Toast.LENGTH_SHORT);

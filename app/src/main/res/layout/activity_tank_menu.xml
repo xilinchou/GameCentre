@@ -36,12 +36,13 @@
         android:layout_marginStart="19dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@+id/inviteBtn"
-        android:singleLine="true"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
+        android:singleLine="true"
         android:textColor="@color/white"
-        android:textSize="10sp"/>
+        android:text="@string/invite_def_txt"
+        android:textSize="10sp" />
 
     <LinearLayout
         android:id="@+id/PStatus"

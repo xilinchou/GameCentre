@@ -20,6 +20,7 @@ import java.util.ArrayList;
 public class TankGameModel extends Game implements Serializable {
     public ArrayList<MTank> mEnemies = new ArrayList<>();
     public ArrayList<int[]> lObjects = new ArrayList<>();
+    public ArrayList<Integer> lBushes = new ArrayList<>();
     public MTank mPlayer;
     public int height = TankView.HEIGHT;
     public boolean gameOver = false;
@@ -101,8 +102,14 @@ public class TankGameModel extends Game implements Serializable {
         }
     }
 
-    public void loadBonus(int x, int y, int b, boolean av, boolean cl) {
-        bonus = new int[] {x, y, b};
+    public void loadLevelBushes(ArrayList<Integer> lb) {
+        for(int l: lb) {
+            lBushes.add(l);
+        }
+    }
+
+    public void loadBonus(int x, int y, int b, boolean av, boolean cl, int id) {
+        bonus = new int[] {x, y, b, id};
         bnsAv = av;
         bnsClr = cl;
     }

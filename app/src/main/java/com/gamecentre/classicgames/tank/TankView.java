@@ -137,6 +137,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private ArrayList<ArrayList<GameObjects>> levelObjects;
     ArrayList<int[]> levelObjectsUpdate;
     private ArrayList<Bush> levelBushes;
+    private ArrayList<Integer> levelBushesUpdate;
     public static Bonus bonus;
     private int new_enemy_time = 0;
     private final int genEnemyTime = (int)TO_SEC;
@@ -376,6 +377,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         levelObjects = new ArrayList<>();
         levelBushes = new ArrayList<>();
         if(twoPlayers) {
+            levelBushesUpdate = new ArrayList<>();
+        }
+        if(twoPlayers) {
             levelObjectsUpdate = new ArrayList<>();
         }
         BufferedReader reader;
@@ -488,6 +492,12 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
         Drawable d = new BitmapDrawable(context.getResources(), bm);
         ((TankActivity)context).P1StatusImg.setBackground(d);
+
+        if(twoPlayers) {
+            bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y + sprite.h, sprite.w, sprite.h);
+            d = new BitmapDrawable(context.getResources(), bm);
+            ((TankActivity)context).P2StatusImg.setBackground(d);
+        }
 
         sprite = SpriteObjects.getInstance().getData(ObjectType.ST_STAGE_STATUS);
         bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y, sprite.w, sprite.h);
@@ -692,48 +702,59 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         }
 
         if(scoreFrameTmr <= 0) {
-            int killCount;
+            int p1killCount, p2killCount;
 
             switch (enemyFrame) {
                 case 0:
-                    killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
-                    if (killCount < P1.kills[enemyFrame]) {
-                        killCount++;
-                        ((TankActivity) context).p1AScore.setText(String.valueOf(killCount*100));
-                        ((TankActivity) context).p1ACount.setText(String.valueOf(killCount));
+                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
+
+//                    if(twoPlayers) {
+//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
+//                    }
+                    if (p1killCount < P1.kills[enemyFrame]) {
+                        p1killCount++;
+                        ((TankActivity) context).p1AScore.setText(String.valueOf(p1killCount*100));
+                        ((TankActivity) context).p1ACount.setText(String.valueOf(p1killCount));
                         SoundManager.playSound(Sounds.TANK.SCORE);
-                    } else {
+                    }
+//                    else if (twoPlayers && p1killCount < P1.kills[enemyFrame]) {
+//                        p1killCount++;
+//                        ((TankActivity) context).p1AScore.setText(String.valueOf(p1killCount*100));
+//                        ((TankActivity) context).p1ACount.setText(String.valueOf(p1killCount));
+//                        SoundManager.playSound(Sounds.TANK.SCORE);
+//                    }
+                    else {
                         enemyFrame++;
                     }
                     break;
                 case 1:
-                    killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
-                    if (killCount < P1.kills[enemyFrame]) {
-                        killCount++;
-                        ((TankActivity) context).p1BScore.setText(String.valueOf(killCount*200));
-                        ((TankActivity) context).p1BCount.setText(String.valueOf(killCount));
+                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
+                    if (p1killCount < P1.kills[enemyFrame]) {
+                        p1killCount++;
+                        ((TankActivity) context).p1BScore.setText(String.valueOf(p1killCount*200));
+                        ((TankActivity) context).p1BCount.setText(String.valueOf(p1killCount));
                         SoundManager.playSound(Sounds.TANK.SCORE);
                     } else {
                         enemyFrame++;
                     }
                     break;
                 case 2:
-                    killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
-                    if (killCount < P1.kills[enemyFrame]) {
-                        killCount++;
-                        ((TankActivity) context).p1CScore.setText(String.valueOf(killCount*300));
-                        ((TankActivity) context).p1CCount.setText(String.valueOf(killCount));
+                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
+                    if (p1killCount < P1.kills[enemyFrame]) {
+                        p1killCount++;
+                        ((TankActivity) context).p1CScore.setText(String.valueOf(p1killCount*300));
+                        ((TankActivity) context).p1CCount.setText(String.valueOf(p1killCount));
                         SoundManager.playSound(Sounds.TANK.SCORE);
                     } else {
                         enemyFrame++;
                     }
                     break;
                 case 3:
-                    killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
-                    if (killCount < P1.kills[enemyFrame]) {
-                        killCount++;
-                        ((TankActivity) context).p1DScore.setText(String.valueOf(killCount*400));
-                        ((TankActivity) context).p1DCount.setText(String.valueOf(killCount));
+                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
+                    if (p1killCount < P1.kills[enemyFrame]) {
+                        p1killCount++;
+                        ((TankActivity) context).p1DScore.setText(String.valueOf(p1killCount*400));
+                        ((TankActivity) context).p1DCount.setText(String.valueOf(p1killCount));
                         SoundManager.playSound(Sounds.TANK.SCORE);
                     } else {
                         enemyFrame++;
@@ -945,7 +966,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                         if(levelObjects.get(i).get(j) != null && !levelObjects.get(i).get(j).isDestroyed() && pbullet.collides_with(levelObjects.get(i).get(j))) {
                             if(levelObjects.get(i).get(j) instanceof Brick) {
                                 boolean coll = ((Brick) levelObjects.get(i).get(j)).collidsWithBullet(pbullet.getDirection());
-                                if(coll) {
+                                if(coll && twoPlayers) {
                                     switch (pbullet.getDirection()) {
                                         case CONST.Direction.UP:
                                             levelObjectsUpdate.add(new int[]{i,j,6});
@@ -964,7 +985,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                                 }
                                 if(p.canBreakWall() || !coll) {
                                     levelObjects.get(i).set(j, null);
-                                    levelObjectsUpdate.add(new int[]{i,j,0});
+                                    if(twoPlayers) {
+                                        levelObjectsUpdate.add(new int[]{i, j, 0});
+                                    }
                                 }
                                 pbullet.setDestroyed();
                                 count++;
@@ -978,6 +1001,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                                 pbullet.setDestroyed();
                                 if(p.canBreakWall()) {
                                     levelObjects.get(i).set(j,null);
+                                    if(twoPlayers) {
+                                        levelObjectsUpdate.add(new int[]{i, j, 0});
+                                    }
                                 }
                                 count++;
                                 if(count >= 2){
@@ -1001,6 +1027,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 for(int i = 0; i < levelBushes.size(); i++) {
                     if(p.canClearBush() && levelBushes.get(i) != null && pbullet.collides_with(levelBushes.get(i))) {
                         levelBushes.set(i,null);
+                        if(twoPlayers) {
+                            levelBushesUpdate.add(i);
+                        }
                         count++;
                         if(count >= 2){
                             break;
@@ -1018,7 +1047,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private void checkCollisionEnemyBulletWithPlayer(Player p) {
             for(Enemy e:Enemies) {
                 for (Bullet bullet : e.getBullets()) {
-                    if (!bullet.isDestroyed() && p.collidsWithBullet(bullet)) {
+                    if (bullet != null && !bullet.isDestroyed() && p.collidsWithBullet(bullet)) {
                         return;
                     }
                 }
@@ -1039,7 +1068,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                             if(levelObjects.get(i).get(j) != null && !levelObjects.get(i).get(j).isDestroyed() && bullet.collides_with(levelObjects.get(i).get(j))) {
                                 if(levelObjects.get(i).get(j) instanceof Brick) {
                                     boolean coll = ((Brick) levelObjects.get(i).get(j)).collidsWithBullet(bullet.getDirection());
-                                    if(coll) {
+                                    if(coll && twoPlayers) {
                                         switch (bullet.getDirection()) {
                                             case CONST.Direction.UP:
                                                 levelObjectsUpdate.add(new int[]{i,j,6});
@@ -1058,7 +1087,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                                     }
                                     if(p.canBreakWall() || !coll) {
                                         levelObjects.get(i).set(j, null);
-                                        levelObjectsUpdate.add(new int[]{i,j,0});
+                                        if(twoPlayers) {
+                                            levelObjectsUpdate.add(new int[]{i, j, 0});
+                                        }
                                     }
                                     bullet.setDestroyed();
                                     count++;
@@ -1072,6 +1103,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                                     bullet.setDestroyed();
                                     if(e.canBreakWall()) {
                                         levelObjects.get(i).set(j,null);
+                                        if(twoPlayers){
+                                            levelObjectsUpdate.add(new int[]{i, j, 0});
+                                        }
                                     }
                                     count++;
                                     if(count >= 2){
@@ -1161,7 +1195,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(((Enemy.lives <= 0 && Enemies.size() <= 0) || notifyStageComplete) && !stageComplete) {
             doStageComplete();
         }
-        else if((P1.lives <= 0 || (eagle != null && eagle.isDestroyed()) || notifyGameOver) && !gameover) {
+        else if((((!twoPlayers && P1.lives <= 0) || (twoPlayers && P1.lives <= 0 && P2.lives <= 0)) || (eagle != null && eagle.isDestroyed()) || notifyGameOver) && !gameover) {
             doGameOver();
         }
 
@@ -1217,6 +1251,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         if(twoPlayers) {
             levelObjectsUpdate.clear();
+            levelBushesUpdate.clear();
         }
 
         if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
@@ -1234,12 +1269,15 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             checkCollisionPlayerBullet(P1);
             checkCollisionPlayerWithBonus(P1, bonus);
             checkCollisionEnemyBullet(P1);
-            checkCollisionEnemyBulletWithPlayer(P2);
+            if(twoPlayers){
+                checkCollisionEnemyBulletWithPlayer(P2);
+            }
 
         }
 
         if(twoPlayers && !WifiDirectManager.getInstance().isServer()) {
             checkCollisionPlayerBullet(P1);
+            checkCollisionPlayerWithBonus(P1, bonus);
             checkCollisionEnemyBulletWithPlayer(P1);
         }
             checkCollisionPlayer(P1);
@@ -1360,6 +1398,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         P2.setModel(model.mPlayer, scale);
 
+
         if (!WifiDirectManager.getInstance().isServer()) {
             for (int i = 0; i < Enemies.size(); i++) {
                 if (Enemies.get(i).recycle) {
@@ -1390,6 +1429,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         }
 
         if (WifiDirectManager.getInstance().isServer()) {
+
             for (int i = 0; i < model.mEnemies.size(); i++) {
                 for (int j = 0; j < Enemies.size(); j++) {
                     if(model.mEnemies.get(i).id == Enemies.get(j).id){
@@ -1400,6 +1440,14 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     }
                 }
             }
+
+            if(model.mPlayer.gotBonus == Bonus.CLOCK) {
+                TankView.freeze = true;
+                TankView.freezeTmr = TankView.FreezeTime;
+            }
+//            else if(model.mPlayer.gotBonus == Bonus.GRENADE) {
+//
+//            }
 
 
         }
@@ -1422,6 +1470,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             }
         }
 
+        for(int i:model.lBushes) {
+            levelBushes.set(i,null);
+        }
+
         if(model.eagleProtection == 1) {
             for (int[] eaglePo : eaglePos) {
                 levelObjects.get(eaglePo[1]).set(eaglePo[0], new StoneWall(eaglePo[0], eaglePo[1]));
@@ -1433,7 +1485,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             }
         }
 
-        bonus.setBonus((int)(model.bonus[0]*scale),(int)(model.bonus[1]*scale),model.bonus[2],model.bnsAv,model.bnsClr);
+        bonus.setBonus((int)(model.bonus[0]*scale),(int)(model.bonus[1]*scale),model.bonus[2],model.bnsAv,model.bnsClr,model.bonus[3]);
 
     }
 
@@ -1443,16 +1495,18 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //            if(WifiDirectManager.getInstance().isServer()) {
                 model.loadEnemies(Enemies);
                 model.loadLevelObjects(levelObjectsUpdate);
+            model.loadLevelBushes(levelBushesUpdate);
 //            }
             model.loadPlayer(P1);
             model.eagleDestroyed = eagle.isDestroyed();
             model.eagleProtection = eagle.protection;
-            model.loadBonus(bonus.x, bonus.y, bonus.getBonus(), Bonus.available, Bonus.cleared);
+            model.loadBonus(bonus.x, bonus.y, bonus.getBonus(), Bonus.available, Bonus.cleared, Bonus.id);
             WifiDirectManager.getInstance().sendMessage(model);
 //            Gson gson = new Gson();
 //            WifiDirectManager.getInstance().sendMessage(gson.fromJson(gson.toJson(model), TankGameModel.class));
             eagle.protection = 0;
             Bonus.cleared = false;
+            P1.gotBonus = 0;
         }
     }
 

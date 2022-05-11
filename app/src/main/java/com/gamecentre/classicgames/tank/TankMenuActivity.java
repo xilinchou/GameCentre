@@ -15,11 +15,15 @@ import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener {
+
+    TankTextView inviteTxt;
 
     public static final String TWO_PLAYERS = "two players";
     public static final String
@@ -36,6 +40,8 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         setContentView(R.layout.activity_tank_menu);
         MessageRegister.getInstance().setwifiDialogListener(this);
         setListeners();
+        inviteTxt = (TankTextView) findViewById(R.id.ivName);
+        inviteTxt.setSelected(true);
     }
 
     protected void setListeners () {
@@ -56,7 +62,15 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             openStages(v, true);
                         }
                         else {
+                            Toast toast = Toast.makeText(TankMenuActivity.this.getApplicationContext(),
+                                    "Invite a player first",
+                                    Toast.LENGTH_SHORT);
 
+                            ViewGroup group = (ViewGroup) toast.getView();
+                            TextView messageTextView = (TextView) group.getChildAt(0);
+                            messageTextView.setTextSize(20);
+
+                            toast.show();
                         }
                     }
                 });
@@ -128,19 +142,19 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 //        this.getView().update(true);
         if(WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) {
             findViewById(R.id.inviteBtn).setBackground(ResourcesCompat.getDrawable(getResources(),R.drawable.p2,null));
-            TankTextView txt = (TankTextView) findViewById(R.id.ivName);
-            txt.setText(WifiDirectManager.getInstance().getDeviceName());
-            txt.setSelected(true);
+            inviteTxt = (TankTextView) findViewById(R.id.ivName);
+            inviteTxt.setText(WifiDirectManager.getInstance().getDeviceName());
+            inviteTxt.setSelected(true);
 
         }
         else if(!WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
             findViewById(R.id.inviteBtn).setBackground(ResourcesCompat.getDrawable(getResources(),R.drawable.p1,null));
-            TankTextView txt = (TankTextView) findViewById(R.id.ivName);
-            txt.setText(WifiDirectManager.getInstance().getDeviceName());
-            txt.setSelected(true);
+            inviteTxt = (TankTextView) findViewById(R.id.ivName);
+            inviteTxt.setText(WifiDirectManager.getInstance().getDeviceName());
+            inviteTxt.setSelected(true);
         }
         else {
-            ((TextView) findViewById(R.id.ivName)).setText(null);
+            inviteTxt.setText(R.string.invite_def_txt);
         }
     }
 }
