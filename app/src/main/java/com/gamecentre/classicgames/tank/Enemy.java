@@ -10,6 +10,9 @@ import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
+
+import java.util.ArrayList;
 
 public class Enemy extends Tank{
 
@@ -28,6 +31,8 @@ public class Enemy extends Tank{
     private boolean killed = false;
     public  int id;
     private static int nxtId = 0;
+    private ArrayList<Bullet> dbullets;
+
 
     public Enemy(ObjectType type, int x, int y) {
         super(type, x, y, 0);
@@ -67,6 +72,7 @@ public class Enemy extends Tank{
         }
 
         frame = 0;
+        dbullets = new ArrayList<>();
 //        moving = true;
     }
 
@@ -210,9 +216,11 @@ public class Enemy extends Tank{
                 by = y+(int) sprite.h/2;
                 break;
         }
+        bId++;
         bullet.move(direction);
         bullet.setSpeed(bulletSpeed);
         bullet.setPlayer(false);
+        bullet.id = bId;
         bullets.add((new Bullet(bullet,bx,by)));
 //        SoundManager.playSound(Sounds.TANK.FIRE);
         reload_time = (int)((0.2*TankView.TO_SEC) + Math.random()*reloadTmr);
@@ -257,6 +265,7 @@ public class Enemy extends Tank{
             bullet.setDestroyed();
             if(group == 1) {
                 killed = true;
+                svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
                 setDestroyed();
                 return true;
             }
@@ -313,53 +322,85 @@ public class Enemy extends Tank{
 
         move();
         fire();
+
+//        for(int i = 0; i < bullets.size(); i++) {
+//            if(bullets.get(i).isDestroyed()) {
+//                dbullets.add(bullets.get(i));
+//                bullets.set(i,null);
+//            }
+//        }
+
         for(Bullet bullet:bullets) {
             bullet.move();
         }
     }
 
 
-    public void setModel(MTank model, float scale) {
-        this.x = (int) (model.x * scale);
-        this.y = (int) (model.y * scale);
-        this.direction = model.dirction;
+    public void setModel(MTank model, float scale, boolean server) {
+        if(!server){
+            this.x = (int) (model.x * scale);
+            this.y = (int) (model.y * scale);
+            this.direction = model.dirction;
 //        this.setShield(model.shield);
 //        this.setBoat(model.boat);
 //        this.armour = model.armour;
-        destroyed = model.tDestroyed;
-        lives = model.lives;
-        this.group = model.group;
-        this.typeVal = model.typeVal;
-        this.respawn = model.respawn;
-        this.id = model.id;
-        this.hasBonus = model.hasBonus;
-
-        if(model.tDestroyed) {
-            setDestroyed();
-        }
-
-        for(int i = 0; i < bullets.size(); i++) {
-            if(!(bullets.get(i).isDestroyed())) {
-                bullets.set(i,null);
-            }
-        }
-
-        while(bullets.remove(null));
-
-//        if(bullets.size() >= MaxBullet) {
-//            return;
+//        if(!destroyed) {
+//            destroyed = model.tDestroyed;
 //        }
+            lives = model.lives;
+//            this.group = model.group;
+            if(model.group < this.group){
+                this.group = model.group;
+            }
+            this.typeVal = model.typeVal;
+            this.respawn = model.respawn;
+            this.id = model.id;
+            this.hasBonus = model.hasBonus;
 
-        for(int[] b:model.bullets) {
-            bullet.move(direction);
-//            bullet.setSpeed(b[2]);
-            bullet.setPlayer(false);
-            if(b[3] == 1) {
-                bullet.setDestroyed();
+            if (model.tDestroyed && !destroyed) {
+                setDestroyed();
             }
 
-            bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
-            bullet.destroyed = false;
+            for (int i = 0; i < bullets.size(); i++) {
+                if (!(bullets.get(i).isDestroyed()) || bullets.get(i).recycle) {
+                    bullets.set(i, null);
+                }
+            }
+
+            while (bullets.remove(null)) ;
+
+            for (int i = 0; i < model.bullets.size(); i++) {
+                boolean found = false;
+                for (int j = 0; j < bullets.size(); j++) {
+                    if (model.bullets.get(i)[4] == bullets.get(j).id) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (model.bullets.get(i)[3] == 1) {
+                        bullet.setDestroyed();
+                    } else {
+                        bullet.destroyed = false;
+                    }
+
+
+                    bullet.id = model.bullets.get(i)[4];
+                    bullet.move(direction);
+                    bullet.setPlayer(false);
+                    bullets.add((new Bullet(bullet, (int) (model.bullets.get(i)[0] * scale), (int) (model.bullets.get(i)[1] * scale))));
+                    bullet.destroyed = false;
+                }
+            }
+        }
+        else {
+            if(model.group < group){
+                group = model.group;
+            }
+
+            if (model.tDestroyed && !destroyed) {
+                setDestroyed();
+            }
         }
     }
 
@@ -390,7 +431,7 @@ public class Enemy extends Tank{
                 lifeFrame = 0;
             }
             frame %= sprite.frame_count;
-            Log.d("DRAWE", sprite.frame_count+" "+typeVal+" "+frame);
+//            Log.d("DRAWE", sprite.frame_count+" "+typeVal+" "+frame);
             canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * typeVal + frame).get(4*(lifeFrame>0?0:group)+direction),x,y,null);
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;

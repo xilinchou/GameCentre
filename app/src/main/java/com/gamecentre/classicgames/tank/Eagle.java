@@ -18,6 +18,7 @@ public class Eagle extends GameObjects{
     private int frame;
     private int frame_delay;
     private boolean dead = false;
+    public int protection = 0;
 
     public Eagle() {
         super(0,0);

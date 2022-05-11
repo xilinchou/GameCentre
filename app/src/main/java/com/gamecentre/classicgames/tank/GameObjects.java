@@ -13,6 +13,7 @@ public class GameObjects implements Serializable {
     protected Rect rect;
     protected boolean destroyed = false;
     public boolean recycle = false;
+    public boolean svrKill = false;
 
     public GameObjects(int x, int y, int w, int h){
         this.x = x;

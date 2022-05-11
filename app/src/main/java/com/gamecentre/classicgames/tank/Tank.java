@@ -50,10 +50,13 @@ public class Tank extends GameObjects {
     protected boolean collision;
     protected Rect cRct;
     protected final int TileScale = 2;
+    public int bId = 0;
+    public int player = 1;
 
 
     public Tank(ObjectType type, int x, int y, int player) {
         super(x,y);
+        this.player = player;
         direction = CONST.Direction.UP;
         this.type = type;
 

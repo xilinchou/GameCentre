@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ServerSenderThread extends Thread{
 
@@ -15,17 +16,17 @@ public class ServerSenderThread extends Thread{
     private OutputStream os;
     private ObjectOutputStream oos;
     private BufferedOutputStream bos;
-    private final LinkedList<Object> messages;
+    private final ConcurrentLinkedQueue<Object> messages;
     private boolean RUN = true;
 
     public ServerSenderThread(Socket socket, Object message) {
-        messages = new LinkedList<>();
+        messages = new ConcurrentLinkedQueue<>();
         hostThreadSocket = socket;
         this.messages.add(message);
     }
 
     public ServerSenderThread(Socket socket) {
-        messages = new LinkedList<>();
+        messages = new ConcurrentLinkedQueue<>();
         hostThreadSocket = socket;
     }
 
@@ -38,7 +39,7 @@ public class ServerSenderThread extends Thread{
 
             while(RUN) {
                 while(!messages.isEmpty()) {
-                    oos.writeObject(messages.removeFirst());
+                    oos.writeObject(messages.poll());
                     oos.flush();
                 }
             }

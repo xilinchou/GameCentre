@@ -5,6 +5,7 @@ import com.gamecentre.classicgames.tank.Enemy;
 import com.gamecentre.classicgames.tank.ObjectType;
 import com.gamecentre.classicgames.tank.Player;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class MTank implements Serializable {
     public int typeVal, group;
     public int id;
     public boolean hasBonus = false;
+    public boolean svrKill = false;
 
     public  MTank(ObjectType type, int x, int y, int dirction) {
         this.x = x;
@@ -41,13 +43,17 @@ public class MTank implements Serializable {
         lives = p.lives;
         tDestroyed = p.isDestroyed();
         respawn = p.respawn;
+        svrKill = p.svrKill;
 
 
         bullets = new ArrayList<>();
         ArrayList<Bullet> pBullets = p.getBullets();
         for(Bullet b:pBullets) {
+            if(b.isDestroyed() && !b.svrKill && WifiDirectManager.getInstance().isServer()) {
+                continue;
+            }
             if(b != null) {
-                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0};
+                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0,b.id};
                 bullets.add(bt);
             }
         }
@@ -58,6 +64,7 @@ public class MTank implements Serializable {
         x = e.x;
         y = e.y;
         type = e.type;
+        svrKill = e.svrKill;
         dirction = e.getDirection();
         tDestroyed = e.isDestroyed();
 //        boat = p.hasBoat();
@@ -77,7 +84,7 @@ public class MTank implements Serializable {
         ArrayList<Bullet> pBullets = e.getBullets();
         for(Bullet b:pBullets) {
             if(b != null) {
-                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0};
+                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0,b.id};
                 bullets.add(bt);
             }
         }

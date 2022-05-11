@@ -23,6 +23,7 @@ public class Bonus extends GameObjects {
     private int bonusTmr = 200;
     private int scoreTmr;
 
+    public static boolean cleared = false;
     public static final int GRENADE = 0;
     public static final int HELMET = 1;
     public static final int CLOCK = 2;
@@ -31,6 +32,7 @@ public class Bonus extends GameObjects {
     public static final int STAR = 5;
     public static final int GUN = 6;
     public static final int BOAT = 7;
+    public static boolean available = false;
 
     public Bonus() {
         super(0,0);
@@ -58,8 +60,32 @@ public class Bonus extends GameObjects {
         if(bonus >= 0 && bonus <= 7) {
             bonusBm = bitmaps.get(bonus);
             on = true;
+            available = true;
         }
 //        bonusTmr = 200;
+    }
+
+    public void setBonus(int x, int y, int b, boolean av, boolean cl) {
+        if(b == -1) {
+            return;
+        }
+        if(cl){
+            bonus = -1;
+            bonusTmr = 200;
+            scoreTmr = 5;
+            available = false;
+            return;
+        }
+        if(x == this.x && y == this.y && b == this.bonus ) {
+            available = av;
+            return;
+        }
+        bonusBm = bitmaps.get(b);
+        this.x = x;
+        this.y = y;
+        this.bonus = b;
+        available = av;
+
     }
 
     public int getBonus() {
@@ -69,18 +95,23 @@ public class Bonus extends GameObjects {
 
     public void clearBonus() {
         bonus = -1;
-        on = false;
+//        on = false;
         bonusTmr = 200;
         scoreTmr = 5;
+        available = false;
+        cleared = true;
     }
 
     public void reset() {
-        on = false;
+        available = false;
     }
-    public boolean isOn() {
-        return on;
+    public boolean isAvailable() {
+        return available;
     }
     public void draw(Canvas canvas) {
+        if(!available) {
+            return;
+        }
         if(bonus >= 0 && bonus <= 7) {
             if(blinkTmr > 0) {
                 --blinkTmr;

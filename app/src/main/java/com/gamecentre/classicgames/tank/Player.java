@@ -3,12 +3,12 @@ package com.gamecentre.classicgames.tank;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
 import java.util.ArrayList;
 
@@ -234,9 +234,11 @@ public class Player extends Tank{
                 by = y+(int) sprite.h/2;
                 break;
         }
+        bId++;
         bullet.move(direction);
         bullet.setSpeed(bulletSpeed);
         bullet.setPlayer(true);
+        bullet.id = bId;
         bullets.add((new Bullet(bullet,bx,by)));
         SoundManager.playSound(Sounds.TANK.FIRE);
         if(MaxBullet > 1){
@@ -304,7 +306,7 @@ public class Player extends Tank{
 //    }
 
     public int collidsWithBonus(Bonus b) {
-        if(b.isOn() && super.collides_with(b)) {
+        if(b.isAvailable() && super.collides_with(b)) {
             stageScore += 500;
             SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
             int bonus = b.getBonus();
@@ -387,6 +389,11 @@ public class Player extends Tank{
             return false;
         }
         if(super.collides_with(bullet)) {
+            if(TankView.twoPlayers && this.player == 2) {
+                bullet.recycle = true;
+                return true;
+            }
+
             if(shield) {
                 bullet.setDestroyed(false);
                 return true;
@@ -404,6 +411,7 @@ public class Player extends Tank{
                 bullet.setDestroyed();
                 return true;
             }
+            svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
             setDestroyed();
             bullet.setDestroyed();
 
@@ -517,7 +525,7 @@ public class Player extends Tank{
         this.armour = model.armour;
         this.lives = model.lives;
         this.respawn = model.respawn;
-        if(model.tDestroyed) {
+        if(!destroyed && model.tDestroyed) {
             setDestroyed();
         }
 
@@ -529,16 +537,41 @@ public class Player extends Tank{
 
         while(bullets.remove(null));
 
-        for(int[] b:model.bullets) {
-            bullet.move(direction);
-//            bullet.setSpeed(b[2]);
-            bullet.setPlayer(true);
-            if(b[3] == 1) {
-                bullet.setDestroyed();
-            }
+//        for(int[] b:model.bullets) {
+//            bullet.move(direction);
+////            bullet.setSpeed(b[2]);
+//            bullet.setPlayer(true);
+//            if(b[3] == 1) {
+//                bullet.setDestroyed();
+//            }
+//
+//            bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
+//            bullet.destroyed = false;
+//        }
 
-            bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
-            bullet.destroyed = false;
+        for (int i = 0; i < model.bullets.size(); i++) {
+            boolean found = false;
+            for(int j = 0; j < bullets.size(); j++) {
+                if (model.bullets.get(i)[4] == bullets.get(j).id) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                if (model.bullets.get(i)[3] == 1) {
+                    bullet.setDestroyed();
+                }
+                else{
+                    bullet.destroyed = false;
+                }
+
+
+                bullet.id = model.bullets.get(i)[4];
+                bullet.move(direction);
+                bullet.setPlayer(false);
+                bullets.add((new Bullet(bullet, (int) (model.bullets.get(i)[0] * scale), (int) (model.bullets.get(i)[1] * scale))));
+                bullet.destroyed = false;
+            }
         }
     }
 
@@ -562,7 +595,7 @@ public class Player extends Tank{
         }
         else if(!destroyed) {
             frame %= sprite.frame_count;
-            Log.d("DRAWP", sprite.frame_count+" "+typeVal+" "+frame);
+//            Log.d("DRAWP", sprite.frame_count+" "+typeVal+" "+frame);
             canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * armour + frame).get(4*group+direction),x,y,null);
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;

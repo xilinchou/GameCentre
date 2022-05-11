@@ -51,9 +51,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
-public class TankView extends View implements View.OnTouchListener, View.OnClickListener, RemoteMessageListener, ButtonListener {
+public class TankView extends View implements RemoteMessageListener, ButtonListener {
 
     /** Debug tag */
     @SuppressWarnings("unused")
@@ -100,6 +101,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     /** Flag that marks this view as initialized */
     private boolean mInitialized = false;
+    private boolean round_started = false;
 
     protected boolean updatingRemote = false;
     protected boolean drawing = false;
@@ -133,6 +135,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     public Bitmap eCountBm;
     private ArrayList<Enemy> Enemies;
     private ArrayList<ArrayList<GameObjects>> levelObjects;
+    ArrayList<int[]> levelObjectsUpdate;
     private ArrayList<Bush> levelBushes;
     public static Bonus bonus;
     private int new_enemy_time = 0;
@@ -170,7 +173,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     private int newStageTmr = (int)(2*TO_SEC);
 
 
-    public static LinkedList<Game> gameModel;
+    public static ConcurrentLinkedQueue<Game> gameModel;
 
 
     public static boolean freeze = false;
@@ -217,7 +220,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 //    private TankView.RemoteUpdateHandler mRemoteUpdateHandler = new TankView.RemoteUpdateHandler();
 
     /** Flags indicating who is a player */
-    private boolean twoPlayers = false;
+    public static boolean twoPlayers = false;
 
     /**
      * An overloaded class that repaints this view in a separate thread.
@@ -372,6 +375,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     private void loadLevel(int level) {
         levelObjects = new ArrayList<>();
         levelBushes = new ArrayList<>();
+        if(twoPlayers) {
+            levelObjectsUpdate = new ArrayList<>();
+        }
         BufferedReader reader;
         int row_count = 0;
         try {
@@ -501,7 +507,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         resetScoreView();
 
         if(twoPlayers) {
-            gameModel = new LinkedList<>();
+            gameModel = new ConcurrentLinkedQueue<>();
             if(WifiDirectManager.getInstance().isServer()) {
                 P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 , getHeight() / 2 , 1);
                 P2 = new Player(ObjectType.ST_PLAYER_2, getWidth() / 2, getHeight() / 2, 2);
@@ -523,7 +529,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     public void retryStage() {
         if(twoPlayers) {
-            gameModel = new LinkedList<>();
+            gameModel = new ConcurrentLinkedQueue<>();
             if(WifiDirectManager.getInstance().isServer()) {
                 P1 = new Player(ObjectType.ST_PLAYER_1, getWidth() / 2 , getHeight() / 2 , 1);
                 P2 = new Player(ObjectType.ST_PLAYER_2, getWidth() / 2, getHeight() / 2, 2);
@@ -582,9 +588,10 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         P1.respawn();
         P1.resetKills();
         P1.clearBullets();
+        P1.bId = 0;
         P1.stageScore = 0;
         showingScore = false;
-//        round_started = true;
+        round_started = true;
     }
 
     /**
@@ -817,6 +824,11 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 return;
             }
         }
+        if(twoPlayers) {
+            if(P1.collidesWithObject(P2)) {
+                return;
+            }
+        }
         if(!p.collidesWithObject(eagle)) {
             boolean stop = false;
             for(int i = 0; i < levelObjects.size(); i++){
@@ -852,9 +864,12 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     }
 
-    private void checkCollisionEnemy(Player P1) {
+    private void checkCollisionEnemy() {
         for(int e1 = 0; e1 < Enemies.size(); e1++) {
             if(Enemies.get(e1).collidesWithObject(P1)) {
+                continue;
+            }
+            else if(twoPlayers && Enemies.get(e1).collidesWithObject(P2)) {
                 continue;
             }
             else if(Enemies.get(e1).collidesWithObject(eagle)) {
@@ -929,8 +944,27 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                     for(int j = 0; j < levelObjects.get(i).size(); j++){
                         if(levelObjects.get(i).get(j) != null && !levelObjects.get(i).get(j).isDestroyed() && pbullet.collides_with(levelObjects.get(i).get(j))) {
                             if(levelObjects.get(i).get(j) instanceof Brick) {
-                                if(p.canBreakWall() || !((Brick) levelObjects.get(i).get(j)).collidsWithBullet(pbullet.getDirection())) {
+                                boolean coll = ((Brick) levelObjects.get(i).get(j)).collidsWithBullet(pbullet.getDirection());
+                                if(coll) {
+                                    switch (pbullet.getDirection()) {
+                                        case CONST.Direction.UP:
+                                            levelObjectsUpdate.add(new int[]{i,j,6});
+                                            break;
+                                        case CONST.Direction.DOWN:
+                                            levelObjectsUpdate.add(new int[]{i,j,7});
+                                            break;
+                                        case CONST.Direction.LEFT:
+                                            levelObjectsUpdate.add(new int[]{i,j,8});
+                                            break;
+                                        case CONST.Direction.RIGHT:
+                                            levelObjectsUpdate.add(new int[]{i,j,9});
+                                            break;
+                                    }
+
+                                }
+                                if(p.canBreakWall() || !coll) {
                                     levelObjects.get(i).set(j, null);
+                                    levelObjectsUpdate.add(new int[]{i,j,0});
                                 }
                                 pbullet.setDestroyed();
                                 count++;
@@ -981,6 +1015,16 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         }
     }
 
+    private void checkCollisionEnemyBulletWithPlayer(Player p) {
+            for(Enemy e:Enemies) {
+                for (Bullet bullet : e.getBullets()) {
+                    if (!bullet.isDestroyed() && p.collidsWithBullet(bullet)) {
+                        return;
+                    }
+                }
+            }
+    }
+
     private void checkCollisionEnemyBullet(Player p) {
         for(Enemy e:Enemies) {
             for(Bullet bullet: e.getBullets()) {
@@ -994,8 +1038,27 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                         for(int j = 0; j < levelObjects.get(i).size(); j++){
                             if(levelObjects.get(i).get(j) != null && !levelObjects.get(i).get(j).isDestroyed() && bullet.collides_with(levelObjects.get(i).get(j))) {
                                 if(levelObjects.get(i).get(j) instanceof Brick) {
-                                    if(e.canBreakWall() || !((Brick) levelObjects.get(i).get(j)).collidsWithBullet(bullet.getDirection())) {
+                                    boolean coll = ((Brick) levelObjects.get(i).get(j)).collidsWithBullet(bullet.getDirection());
+                                    if(coll) {
+                                        switch (bullet.getDirection()) {
+                                            case CONST.Direction.UP:
+                                                levelObjectsUpdate.add(new int[]{i,j,6});
+                                                break;
+                                            case CONST.Direction.DOWN:
+                                                levelObjectsUpdate.add(new int[]{i,j,7});
+                                                break;
+                                            case CONST.Direction.LEFT:
+                                                levelObjectsUpdate.add(new int[]{i,j,8});
+                                                break;
+                                            case CONST.Direction.RIGHT:
+                                                levelObjectsUpdate.add(new int[]{i,j,9});
+                                                break;
+                                        }
+
+                                    }
+                                    if(p.canBreakWall() || !coll) {
                                         levelObjects.get(i).set(j, null);
+                                        levelObjectsUpdate.add(new int[]{i,j,0});
                                     }
                                     bullet.setDestroyed();
                                     count++;
@@ -1068,6 +1131,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 break;
             case 3:
                 protectEagle = true;
+                eagle.protection = 1;
                 protectEagleTmr = ProtectEagleTime;
                 for (int[] eaglePo : eaglePos) {
                     levelObjects.get(eaglePo[1]).set(eaglePo[0], new StoneWall(eaglePo[0], eaglePo[1]));
@@ -1148,11 +1212,14 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 levelObjects.get(eaglePo[1]).set(eaglePo[0], new Brick(eaglePo[0], eaglePo[1]));
             }
             protectEagle = false;
+            eagle.protection = 2;
         }
 
-//        getRemoteUpdate();
+        if(twoPlayers) {
+            levelObjectsUpdate.clear();
+        }
 
-        if(!twoPlayers || (twoPlayers && WifiDirectManager.getInstance().isServer())) {
+        if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
             for (int i = 0; i < Enemies.size(); i++) {
                 if (Enemies.get(i).recycle) {
                     Enemies.set(i, null);
@@ -1163,13 +1230,22 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
             generateEnemy();
 
-            checkCollisionPlayer(P1);
+//            checkCollisionPlayer(P1);
             checkCollisionPlayerBullet(P1);
             checkCollisionPlayerWithBonus(P1, bonus);
             checkCollisionEnemyBullet(P1);
+            checkCollisionEnemyBulletWithPlayer(P2);
 
+        }
+
+        if(twoPlayers && !WifiDirectManager.getInstance().isServer()) {
+            checkCollisionPlayerBullet(P1);
+            checkCollisionEnemyBulletWithPlayer(P1);
+        }
+            checkCollisionPlayer(P1);
             P1.update();
 
+        if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
             // Get target
             int min_dist = TankView.HEIGHT + TankView.WIDTH;
             Rect pRect = P1.getRect();
@@ -1201,7 +1277,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 e.changeDirection();
             }
 
-            checkCollisionEnemy(P1);
+            checkCollisionEnemy();
 
             for (Enemy e : Enemies) {
                 e.update();
@@ -1235,14 +1311,16 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     private void getRemoteUpdate() {
-
+        if(!round_started) {
+            return;
+        }
 //        if(twoPlayers && !gameModel.isEmpty()){
 //        if(gameModel.isEmpty()){
 //            return;
 //        }
         Game m = null;
         try {
-            m = gameModel.removeFirst();
+            m = gameModel.poll();
         }
         catch (Exception e){
             Log.d("Model", "Model exception");
@@ -1255,7 +1333,9 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
         TankGameModel model = (TankGameModel)m;
         playerReady = true;
 
-        eagle.destroyed = model.eagleDestroyed;
+        if(!eagle.destroyed){
+            eagle.destroyed = model.eagleDestroyed;
+        }
 
         if(model.gameOver){
             notifyGameOver = true;
@@ -1292,54 +1372,87 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
                 found = false;
                 for (int j = 0; j < Enemies.size(); j++) {
                     if(model.mEnemies.get(i).id == Enemies.get(j).id){
-                        Enemies.get(j).setModel(model.mEnemies.get(i),scale);
+                        if(!Enemies.get(j).isDestroyed()) {
+                            Enemies.get(j).setModel(model.mEnemies.get(i), scale,false);
+                        }
                         found = true;
                         break;
                     }
                 }
                 if(!found) {
-                    Enemy e = new Enemy(ObjectType.ST_TANK_A, 0, 0);
-                    e.setModel(model.mEnemies.get(i), scale);
+                    Enemy e = new Enemy(ObjectType.ST_TANK_A,model.mEnemies.get(i).group, 0, 0);
+                    e.setModel(model.mEnemies.get(i), scale, false);
                     Enemies.add(e);
                 }
             }
 
-            for(int i = 0; i < model.lObjects.length; i++) {
-                for(int j = 0; j < model.lObjects[i].length; j++) {
-                    if(model.lObjects[i][j] == 0) {
-                        levelObjects.get(i).set(j,null);
-                    }
-                    else if(model.lObjects[i][j] == 6) {
-                        ((Brick)levelObjects.get(i).get(j)).collidsWithBullet(CONST.Direction.UP);
-                    }
-                    else if(model.lObjects[i][j] == 7) {
-                        ((Brick)levelObjects.get(i).get(j)).collidsWithBullet(CONST.Direction.DOWN);
-                    }
-                    else if(model.lObjects[i][j] == 8) {
-                        ((Brick)levelObjects.get(i).get(j)).collidsWithBullet(CONST.Direction.LEFT);
-                    }
-                    else if(model.lObjects[i][j] == 9) {
-                        ((Brick)levelObjects.get(i).get(j)).collidsWithBullet(CONST.Direction.RIGHT);
+
+        }
+
+        if (WifiDirectManager.getInstance().isServer()) {
+            for (int i = 0; i < model.mEnemies.size(); i++) {
+                for (int j = 0; j < Enemies.size(); j++) {
+                    if(model.mEnemies.get(i).id == Enemies.get(j).id){
+                        if(!Enemies.get(j).isDestroyed()) {
+                            Enemies.get(j).setModel(model.mEnemies.get(i), scale, true);
+                        }
+                        break;
                     }
                 }
             }
 
+
         }
+
+        for(int[] l:model.lObjects) {
+
+            if(l[2] == 0) {
+                levelObjects.get(l[0]).set(l[1],null);
+            }
+            else if(levelObjects.get(l[0]).get(l[1]) != null) {
+                if (l[2] == 6) {
+                    ((Brick) levelObjects.get(l[0]).get(l[1])).collidsWithBullet(CONST.Direction.UP);
+                } else if (l[2] == 7) {
+                    ((Brick) levelObjects.get(l[0]).get(l[1])).collidsWithBullet(CONST.Direction.DOWN);
+                } else if (l[2] == 8) {
+                    ((Brick) levelObjects.get(l[0]).get(l[1])).collidsWithBullet(CONST.Direction.LEFT);
+                } else if (l[2] == 9) {
+                    ((Brick) levelObjects.get(l[0]).get(l[1])).collidsWithBullet(CONST.Direction.RIGHT);
+                }
+            }
+        }
+
+        if(model.eagleProtection == 1) {
+            for (int[] eaglePo : eaglePos) {
+                levelObjects.get(eaglePo[1]).set(eaglePo[0], new StoneWall(eaglePo[0], eaglePo[1]));
+            }
+        }
+        else if(model.eagleProtection == 2) {
+            for (int[] eaglePo : eaglePos) {
+                levelObjects.get(eaglePo[1]).set(eaglePo[0], new Brick(eaglePo[0], eaglePo[1]));
+            }
+        }
+
+        bonus.setBonus((int)(model.bonus[0]*scale),(int)(model.bonus[1]*scale),model.bonus[2],model.bnsAv,model.bnsClr);
 
     }
 
     public void sendToWifi() {
         if(twoPlayers) {
             TankGameModel model = new TankGameModel();
-            if(WifiDirectManager.getInstance().isServer()) {
+//            if(WifiDirectManager.getInstance().isServer()) {
                 model.loadEnemies(Enemies);
-                model.loadLevelObjects(levelObjects);
-            }
+                model.loadLevelObjects(levelObjectsUpdate);
+//            }
             model.loadPlayer(P1);
             model.eagleDestroyed = eagle.isDestroyed();
+            model.eagleProtection = eagle.protection;
+            model.loadBonus(bonus.x, bonus.y, bonus.getBonus(), Bonus.available, Bonus.cleared);
             WifiDirectManager.getInstance().sendMessage(model);
 //            Gson gson = new Gson();
 //            WifiDirectManager.getInstance().sendMessage(gson.fromJson(gson.toJson(model), TankGameModel.class));
+            eagle.protection = 0;
+            Bonus.cleared = false;
         }
     }
 
@@ -1507,36 +1620,6 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     }
 
-    public boolean onTouch(View v, MotionEvent mo) {
-//        if(v != this || !gameRunning()) return false;
-        Log.d("Touch TAG", v.getTag().toString());
-//        Toast.makeText(this, " ", Toast.LENGTH_SHORT).show();
-
-//        if(v != this) return false;
-
-        // We want to support multiple touch and single touch
-        InputHandler handle = InputHandler.getInstance();
-
-        // Loop through all the pointers that we detected and
-        // process them as normal touch events.
-        for(int i = 0; i < handle.getTouchCount(mo); i++) {
-            int tx = (int) handle.getX(mo, i);
-            int ty = (int) handle.getY(mo, i);
-
-            if(v.getTag() == "shoot") {
-                Log.d("Button", "SHOOT");
-            }
-        }
-
-        Button b = findViewById(R.id.shootBtn);
-
-        return true;
-    }
-
-    @Override
-    public void onClick(View v) {
-        Log.d("Click TAG", v.getTag().toString());
-    }
 
     @Override
     public void onMessageReceived(Game message) {
@@ -1548,14 +1631,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
     @Override
     public void onButtonPressed(View v, MotionEvent m) {
-//        if(m.getAction() == MotionEvent.ACTION_DOWN) {
-//        Log.d("Button", String.valueOf(TankActivity.upRect.left) + " " + TankActivity.upRect.top);
-//        Log.d("View", String.valueOf(TankActivity.navRect.left) + " " + TankActivity.navRect.top);
-//        Log.d("Touch", String.valueOf((int)m.getX() + TankActivity.navRect.left) + " " + (int)m.getY() + TankActivity.navRect.top);
-//        if(TankActivity.upRect.contains((int)m.getX(),(int)m.getY())) {
-//            P1.move(CONST.Direction.UP);
-//
-//        }
+
             switch (v.getId()) {
                 case R.id.upBtn:
                     if(m.getX() < 0) {
@@ -1664,8 +1740,6 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     public void pause() {
-//        mLastState = mCurrentState;
-//        mCurrentState = TankView.State.Stopped;
 
         if (mCurrentState != TankView.State.Stopped) {
             mLastState = mCurrentState;
@@ -1763,7 +1837,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
 
         // Save the value
         editor.putBoolean(Pong.PREF_MUTED, b);
-        editor.commit();
+        editor.apply();
 
         // TODO
         // Output a toast to the user
@@ -1772,7 +1846,7 @@ public class TankView extends View implements View.OnTouchListener, View.OnClick
     }
 
     private void playSound(int rid) {
-        if(mSound == true) return;
+        if(mSound) return;
         mPool.play(rid, 0.2f, 0.2f, 1, 0, 1.0f);
     }
 }

@@ -10,6 +10,7 @@ import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
 public class Bullet extends GameObjects {
 
@@ -25,6 +26,7 @@ public class Bullet extends GameObjects {
     private boolean fromPlayer;
     private boolean explode = true;
     private float speed = 1;
+    public int id = 0;
 
     public Bullet(ObjectType type, int x, int y, boolean fromPlayer) {
         super(x,y);
@@ -54,6 +56,7 @@ public class Bullet extends GameObjects {
 
     public Bullet(Bullet bullet,int x, int y) {
         super(x,y);
+        id = bullet.id;
         this.fromPlayer = bullet.fromPlayer();
         this.bitmap = bullet.getBitmap();
         this.sprite = SpriteObjects.getInstance().getData(ObjectType.ST_BULLET);
@@ -222,6 +225,7 @@ public class Bullet extends GameObjects {
 
     public void setDestroyed() {
         super.setDestroyed();
+        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
         frame = 0;
         frame_delay = dsprite.frame_time;
         explode = true;
