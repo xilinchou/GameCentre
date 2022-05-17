@@ -138,7 +138,7 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
                         mTankView.updateP1Lives(Integer.parseInt(activity.getResources().getString(R.string.retryGoldAmnt).replace("x", "")));
                         golds = settings.getInt(TankActivity.GOLD, 0);
                         golds -= cost;
-                        goldCountTxt.setText(String.format(Locale.US, "x%d", golds));
+                        goldCountTxt.setText(String.format(Locale.ENGLISH, "x%d", golds));
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(TankActivity.GOLD, golds);
                         editor.commit();

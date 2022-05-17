@@ -76,7 +76,10 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             SHIELD = "SHIELD",
             GOLD = "GOLD",
 
-            GOLD_LEVEL = "GOLD_LEVEL";
+            GOLD_LEVEL = "GOLD_LEVEL",
+
+            LAST_DAY = "LAST_DAY",
+            CONSECUTIVE_DAYS = "CONSECUTIVE_DAYS";
 
     SharedPreferences settings;
 

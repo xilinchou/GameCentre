@@ -130,6 +130,28 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     }
 
 
+    public int checkNewDay() {
+        boolean newDay = false;
+        int numDays = 0;
+        long lastDay = settings.getInt(TankActivity.LAST_DAY,0);
+        long currentDay = (long) (System.currentTimeMillis() / 86400000);
+
+        newDay = currentDay - lastDay == 1;
+
+        if(newDay) {
+            numDays = settings.getInt(TankActivity.CONSECUTIVE_DAYS,0);
+            numDays++;
+        }
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(TankActivity.LAST_DAY,currentDay);
+        editor.putLong(TankActivity.CONSECUTIVE_DAYS,numDays);
+        editor.apply();
+
+        return numDays;
+    }
+
+
     public void openStore() {
         TankPurchaseDialog wd = new TankPurchaseDialog(TankMenuActivity.this);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
