@@ -77,6 +77,25 @@ public class SoundManager
         }
     }
 
+    public static void pauseSounds() {
+        for (int soundIndex : mSoundPoolMap.values())
+        {
+            if(soundIndex == Sounds.TANK.PAUSE) {
+                continue;
+            }
+            mSoundPool.pause(soundIndex);
+        }
+
+    }
+
+    public static void resumeSounds() {
+        for (int soundIndex : mSoundPoolMap.values())
+        {
+            mSoundPool.resume(soundIndex);
+        }
+
+    }
+
     public static void togglePlaySound()
     {
         playSound = !playSound;

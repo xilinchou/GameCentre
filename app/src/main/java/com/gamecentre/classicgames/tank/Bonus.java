@@ -49,12 +49,16 @@ public class Bonus extends GameObjects {
         }
     }
 
-    public void setBonus(int bonus) {
+    public void setBonus() {
 //        if(bonusTmr > 0){
 //            --bonusTmr;
 //            return;
 //        }
-        this.bonus = bonus;
+//        float prob = (float)Math.random();
+        bonus = pollBonus(10);
+
+//        int bonus = (int) (Math.random() * 8);
+//        this.bonus = bonus;
         this.x = (int)(Math.random()*TankView.WIDTH- bitmaps.get(0).getWidth());
         this.y = (int)(Math.random()*TankView.HEIGHT- bitmaps.get(0).getHeight());
         id++;
@@ -65,6 +69,47 @@ public class Bonus extends GameObjects {
             available = true;
         }
 //        bonusTmr = 200;
+    }
+
+    private int pollBonus(int count) {
+        int[] b = new int[] {0,0,0,0,0,0,0,0};
+
+        for(int i = 0; i < count; i++) {
+            float p = (float)Math.random();
+            if(p < 0.1) {
+                b[0]++;
+            }
+            else if(p < 0.4) {
+                b[1]++;
+            }
+            else if(p < 0.5) {
+                b[2]++;
+            }
+            else if(p < 0.7) {
+                b[3]++;
+            }
+            else if(p < 0.75) {
+                b[4]++;
+            }
+            else if(p < 0.85) {
+                b[5]++;
+            }
+            else if(p < 0.9) {
+                b[6]++;
+            }
+            else {
+                b[7]++;
+            }
+        }
+        int max = 0;
+        int bonus = 0;
+        for(int i = 0; i < 8; i ++) {
+            if(b[i] > max){
+                max = b[i];
+                bonus = i;
+            }
+        }
+        return bonus;
     }
 
     public void setBonus(int x, int y, int b, boolean av, boolean cl, int id) {

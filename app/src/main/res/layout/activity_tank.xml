@@ -2,47 +2,70 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/bghud">
+    android:background="@drawable/bghud3">
 
     <com.gamecentre.classicgames.tank.TankView
         android:id="@+id/tankView"
         android:layout_width="350dp"
         android:layout_height="350dp"
-        android:layout_centerInParent="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
         android:background="@color/black" />
 
     <LinearLayout
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="60dp"
         android:layout_alignTop="@+id/tankView"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginEnd="10dp"
         android:gravity="center"
         android:orientation="vertical">
 
-        <com.gamecentre.classicgames.tank.BrickTextView
-            android:id="@+id/pauseBtn"
+        <RelativeLayout
+            android:id="@+id/pauseBtn2"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/pauseTxt"
-            android:textAlignment="viewStart"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/brick_red"/>
+            android:background="@drawable/btn1">
 
-        <com.gamecentre.classicgames.tank.BrickTextView
-            android:id="@+id/endBtn"
+            <com.gamecentre.classicgames.tank.TankTextView
+                android:id="@+id/pauseBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pauseTxt"
+                android:layout_centerInParent="true"
+                android:textAlignment="viewStart"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/brick_brown"
+                android:background="@android:color/transparent"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/endBtn2"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="10dp"
-            android:layout_weight="3"
-            android:text="@string/end_gameTxt"
-            android:textAlignment="viewStart"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/brick_red"/>
+            android:layout_weight="1"
+            android:background="@drawable/btn1">
+
+            <com.gamecentre.classicgames.tank.TankTextView
+                android:id="@+id/endBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/end_gameTxt"
+                android:layout_centerInParent="true"
+                android:textAlignment="viewStart"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/brick_brown"
+                android:background="@android:color/transparent"/>
+
+        </RelativeLayout>
+
+
 
     </LinearLayout>
 
@@ -65,7 +88,7 @@
         android:layout_marginBottom="1dp"
         android:text="@string/game_over"
         android:textAlignment="center"
-        android:textSize="12sp"
+        android:textSize="15sp"
         android:textColor="@color/brick_red"
         android:visibility="invisible" />
 
@@ -372,9 +395,10 @@
         android:layout_marginStart="37dp"
         android:layout_marginTop="50dp"
         android:orientation="vertical"
-        android:background="@drawable/bonus_bg">
+        android:background="@drawable/bghud7">
 
         <LinearLayout
+            android:id="@+id/bonusBank"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -391,8 +415,8 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center">
 
-                <ImageView
-                    android:id="@+id/brenade"
+                <RelativeLayout
+                    android:id="@+id/grenade"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -400,9 +424,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_grenade"/>
+                    android:background="@drawable/bonus_grenade"
+                    android:tag="GRENADE">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/grenadeCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:alpha="1"
+                        android:text="10"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/white"
+                        android:textSize="9sp" />
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/clock"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -411,9 +451,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_clock"/>
+                    android:background="@drawable/bonus_clock"
+                    android:tag="CLOCK">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/clockCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/shovel"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -422,7 +478,23 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_shovel"/>
+                    android:background="@drawable/bonus_shovel"
+                    android:tag="SHOVEL">
+
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/shovelCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -434,7 +506,7 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center">
 
-                <ImageView
+                <RelativeLayout
                     android:id="@+id/tank"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -443,9 +515,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_tank"/>
+                    android:background="@drawable/bonus_tank"
+                    android:tag="TANK">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/tankCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/gun"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -454,9 +542,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_gun"/>
+                    android:background="@drawable/bonus_gun"
+                    android:tag="GUN">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/gunCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/boat"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -465,7 +569,23 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_boat"/>
+                    android:background="@drawable/bonus_boat"
+                    android:tag="BOAT">
+
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/boatCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -477,7 +597,7 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center">
 
-                <ImageView
+                <RelativeLayout
                     android:id="@+id/star"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -486,9 +606,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_star"/>
+                    android:background="@drawable/bonus_star"
+                    android:tag="STAR">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/starCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/shield"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -497,9 +633,25 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/bonus_helmet"/>
+                    android:background="@drawable/bonus_helmet"
+                    android:tag="SHIELD">
 
-                <ImageView
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/shieldCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/gold"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -507,7 +659,24 @@
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"/>
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/gold_stack"
+                    android:tag="GOLD">
+
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/goldCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginTop="5dp"
+                        android:textAlignment="viewStart"
+                        android:text="10"
+                        android:textSize="9sp"
+                        android:alpha="1"
+                        android:textColor="@color/white"/>
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -516,7 +685,19 @@
     </LinearLayout>
 
 
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+    </com.google.android.gms.ads.AdView>
 
+
+<!--    ads:adUnitId="ca-app-pub-3940256099942544/6300978111"-->
     <RelativeLayout
         android:id="@+id/navView"
         android:layout_width="160dp"
@@ -596,7 +777,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <Button
             android:id="@+id/menuBtn"

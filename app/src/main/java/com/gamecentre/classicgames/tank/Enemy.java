@@ -19,13 +19,14 @@ public class Enemy extends Tank{
     private Point target;
     private int change_dir_time;
     private int dir_time;
-    private static boolean freeze = false, shield, boat;
-    private static int freezeTmr, shieldTmr, boatTmr;
+    private boolean freeze = false, shield, boat;
+    private  int freezeTmr, shieldTmr, boatTmr;
     public static int lives = 20;
     private  float bulletSpeed = 1;
     protected int reloadTmr = (int)(0.2*TankView.TO_SEC);
     protected int reload_time = 0;
     public boolean hasBonus = false;
+    private boolean breakWall = false;
     private int lifeFrame = 0;
     private String killScore;
     private boolean killed = false;
@@ -226,6 +227,73 @@ public class Enemy extends Tank{
         reload_time = (int)((0.2*TankView.TO_SEC) + Math.random()*reloadTmr);
     }
 
+
+    public void applyShield() {
+        group += 2;
+        if(group > 4) {
+            group = 4;
+        }
+    }
+
+    public void applyBoat() {
+        boat = true;
+        boatTmr = BoatTime;
+    }
+
+    public void applyTank() {
+        hasBonus = true;
+    }
+
+    public void applyGun() {
+        breakWall = true;
+        group = 4;
+    }
+
+    public void applyStar() {
+        group += 1;
+        if(group > 4) {
+            group = 4;
+        }
+    }
+
+    public int collidsWithBonus(Bonus b) {
+        if(b.isAvailable() && super.collides_with(b) && TankView.ENEMY_BOOST) {
+//            stageScore += 500;
+//            SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
+            int bonus = b.getBonus();
+//            gotBonus = bonus;
+            switch (bonus) {
+                case Bonus.GRENADE:
+                    break;
+                case Bonus.HELMET:
+                    applyShield();
+                    break;
+                case Bonus.CLOCK:
+                    break;
+                case Bonus.SHOVEL:
+                    break;
+                case Bonus.TANK:
+                    applyTank();
+                    break;
+                case Bonus.STAR:
+                    applyStar();
+                    break;
+                case Bonus.GUN:
+                    applyGun();
+                    break;
+                case Bonus.BOAT:
+                    applyBoat();
+                    break;
+            }
+            b.clearBonus();
+            return bonus;
+        }
+        return -1;
+    }
+
+
+
+
     public boolean collidesWithObject(GameObjects targ) {
         rect = getRect();
         Rect tRect = targ.getRect();
@@ -249,18 +317,18 @@ public class Enemy extends Tank{
 //                bullet.setDestroyed();
 //                return;
 //            }
-//            if(boat) {
-//                boat = false;
-//                bullet.setDestroyed();
-//                return;
-//            }
+            if(boat && TankView.ENEMY_BOOST) {
+                boat = false;
+                bullet.setDestroyed(false);
+                return true;
+            }
 //            if(armour >= 3) {
 //                armour = 2;
 //                bullet.setDestroyed();
 //                return;
 //            }
             if(hasBonus) {
-                TankView.bonus.setBonus((int) (Math.random() * 8));
+                TankView.bonus.setBonus();
             }
             bullet.setDestroyed();
             if(group == 1) {
@@ -279,7 +347,7 @@ public class Enemy extends Tank{
     }
 
     public boolean canBreakWall() {
-        return false;
+        return TankView.ENEMY_BOOST && breakWall;
     }
 
     public boolean canClearBush() {

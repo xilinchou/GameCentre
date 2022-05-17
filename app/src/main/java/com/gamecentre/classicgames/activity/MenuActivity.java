@@ -14,8 +14,7 @@ import android.widget.GridLayout;
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.numberpuzzle.NumberPuzzLevelActivity;
 import com.gamecentre.classicgames.pingpong.Pong;
-import com.gamecentre.classicgames.tank.TankActivity;
-import com.gamecentre.classicgames.tank.TankMenuActivity;
+import com.gamecentre.classicgames.tank.TankIntroActivity;
 
 public class MenuActivity extends AppCompatActivity {
 //    Sound sound;
@@ -84,7 +83,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void tank() {
-        Intent intent = new Intent(MenuActivity.this, TankMenuActivity.class);
+        Intent intent = new Intent(MenuActivity.this, TankIntroActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
         finish();

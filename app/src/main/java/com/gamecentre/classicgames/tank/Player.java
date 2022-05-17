@@ -17,7 +17,7 @@ public class Player extends Tank{
     public int armour = 0;
     protected int frame;
     protected int frame_delay;
-    public int lives = 3;
+    public int lives = 1;
     protected int reloadTmr = (int)(0.1*TankView.TO_SEC);
     protected int reload_time = 0;
     protected int MaxBullet = 1;
@@ -35,6 +35,8 @@ public class Player extends Tank{
     public int stageScore;
     boolean killed = false;
     public int gotBonus = 0;
+    private boolean freezeOn = false;
+    private int freezeOnTmr, freezBlinkTime = 5;
 
 
 
@@ -71,7 +73,6 @@ public class Player extends Tank{
     }
 
     public void move() {
-//        setDirection();
 //        Log.d("MOTION", String.valueOf(moving) + " " + collision + " " + direction);
         if(respawn || destroyed) {
             return;
@@ -169,6 +170,9 @@ public class Player extends Tank{
     }
 
     public void changeDirection(int dir) {
+        if(freeze) {
+            return;
+        }
         if(iceTmr > 0) {
             newDirection = dir;
             return;
@@ -251,10 +255,6 @@ public class Player extends Tank{
         }
     }
 
-//    public void setReloadTime(int t) {
-//        ReloadTime = t;
-//    }
-
     public void loseLife() {
         --lives;
         if(lives < 0) {
@@ -279,14 +279,18 @@ public class Player extends Tank{
         super.setDestroyed();
         killed = true;
         TankView.vibrate(500);
-//        frame = 0;
-//        frame_delay = dsprite.frame_time;
-//        loseLife();
     }
 
     public void setFreeze() {
         TankView.freeze = true;
         TankView.freezeTmr = TankView.FreezeTime;
+    }
+
+
+    public void freeze() {
+        freeze = true;
+        freezeTmr = FreezeTime;
+        freezeOnTmr = 0;
     }
 
     public void iceSlippage() {
@@ -299,20 +303,80 @@ public class Player extends Tank{
     public void stopSlip() {
         iceTmr = 0;
         slip = false;
-//        if(newDirection != direction){
-//            changeDirection(newDirection);
-//        }
+
         if(moving) {
             move(newDirection);
         }
 
     }
 
-//    public boolean collidesWithTank(GameObjects targ) {
-//        boolean c = super.collidesWithTank(targ);
-//
-//        return c;
-//    }
+    public void applyShield() {
+        shield = true;
+        shieldTmr = ShieldTime;
+    }
+
+    public void applyBoat() {
+        boat = true;
+        boatTmr = BoatTime;
+    }
+
+    public void applyTank() {
+        ++lives;
+        if (this.type == ObjectType.ST_PLAYER_1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
+        } else {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
+        }
+    }
+
+    public void applyGun() {
+        bulletSpeed = 1.3f;
+        breakWall = true;
+        vx *= 1.3;
+        vy *= 1.3;
+        if(vx > DEFAULT_SPEED*1.35){
+            vx = DEFAULT_SPEED*1.35f;
+        }
+        if(vy > DEFAULT_SPEED*1.35){
+            vy = DEFAULT_SPEED*1.35f;
+        }
+        starCount += 3;
+        if(starCount > 3) {
+            clearBush = true;
+            starCount = 4;
+        }
+        MaxBullet = 2;
+        armour = 3;
+        level = 1;
+    }
+
+    public void applyStar() {
+        ++starCount;
+        if(starCount > 3) {
+            clearBush = true;
+            starCount = 4;
+        }
+        if(starCount >= 3) {
+            breakWall = true;
+        }
+        bulletSpeed = 1.3f;
+        if(starCount >= 2) {
+            MaxBullet = 2;
+        }
+        armour++;
+        vx *= 1.2;
+        if(vx > DEFAULT_SPEED*1.35){
+            vx = DEFAULT_SPEED*1.35f;
+        }
+        vy *= 1.2;
+        if(vy > DEFAULT_SPEED*1.35){
+            vy = DEFAULT_SPEED*1.35f;
+        }
+        if(armour >= 3){
+            armour = 3;
+            level = 1;
+        }
+    }
 
     public int collidsWithBonus(Bonus b) {
         if(b.isAvailable() && super.collides_with(b)) {
@@ -324,72 +388,23 @@ public class Player extends Tank{
                 case Bonus.GRENADE:
                     break;
                 case Bonus.HELMET:
-                    shield = true;
-                    shieldTmr = ShieldTime;
+                    applyShield();
                     break;
                 case Bonus.CLOCK:
                     break;
                 case Bonus.SHOVEL:
                     break;
                 case Bonus.TANK:
-                    ++lives;
-                    if (this.type == ObjectType.ST_PLAYER_1) {
-                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
-                    } else {
-                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
-                    }
+                    applyTank();
                     break;
                 case Bonus.STAR:
-                    ++starCount;
-                    if(starCount > 3) {
-                        clearBush = true;
-                        starCount = 4;
-                    }
-                    if(starCount >= 3) {
-                        breakWall = true;
-                    }
-                    bulletSpeed = 1.3f;
-                    if(starCount >= 2) {
-                        MaxBullet = 2;
-                    }
-                    armour++;
-                    vx *= 1.2;
-                    if(vx > DEFAULT_SPEED*1.35){
-                        vx = DEFAULT_SPEED*1.35f;
-                    }
-                    vy *= 1.2;
-                    if(vy > DEFAULT_SPEED*1.35){
-                        vy = DEFAULT_SPEED*1.35f;
-                    }
-                    if(armour >= 3){
-                        armour = 3;
-                        level = 1;
-                    }
+                    applyStar();
                     break;
                 case Bonus.GUN:
-                    bulletSpeed = 1.3f;
-                    breakWall = true;
-                    vx *= 1.3;
-                    vy *= 1.3;
-                    if(vx > DEFAULT_SPEED*1.35){
-                        vx = DEFAULT_SPEED*1.35f;
-                    }
-                    if(vy > DEFAULT_SPEED*1.35){
-                        vy = DEFAULT_SPEED*1.35f;
-                    }
-                    starCount += 3;
-                    if(starCount > 3) {
-                        clearBush = true;
-                        starCount = 4;
-                    }
-                    MaxBullet = 2;
-                    armour = 3;
-                    level = 1;
-
+                    applyGun();
                     break;
                 case Bonus.BOAT:
-                    boat = true;
-                    boatTmr = BoatTime;
+                    applyBoat();
                     break;
             }
             if(player == 1) {
@@ -450,6 +465,7 @@ public class Player extends Tank{
         killed = false;
         starCount = 0;
         armour = 0;
+        boat = false;
         bulletSpeed = 1;
         clearBush = false;
         breakWall = false;
@@ -514,12 +530,12 @@ public class Player extends Tank{
             shield = false;
         }
 
-//        if(respawn) {
-//            destroyed = false;
-//            direction = CONST.Direction.UP;
-//            frame = 0;
-//            respawn = false;
-//        }
+        if(freeze && freezeTmr > 0){
+            --freezeTmr;
+        }
+        else {
+            freeze = false;
+        }
 
         for(int i = 0; i < bullets.size(); i++) {
             if(bullets.get(i).recycle) {
@@ -531,7 +547,9 @@ public class Player extends Tank{
         while(bullets.remove(null));
 
         fire();
-        move();
+        if(!freeze) {
+            move();
+        }
         if(iceTmr == 1) {
             stopSlip();
         }
@@ -568,18 +586,6 @@ public class Player extends Tank{
 
         while(bullets.remove(null));
 
-//        for(int[] b:model.bullets) {
-//            bullet.move(direction);
-////            bullet.setSpeed(b[2]);
-//            bullet.setPlayer(true);
-//            if(b[3] == 1) {
-//                bullet.setDestroyed();
-//            }
-//
-//            bullets.add((new Bullet(bullet,(int)(b[0]* scale),(int)(b[1]* scale))));
-//            bullet.destroyed = false;
-//        }
-
         for (int i = 0; i < model.bullets.size(); i++) {
             boolean found = false;
             for(int j = 0; j < bullets.size(); j++) {
@@ -607,8 +613,6 @@ public class Player extends Tank{
     }
 
     public void draw(Canvas canvas) {
-        Bitmap bm;
-        int bx, by, bw, bh;
         if(respawn) {
             if(frame >= spsprite.frame_count) {
                 respawn = false;
@@ -626,8 +630,19 @@ public class Player extends Tank{
         }
         else if(!destroyed) {
             frame %= sprite.frame_count;
-//            Log.d("DRAWP", sprite.frame_count+" "+typeVal+" "+frame);
-            canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * armour + frame).get(4*group+direction),x,y,null);
+
+            if(freeze) {
+                freezeOnTmr = (freezeOnTmr + 1) % freezBlinkTime;
+                if(freezeOnTmr == 0) {
+                    freezeOn = !freezeOn;
+                }
+            }
+
+
+            if(!freeze || freezeOn) {
+                canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * armour + frame).get(4 * group + direction), x, y, null);
+            }
+
             if(frame_delay <= 0) {
                 frame = (frame + 1) % sprite.frame_count;
                 frame_delay = sprite.frame_time;
@@ -636,7 +651,6 @@ public class Player extends Tank{
                 --frame_delay;
             }
 
-//            if(boat && boatTmr > 0) {
             if(boat) {
                 mBoat.setPosition(x,y);
                 mBoat.draw(canvas);

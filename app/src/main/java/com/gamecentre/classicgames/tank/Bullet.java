@@ -113,43 +113,6 @@ public class Bullet extends GameObjects {
         fromPlayer = player;
     }
 
-//    protected int[] setCollissionRect(int dir) {
-//        getRect();
-//        int rl,rt,rr,rb;
-//        switch (dir) {
-//            case CONST.Direction.UP:
-//                rect.left = rect.left+2;
-//                rect.top = rect.top-4;
-//                rr = rect.right-2;
-//                rb = rect.top-2;
-//                break;
-//            case CONST.Direction.DOWN:
-//                rect.left = rect.left+2;
-//                rect.top = rect.bottom+2;
-//                rect.top = rect.right-2;
-//                rect.top = rect.bottom+4;
-//                break;
-//            case CONST.Direction.LEFT:
-//                rect.left = rect.left-4;
-//                rt = rect.top+2;
-//                rr = rect.left-2;
-//                rb = rect.bottom-2;
-//                break;
-//            case CONST.Direction.RIGHT:
-//                rect.left = rect.right+2;
-//                rt = rect.top+2;
-//                rr = rect.right+4;
-//                rb = rect.bottom-2;
-//                break;
-//            default:
-//                rl = 0;rt=0;rr=0;rb=0;
-//        }
-//
-//        cRct.set(rl,rt,rr,rb);
-//        return new int[]{rl,rt,rr,rb};
-//
-//    }
-
     protected boolean collides_with(GameObjects targ) {
         rect = getRect();
         Rect r = new Rect();
@@ -180,7 +143,7 @@ public class Bullet extends GameObjects {
                     r.left -= TankView.tile_dim/2;
                     break;
             }
-//        }
+
         return Rect.intersects(r,targ.getRect());
     }
 
@@ -217,10 +180,6 @@ public class Bullet extends GameObjects {
     public void move(int dir) {
         direction = dir;
     }
-
-//    public boolean collidesWith(TankGameObjects targ) {
-//
-//    }
 
 
     public void setDestroyed() {

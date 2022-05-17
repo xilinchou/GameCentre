@@ -46,4 +46,22 @@
     <string name="save_txt">Save</string>
     <string name="cancel_txt">Cancel</string>
     <string name="invite_def_txt">Invite a player</string>
+
+
+    <string name="starboat_gold">x5</string>
+    <string name="clockshovel_gold">x5</string>
+    <string name="gunhelmet_gold">x5</string>
+    <string name="tankgrenade_gold">x5</string>
+
+
+    <string name="starboat_count">x2</string>
+    <string name="clockshovel_count">x2</string>
+    <string name="gunhelmet_count">x2</string>
+    <string name="tankgrenade_count">x2</string>
+
+    <string name="gold_cost">$0.99</string>
+    <string name="goldbar_count">x20</string>
+    <string name="retryGoldAmnt">x2</string>
+    <string name="retryWatchAmnt">x1</string>
+    <string name="retryGoldCost">x2</string>
 </resources>

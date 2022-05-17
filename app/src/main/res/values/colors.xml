@@ -10,5 +10,6 @@
     <color name="gray">#888888</color>
     <color name="brick_red">#AA4A44</color>
     <color name="brick_brown">#FFC300</color>
+    <color name="button_gray">#D3D3D3</color>
 
 </resources>

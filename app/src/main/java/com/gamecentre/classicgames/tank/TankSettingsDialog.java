@@ -63,6 +63,11 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
         CheckBox vibrateCheck = (CheckBox) findViewById(R.id.enableVibrate);
         vibrateCheck.setChecked(vibrate);
 
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(TankMenuActivity.PREF_MUTED, sound);
+        editor.putBoolean(TankMenuActivity.PREF_VIBRATE,vibrate);
+        editor.apply();
+
     }
 
     @Override

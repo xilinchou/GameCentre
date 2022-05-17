@@ -34,14 +34,13 @@
                     android:layout_width="130sp"
                     android:layout_height="130sp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginLeft="20dp"
                     android:layout_marginTop="10sp"
                     app:cardCornerRadius="6dp">
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/num_puzz15" />.
+                        android:src="@drawable/num_puzz15" />
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView

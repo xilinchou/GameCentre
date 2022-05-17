@@ -22,6 +22,8 @@ public class Sounds {
         public static final int STEEL = 9;
         public static final int POWERUP = 10;
         public static final int PAUSE = 11;
+        public static final int EARN_GOLD = 12;
+        public static final int BUY_ITEM = 13;
     }
 
 }
