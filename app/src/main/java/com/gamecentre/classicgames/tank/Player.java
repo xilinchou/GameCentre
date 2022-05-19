@@ -17,7 +17,7 @@ public class Player extends Tank{
     public int armour = 0;
     protected int frame;
     protected int frame_delay;
-    public int lives = 1;
+    public int lives = 3;
     protected int reloadTmr = (int)(0.1*TankView.TO_SEC);
     protected int reload_time = 0;
     protected int MaxBullet = 1;

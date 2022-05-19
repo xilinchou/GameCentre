@@ -13,13 +13,42 @@
 
 
         <LinearLayout
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_width="30dp"
+            android:layout_height="50dp"
+            android:layout_alignTop="@+id/items"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="15dp"
+            android:layout_toStartOf="@+id/items"
             android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/retry_img" />
+
+            <com.gamecentre.classicgames.tank.TankTextView
+                android:id="@+id/retryTxt"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="10"
+                android:textColor="@color/white"
+                android:textSize="8sp" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/items"
+            android:layout_width="60dp"
+            android:layout_height="240dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="50dp">
+            android:layout_marginTop="50dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -31,21 +60,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_grenade"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_grenade" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/grenadeCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -60,21 +89,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_helmet"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_helmet" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/shieldCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -89,21 +118,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_clock"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_clock" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/clockCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -118,21 +147,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_shovel"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_shovel" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/shovelCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -147,21 +176,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_tank"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_tank" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/tankCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -176,21 +205,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_star"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_star" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/starCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -205,21 +234,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_gun"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_gun" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/gunCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -234,21 +263,21 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/bonus_boat"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_boat" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/boatCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -263,21 +292,20 @@
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/gold_stack2"/>
+                    android:layout_weight="1.5"
+                    android:background="@drawable/gold_stack2" />
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/goldCountTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
+                    android:text="10"
                     android:textColor="@color/brick_brown"
-                    android:textSize="12sp"
-                    android:text="10"/>
+                    android:textSize="8sp" />
 
             </LinearLayout>
 
@@ -293,10 +321,10 @@
                     android:id="@+id/shop"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:background="@drawable/shop"/>
+                    android:layout_weight="1"
+                    android:background="@drawable/shop" />
 
             </LinearLayout>
 

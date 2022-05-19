@@ -9,6 +9,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,15 +18,22 @@ import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 
+import java.util.ArrayList;
+
 public class TankDailyRewardDialog extends Dialog implements View.OnTouchListener{
     TankView mTankView;
 
     public AppCompatActivity activity;
     public Dialog dialog;
     public TankTextView watchBtn, cancelBtn;
+    public ImageView watchBtn2;
     SharedPreferences settings;
     int goldCount;
-    TankTextView goldCountTxt;
+    int day;
+
+    ArrayList<RelativeLayout> rewardCover = new ArrayList<>();
+
+    ArrayList<RelativeLayout> reward = new ArrayList<>();
 
 
     private static String TOTAL_GOLD = "TOTAL GOLD";
@@ -35,11 +44,12 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
         this.mTankView = mTankView;
     }
 
-    public TankDailyRewardDialog(AppCompatActivity a) {
+    public TankDailyRewardDialog(AppCompatActivity a, int day) {
         super(a);
         this.activity = a;
         this.mTankView = null;
         this.dialog = null;
+        this.day = day;
     }
 
     public TankDailyRewardDialog(AppCompatActivity a, Dialog d) {
@@ -65,44 +75,55 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_daily_reward);
-        watchBtn = (TankTextView) findViewById(R.id.watchBtn);
-        cancelBtn = (TankTextView) findViewById(R.id.buyCancelBtn);
+        watchBtn = (TankTextView) findViewById(R.id.watchRwdBtn);
+        watchBtn2 = (ImageView) findViewById(R.id.watchRwdPlay);
+        cancelBtn = (TankTextView) findViewById(R.id.closeReward);
         watchBtn.setOnTouchListener(this);
-        findViewById(R.id.watchgold).setOnTouchListener(this);
+        watchBtn2.setOnTouchListener(this);
         cancelBtn.setOnTouchListener(this);
 
-        findViewById(R.id.starboat1).setOnTouchListener(this);
-        findViewById(R.id.starboat2).setOnTouchListener(this);
-        findViewById(R.id.starboat3).setOnTouchListener(this);
-        findViewById(R.id.starboat4).setOnTouchListener(this);
+        rewardCover.add(findViewById(R.id.day1));
+        rewardCover.add(findViewById(R.id.day2));
+        rewardCover.add(findViewById(R.id.day3));
+        rewardCover.add(findViewById(R.id.day4));
+        rewardCover.add(findViewById(R.id.day5));
+        rewardCover.add(findViewById(R.id.day6));
+        rewardCover.add(findViewById(R.id.day7));
+
+//        reward.add(findViewById(R.id.day1rwd));
+//        reward.add(findViewById(R.id.day2rwd));
+//        reward.add(findViewById(R.id.day3rwd));
+//        reward.add(findViewById(R.id.day4rwd));
+//        reward.add(findViewById(R.id.day5rwd));
+//        reward.add(findViewById(R.id.day6rwd));
+//        reward.add(findViewById(R.id.day7rwd));
+
+        for(int i = 1; i <= 7; i++) {
+            if(i > day) {
+                break;
+            }
+            if(i <= day) {
+                rewardCover.get(i-1).setAlpha(0);
+                if(i == day) {
+//                    reward.get(i-1).setVisibility(View.VISIBLE);
+                }
+                else{
+//                    reward.get(i-1).setVisibility(View.INVISIBLE);
+                }
+            }
+            else {
+                rewardCover.get(i-1).setAlpha(0.5f);
+//                reward.get(i-1).setVisibility(View.INVISIBLE);
+            }
+        }
 
 
-        findViewById(R.id.clockshovel1).setOnTouchListener(this);
-        findViewById(R.id.clockshovel2).setOnTouchListener(this);
-        findViewById(R.id.clockshovel3).setOnTouchListener(this);
-        findViewById(R.id.clockshovel4).setOnTouchListener(this);
-
-
-        findViewById(R.id.gunhelmet1).setOnTouchListener(this);
-        findViewById(R.id.gunhelmet2).setOnTouchListener(this);
-        findViewById(R.id.gunhelmet3).setOnTouchListener(this);
-        findViewById(R.id.gunhelmet4).setOnTouchListener(this);
-
-
-        findViewById(R.id.tankgrenade1).setOnTouchListener(this);
-        findViewById(R.id.tankgrenade2).setOnTouchListener(this);
-        findViewById(R.id.tankgrenade3).setOnTouchListener(this);
-        findViewById(R.id.tankgrenade4).setOnTouchListener(this);
-
-        findViewById(R.id.gold1).setOnTouchListener(this);
-        findViewById(R.id.gold1).setOnTouchListener(this);
-
-        goldCountTxt = (TankTextView)findViewById(R.id.stashTxt);
-
-        settings = activity.getSharedPreferences("TankSettings", 0);
-
-        goldCount = settings.getInt(TankActivity.GOLD, 0);
-        goldCountTxt.setText(String.format("x%s", goldCount));
+//        goldCountTxt = (TankTextView)findViewById(R.id.stashTxt);
+//
+//        settings = activity.getSharedPreferences("TankSettings", 0);
+//
+//        goldCount = settings.getInt(TankActivity.GOLD, 0);
+//        goldCountTxt.setText(String.format("x%s", goldCount));
     }
 
 
@@ -110,152 +131,37 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
     public boolean onTouch(View v, MotionEvent m) {
         {
             if(m.getAction() == MotionEvent.ACTION_DOWN){
-                int cost;
-                int goldCount = settings.getInt(TankActivity.GOLD,0);
+//                int cost;
+//                int goldCount = settings.getInt(TankActivity.GOLD,0);
                 switch (v.getId()) {
-                    case R.id.starboat1:
-                    case R.id.starboat2:
-                    case R.id.starboat3:
-                    case R.id.starboat4:
+                    case R.id.watchRwdBtn:
+                    case R.id.watchRwdPlay:
 
-                        cost = Integer.parseInt((activity.getResources().getString(R.string.starboat_gold).replace("x","")));
-                        if(cost <= goldCount) {
-                            int star = settings.getInt(TankActivity.STAR,0);
-                            int boat = settings.getInt(TankActivity.BOAT,0);
-
-                            int amount = Integer.parseInt((activity.getResources().getString(R.string.starboat_count).replace("x","")));
-                            star += amount;
-                            boat += amount;
-                            goldCount -= cost;
-                            goldCountTxt.setText(String.format("x%s", goldCount));
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putInt(TankActivity.STAR,star);
-                            editor.putInt(TankActivity.STAR,boat);
-                            editor.putInt(TankActivity.GOLD,goldCount);
-                            editor.apply();
-                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
-                        }
-                        else {
-                            // TODO Not enough gold
-                            Log.d("PURCHASE STARBOAT", "Not enough gold");
-                        }
+//                        cost = Integer.parseInt((activity.getResources().getString(R.string.starboat_gold).replace("x","")));
+//                        if(cost <= goldCount) {
+//                            int star = settings.getInt(TankActivity.STAR,0);
+//                            int boat = settings.getInt(TankActivity.BOAT,0);
+//
+//                            int amount = Integer.parseInt((activity.getResources().getString(R.string.starboat_count).replace("x","")));
+//                            star += amount;
+//                            boat += amount;
+//                            goldCount -= cost;
+//                            goldCountTxt.setText(String.format("x%s", goldCount));
+//                            SharedPreferences.Editor editor = settings.edit();
+//                            editor.putInt(TankActivity.STAR,star);
+//                            editor.putInt(TankActivity.STAR,boat);
+//                            editor.putInt(TankActivity.GOLD,goldCount);
+//                            editor.apply();
+//                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
+//                        }
+//                        else {
+//                            // TODO Not enough gold
+//                            Log.d("PURCHASE STARBOAT", "Not enough gold");
+//                        }
 
                         break;
 
-                    case R.id.clockshovel1:
-                    case R.id.clockshovel2:
-                    case R.id.clockshovel3:
-                    case R.id.clockshovel4:
-
-                        cost = Integer.parseInt((activity.getResources().getString(R.string.clockshovel_gold).replace("x","")));
-                        if(cost <= goldCount) {
-                            int clock = settings.getInt(TankActivity.CLOCK,0);
-                            int shovel = settings.getInt(TankActivity.SHOVEL,0);
-
-                            int amount = Integer.parseInt((activity.getResources().getString(R.string.clockshovel_count).replace("x","")));
-                            clock += amount;
-                            shovel += amount;
-                            goldCount -= cost;
-                            goldCountTxt.setText(String.format("x%s", goldCount));
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putInt(TankActivity.CLOCK,clock);
-                            editor.putInt(TankActivity.SHOVEL,shovel);
-                            editor.putInt(TankActivity.GOLD,goldCount);
-                            editor.apply();
-                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
-                        }
-                        else {
-                            // TODO Not enough gold
-                            Log.d("PURCHASE CLOCKSHOVEL", "Not enough gold");
-                        }
-
-                        break;
-
-
-                    case R.id.gunhelmet1:
-                    case R.id.gunhelmet2:
-                    case R.id.gunhelmet3:
-                    case R.id.gunhelmet4:
-
-                        cost = Integer.parseInt((activity.getResources().getString(R.string.gunhelmet_gold).replace("x","")));
-                        if(cost <= goldCount) {
-                            int gun = settings.getInt(TankActivity.GUN,0);
-                            int helmet = settings.getInt(TankActivity.SHIELD,0);
-
-                            int amount = Integer.parseInt((activity.getResources().getString(R.string.gunhelmet_count).replace("x","")));
-                            gun += amount;
-                            helmet += amount;
-                            goldCount -= cost;
-                            goldCountTxt.setText(String.format("x%s", goldCount));
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putInt(TankActivity.GUN,gun);
-                            editor.putInt(TankActivity.SHIELD,helmet);
-                            editor.putInt(TankActivity.GOLD,goldCount);
-                            editor.apply();
-                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
-                        }
-                        else {
-                            // TODO Not enough gold
-                            Log.d("PURCHASE GUNHELMET", "Not enough gold");
-                        }
-
-                        break;
-
-
-                    case R.id.tankgrenade1:
-                    case R.id.tankgrenade2:
-                    case R.id.tankgrenade3:
-                    case R.id.tankgrenade4:
-
-                        cost = Integer.parseInt((activity.getResources().getString(R.string.tankgrenade_gold).replace("x","")));
-                        if(cost <= goldCount) {
-                            int tank = settings.getInt(TankActivity.TANK,0);
-                            int grenade = settings.getInt(TankActivity.GRENADE,0);
-
-                            int amount = Integer.parseInt((activity.getResources().getString(R.string.tankgrenade_count).replace("x","")));
-                            tank += amount;
-                            grenade += amount;
-                            goldCount -= cost;
-                            goldCountTxt.setText(String.format("x%s", goldCount));
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putInt(TankActivity.TANK,tank);
-                            editor.putInt(TankActivity.GRENADE,grenade);
-                            editor.putInt(TankActivity.GOLD,goldCount);
-                            editor.apply();
-                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
-                        }
-                        else {
-                            // TODO Not enough gold
-                            Log.d("PURCHASE TANKGRENADE", "Not enough gold");
-                        }
-
-                        break;
-
-                    case R.id.stashTxt:
-                        break;
-
-                    case R.id.watchBtn:
-                    case R.id.watchgold:
-                        if(activity instanceof TankActivity) {
-                            if(dialog instanceof TankEndGameDialog) {
-                                ((TankActivity) activity).showRewardedVideo(this,(TankEndGameDialog)this.dialog);
-                            }
-                            else {
-                                ((TankActivity) activity).showRewardedVideo(this);
-                            }
-                        }
-                        else if(activity instanceof TankMenuActivity) {
-                            ((TankMenuActivity) activity).showRewardedVideo(this);
-                        }
-                        break;
-
-                    case R.id.buyCancelBtn:
-                        if(activity instanceof TankActivity) {
-                            ((TankActivity) activity).updateBonusStack();
-                        }
-                        else if(activity instanceof TankMenuActivity) {
-                            ((TankMenuActivity) activity).updateBonus();
-                        }
+                    case R.id.closeReward:
                         dismiss();
                         break;
                     default:

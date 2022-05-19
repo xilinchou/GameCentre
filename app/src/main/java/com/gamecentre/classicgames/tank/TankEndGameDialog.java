@@ -5,17 +5,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.gamecentre.classicgames.R;
 
@@ -92,7 +89,7 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
 
         settings = activity.getSharedPreferences("TankSettings", 0);
         golds = settings.getInt(TankActivity.GOLD,0);
-        goldCountTxt.setText(String.format(Locale.US,"x%d",golds));
+        goldCountTxt.setText(String.format(Locale.ENGLISH,"x%d",golds));
 //        if(tanks <= 0) {
 //            goldBtn.setBackground(ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.shop,null));
 //        }
@@ -132,7 +129,7 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
                     break;
                 case R.id.goldBtn:
                 case R.id.goldBtn2:
-                    int cost = Integer.parseInt(activity.getResources().getString(R.string.retryGoldCost).replace("x", ""));
+                    int cost = Integer.parseInt(activity.getResources().getString(R.string.playOnGoldCost).replace("x", ""));
                     if (golds >= cost) {
                         TankView.CHECKING_RETRY = 3;
                         mTankView.updateP1Lives(Integer.parseInt(activity.getResources().getString(R.string.retryGoldAmnt).replace("x", "")));

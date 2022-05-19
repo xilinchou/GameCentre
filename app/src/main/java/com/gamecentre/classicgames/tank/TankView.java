@@ -718,6 +718,16 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             return;
         }
         if(!showingScore) {
+            int retries = ((TankActivity)context).settings.getInt(TankActivity.RETRY_COUNT,3);
+//            if(retries <= 0 && gameover) {
+//                ((TankActivity)context).nxtBtn.setEnabled(false);
+//                ((TankActivity)context).nxtBtn.setVisibility(View.INVISIBLE);
+//            }
+//            else {
+//                ((TankActivity)context).nxtBtn.setEnabled(true);
+//                ((TankActivity)context).nxtBtn.setVisibility(View.VISIBLE);
+//            }
+            ((TankActivity) context).retryCount.setText(String.valueOf(retries));
             ((TankActivity) context).p1Score.setText(String.valueOf(P1.totalScore += P1.stageScore));
             ((TankActivity) context).stageScore.setText(String.valueOf(level));
             ((TankActivity) context).scoreView.setVisibility(View.VISIBLE);
@@ -852,11 +862,6 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             enemyCount.add(colCount);
         }
     }
-
-
-
-
-
 
 
     public boolean isStarted(){

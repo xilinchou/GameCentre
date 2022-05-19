@@ -63,5 +63,10 @@
     <string name="goldbar_count">x20</string>
     <string name="retryGoldAmnt">x2</string>
     <string name="retryWatchAmnt">x1</string>
-    <string name="retryGoldCost">x2</string>
+    <string name="playOnGoldCost">x2</string>
+    <string name="adGameAmnt">+1</string>
+    <string name="game15Amnt">+3</string>
+    <string name="game30Time">6h</string>
+    <string name="game15Cost">x15</string>
+    <string name="game30Cost">x30</string>
 </resources>

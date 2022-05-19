@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
+import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.MessageRegister;
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
@@ -56,7 +57,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView curtainTxt,gameOverTxt;
 
     public RelativeLayout scoreView;
-    public TankTextView hiScore, stageScore, p1Score, p2Score;
+    public TankTextView retryCount, hiScore, stageScore, p1Score, p2Score;
     public TankTextView p1AScore, p1BScore, p1CScore, p1DScore;
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
@@ -75,6 +76,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             STAR = "STAR",
             SHIELD = "SHIELD",
             GOLD = "GOLD",
+
+            RETRY_COUNT = "RETRY_COUNT",
+            LIFE_TIME = "LIFE_TIME",
 
             GOLD_LEVEL = "GOLD_LEVEL",
 
@@ -174,8 +178,23 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                    int retries = settings.getInt(TankActivity.RETRY_COUNT,3);
                     if (TankView.gameover) {
-                        mTankView.retryStage();
+                        if(retries == CONST.Tank.MAX_GAME_COUNT) {
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putLong(TankActivity.LIFE_TIME,System.currentTimeMillis());
+                            editor.apply();
+                        }
+                        if(retries > 0){
+                            --retries;
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putInt(RETRY_COUNT, retries);
+                            editor.commit();
+                            mTankView.retryStage();
+                        }
+                        else {
+                            openGamePurchse();
+                        }
                     } else if (TankView.stageComplete) {
                         TankView.mNewRound = true;
                     }
@@ -233,6 +252,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
 
         scoreView = findViewById(R.id.scoreView);
+        retryCount = findViewById(R.id.retryGameTxt);
         hiScore = findViewById(R.id.HiScore);
         stageScore = findViewById(R.id.StageScore);
 
@@ -383,6 +403,16 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             return true;
         }
     };
+
+    public void openGamePurchse() {
+        TankPurchaseGameDialog wd = new TankPurchaseGameDialog(this, mTankView);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(wd.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        wd.show();
+        wd.getWindow().setAttributes(lp);
+    }
 
 
     public void openStore() {
@@ -678,6 +708,15 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 //                                mTankView.updateP1Lives(1);
                                 mTankView.updateP1Lives(Integer.parseInt(TankActivity.this.getResources().getString(R.string.retryWatchAmnt).replace("x","")));
 //
+                            }
+
+                            else if(purchaseDialog instanceof TankPurchaseGameDialog) {
+                                int retryCount = settings.getInt(TankActivity.RETRY_COUNT, 0);
+                                int amnt = Integer.parseInt(((TankPurchaseGameDialog) purchaseDialog).getContext().getResources().getString(R.string.adGameAmnt).replace("+", ""));
+                                ((TankPurchaseGameDialog) purchaseDialog).gameCountTxt.setText(String.valueOf(retryCount + amnt));
+                                editor.putInt(TankActivity.RETRY_COUNT, retryCount + 1);
+                                editor.apply();
+                                SoundManager.playSound(Sounds.TANK.EARN_GOLD);
                             }
 
                             if(auxDialog instanceof TankEndGameDialog) {

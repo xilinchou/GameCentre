@@ -33,6 +33,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -46,10 +47,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener {
 
-    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt;
+    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt;
     ImageView shopImg;
+    boolean firstTime = true;
 
     TankTextView inviteTxt;
     private AdView mAdView;
@@ -88,6 +95,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         boatTxt = findViewById(R.id.boatCountTxt);
         goldTxt = findViewById(R.id.goldCountTxt);
         shopImg = findViewById(R.id.shop);
+        retryTxt = findViewById(R.id.retryTxt);
 
         updateBonus();
 
@@ -127,28 +135,68 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         setListeners();
         inviteTxt = (TankTextView) findViewById(R.id.ivName);
         inviteTxt.setSelected(true);
+
+        int newDay = checkNewDay();
+        Log.d("DATE CHECK", String.valueOf(newDay));
+        if(newDay > 0 && firstTime){
+            openReward(newDay);
+        }
     }
 
 
     public int checkNewDay() {
-        boolean newDay = false;
+//        Date date = null;
+//        String str = "Jul 30 2003 23:11:52.454 UTC";
+//        SimpleDateFormat df = new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz", Locale.ENGLISH);
+//        try{
+//            date = df.parse(str);
+//        }
+//        catch (ParseException e) {
+//            Log.d("DATE CHECK", "PARSE EXCEPTION");
+//            return 0;
+//        }
+//        long epoch = date.getTime();
+
+
+        long newDay;
         int numDays = 0;
-        long lastDay = settings.getInt(TankActivity.LAST_DAY,0);
+        long lastDay = settings.getLong(TankActivity.LAST_DAY,0);
         long currentDay = (long) (System.currentTimeMillis() / 86400000);
+//        long currentDay = (long) (epoch / 86400000);
 
-        newDay = currentDay - lastDay == 1;
+        newDay = currentDay - lastDay;
 
-        if(newDay) {
-            numDays = settings.getInt(TankActivity.CONSECUTIVE_DAYS,0);
+        numDays = settings.getInt(TankActivity.CONSECUTIVE_DAYS,0);
+
+        if(newDay == 1) {
             numDays++;
+            if(numDays > 7) {
+                numDays = 1;
+            }
+        }
+        else if(newDay > 1) {
+            numDays = 1;
+        }
+        else{
+            firstTime = false;
         }
 
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(TankActivity.LAST_DAY,currentDay);
-        editor.putLong(TankActivity.CONSECUTIVE_DAYS,numDays);
+        editor.putInt(TankActivity.CONSECUTIVE_DAYS,numDays);
         editor.apply();
 
         return numDays;
+    }
+
+    public void openReward(int day) {
+        TankDailyRewardDialog wd = new TankDailyRewardDialog(TankMenuActivity.this, day);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(wd.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        wd.show();
+        wd.getWindow().setAttributes(lp);
     }
 
 
@@ -164,15 +212,16 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
 
     public void updateBonus() {
-        grenadeTxt.setText(String.valueOf(settings.getInt(TankActivity.GRENADE,0)));
-        helmetTxt.setText(String.valueOf(settings.getInt(TankActivity.SHIELD,0)));
-        clockTxt.setText(String.valueOf(settings.getInt(TankActivity.CLOCK,0)));
-        shovelTxt.setText(String.valueOf(settings.getInt(TankActivity.SHOVEL,0)));
-        tankTxt.setText(String.valueOf(settings.getInt(TankActivity.TANK,0)));
-        starTxt.setText(String.valueOf(settings.getInt(TankActivity.STAR,0)));
-        gunTxt.setText(String.valueOf(settings.getInt(TankActivity.GUN,0)));
-        boatTxt.setText(String.valueOf(settings.getInt(TankActivity.BOAT,0)));
-        goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,0)));
+        grenadeTxt.setText(String.valueOf(settings.getInt(TankActivity.GRENADE,3)));
+        helmetTxt.setText(String.valueOf(settings.getInt(TankActivity.SHIELD,3)));
+        clockTxt.setText(String.valueOf(settings.getInt(TankActivity.CLOCK,3)));
+        shovelTxt.setText(String.valueOf(settings.getInt(TankActivity.SHOVEL,3)));
+        tankTxt.setText(String.valueOf(settings.getInt(TankActivity.TANK,3)));
+        starTxt.setText(String.valueOf(settings.getInt(TankActivity.STAR,3)));
+        gunTxt.setText(String.valueOf(settings.getInt(TankActivity.GUN,3)));
+        boatTxt.setText(String.valueOf(settings.getInt(TankActivity.BOAT,3)));
+        goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,3)));
+        retryTxt.setText(String.valueOf(settings.getInt(TankActivity.RETRY_COUNT,5)));
     }
 
     protected void setListeners () {
@@ -399,7 +448,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     }
 
 
-    public void showRewardedVideo(TankPurchaseDialog purchaseDialog) {
+    public void showRewardedVideo(Dialog purchaseDialog) {
 
         if (mRewardedAd == null) {
             Log.d("TAG", "The rewarded ad wasn't ready yet.");
@@ -442,11 +491,21 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         // Preload the next rewarded ad.
                         if(GOT_REWARD) {
                             SharedPreferences.Editor editor = settings.edit();
-                            int goldCount = settings.getInt(TankActivity.GOLD,0);
-                            ((TankPurchaseDialog)purchaseDialog).goldCountTxt.setText(String.format("x%s", goldCount+1));
-                            editor.putInt(TankActivity.GOLD,goldCount+1);
-                            editor.apply();
-                            SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            if(purchaseDialog instanceof TankPurchaseDialog) {
+                                int goldCount = settings.getInt(TankActivity.GOLD, 0);
+                                ((TankPurchaseDialog) purchaseDialog).goldCountTxt.setText(String.format("x%s", goldCount + 1));
+                                editor.putInt(TankActivity.GOLD, goldCount + 1);
+                                editor.apply();
+                                SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            }
+                            else if(purchaseDialog instanceof TankPurchaseGameDialog) {
+                                int retryCount = settings.getInt(TankActivity.RETRY_COUNT, 0);
+                                int amnt = Integer.parseInt(((TankPurchaseGameDialog) purchaseDialog).getContext().getResources().getString(R.string.adGameAmnt).replace("+", ""));
+//                                ((TankPurchaseGameDialog) purchaseDialog).gameCountTxt.setText(String.format("x%s", retryCount + amnt));
+                                editor.putInt(TankActivity.RETRY_COUNT, retryCount + 1);
+                                editor.apply();
+                                SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            }
                         }
                         TankMenuActivity.this.loadRewardedAd();
                     }
