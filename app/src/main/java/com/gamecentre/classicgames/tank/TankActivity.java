@@ -45,10 +45,15 @@ import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class TankActivity extends AppCompatActivity implements View.OnTouchListener {
+public class TankActivity extends AppCompatActivity implements View.OnTouchListener, ServiceListener {
 
     public Button upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, menuBtn, nxtBtn;
     public LinearLayout enemyCount;
@@ -62,9 +67,12 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
     public TankTextView p2ACount, p2BCount, p2CCount, p2DCount, p2Count;
-    public FrameLayout boarder;
 
-    public TankTextView pauseBtn, endGameBtn;
+
+    public TankTextView pauseBtn, gameTimeView;
+
+    Timer updateTimer;
+    public long playtime;
 
     public static final String
             GRENADE = "GRENADE",
@@ -83,7 +91,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             GOLD_LEVEL = "GOLD_LEVEL",
 
             LAST_DAY = "LAST_DAY",
-            CONSECUTIVE_DAYS = "CONSECUTIVE_DAYS";
+            CONSECUTIVE_DAYS = "CONSECUTIVE_DAYS",
+
+            OBJECTIVES = "OBJECTIVES";
 
     SharedPreferences settings;
 
@@ -128,7 +138,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         loadRewardedAd();
 
         mTankView = findViewById(R.id.tankView);
-//        boarder = findViewById(R.id.boarder);
 
         initilizeBonusBank();
 
@@ -152,7 +161,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         menuBtn = findViewById(R.id.menuBtn);
         nxtBtn = findViewById(R.id.nxtBtn);
         pauseBtn = findViewById(R.id.pauseBtn);
-        endGameBtn = findViewById(R.id.endBtn);
+        gameTimeView = findViewById(R.id.gameTime);
         enemyCount = findViewById(R.id.enemyCount);
 
         shtBtn.setOnTouchListener(this);
@@ -198,17 +207,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                     } else if (TankView.stageComplete) {
                         TankView.mNewRound = true;
                     }
-                }
-                return true;
-            }
-        });
-
-
-        endGameBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-                    endGame();
                 }
                 return true;
             }
@@ -301,11 +299,47 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         };
         SoundManager.loadSounds(sounds);
 
+        MessageRegister.getInstance().setServiceListener(this);
+
 //        if(!twoPlayers) {
 //            mTankView.update();
 //        }
 //        mTankView.update();
         first_start = true;
+    }
+
+    public void start_timer() {
+        updateTimer = new Timer("update");
+        updateTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                update_gametime();
+            }
+        }, 0, 1000);
+    }
+
+
+    public void stop_timer() {
+        updateTimer.cancel();
+    }
+
+
+    private void update_gametime(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                playtime = System.currentTimeMillis() - TankView.GameStartTime;
+                SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+                gameTimeView.setText(sdf.format(playtime));
+            }
+        });
+    }
+
+
+    public void onServiceMessageReceived(int games, long time_left) {
+        if(mTankView.showingScore) {
+            Log.d("SERVICE MESSAGE:SCORES", String.valueOf(games) + " " + time_left);
+            retryCount.setText(String.valueOf(games));
+        }
     }
 
 
@@ -404,6 +438,20 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         }
     };
 
+
+    public void openPauseDialog(TankView tankView) {
+
+        TankPauseGameDialog wd = new TankPauseGameDialog(this, tankView);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(wd.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        wd.show();
+        wd.getWindow().setAttributes(lp);
+    }
+
+
+
     public void openGamePurchse() {
         TankPurchaseGameDialog wd = new TankPurchaseGameDialog(this, mTankView);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -437,6 +485,36 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         wd.getWindow().setAttributes(lp);
     }
 
+    public void saveObjectives(ArrayList<boolean[]> objectives) {
+        SharedPreferences.Editor editor = settings.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(objectives);
+        editor.putString(TankActivity.OBJECTIVES,json);
+        editor.apply();
+    }
+
+    public ArrayList<boolean[]> loadObjectives() {
+        String objectives = settings.getString(TankActivity.OBJECTIVES,null);
+        if(objectives == null) {
+            ArrayList<boolean[]> obj = new ArrayList<>();
+            for(int i = 0; i < TankView.NUM_LEVELS; i++) {
+                boolean[] p = new boolean[TankView.NUM_OBJECTIVES];
+                for(int j = 0; j < p.length; j++) {
+                    p[j] = false;
+                }
+                obj.add(p);
+            }
+            saveObjectives(obj);
+            return obj;
+        }
+        Type type = new TypeToken<ArrayList<boolean[]>>() {}.getType();
+        Gson gson = new Gson();
+
+//        ArrayList<boolean[]> objectives = gson.fromJson(json,type);
+//        return objectives;
+        return gson.fromJson(objectives,type);
+    }
+
     public void saveString(String key, String val) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key,val);
@@ -463,6 +541,18 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         editor.putString(key,json);
         editor.apply();
     }
+
+    public ArrayList<boolean[]> loadArray(String key) {
+        String json = settings.getString(key,null);
+        Type type = new TypeToken<ArrayList<boolean[]>>() {}.getType();
+        Gson gson = new Gson();
+
+//        ArrayList<boolean[]> objectives = gson.fromJson(json,type);
+//        return objectives;
+        return gson.fromJson(json,type);
+    }
+
+
 
     public void updateGold(int addition) {
         int count = settings.getInt(TankActivity.GOLD,0);
@@ -518,6 +608,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         super.onDestroy();
         mTankView.release();
         WifiDirectManager.getInstance().cancelDisconnect();
+        Log.d("TANKACTIVITY", "Activity destroyed");
     }
 
     @Override
@@ -608,7 +699,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         } else {
             Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
             if(TankView.EVENT != TankView.PAUSE) {
-                mTankView.pauseNoAds();
+                mTankView.resumeNoAds();
             }
         }
     }

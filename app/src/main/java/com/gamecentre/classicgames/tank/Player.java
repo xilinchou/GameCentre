@@ -37,6 +37,10 @@ public class Player extends Tank{
     public int gotBonus = 0;
     private boolean freezeOn = false;
     private int freezeOnTmr, freezBlinkTime = 5;
+    public int bulletIntercept = 0;
+    public ArrayList<Long> killTime = new ArrayList<>();
+
+
 
 
 
@@ -265,6 +269,7 @@ public class Player extends Tank{
         } else {
             ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
         }
+
     }
 
     public boolean isAlive() {
@@ -291,6 +296,10 @@ public class Player extends Tank{
         freeze = true;
         freezeTmr = FreezeTime;
         freezeOnTmr = 0;
+    }
+
+    public void unFreeze() {
+        freeze = false;
     }
 
     public void iceSlippage() {
@@ -380,6 +389,7 @@ public class Player extends Tank{
 
     public int collidsWithBonus(Bonus b) {
         if(b.isAvailable() && super.collides_with(b)) {
+            TankView.getInstance().currentObj[3] = false;
             stageScore += 500;
             SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
             int bonus = b.getBonus();
@@ -420,6 +430,7 @@ public class Player extends Tank{
             return false;
         }
         if(super.collides_with(bullet)) {
+            TankView.getInstance().currentObj[0] = false;
             if(TankView.twoPlayers && this.player == 2) {
                 bullet.recycle = true;
                 return true;

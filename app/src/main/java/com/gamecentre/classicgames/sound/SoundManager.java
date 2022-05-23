@@ -116,7 +116,7 @@ public class SoundManager
     public static void cleanup()
     {
         mSoundPool.release();
-        mSoundPool = null;
+//        mSoundPool = null;
         mSoundPoolMap.clear();
         mAudioManager.unloadSoundEffects();
         _instance = null;

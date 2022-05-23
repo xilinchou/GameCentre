@@ -52,7 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener {
+public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener {
 
     TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt;
     ImageView shopImg;
@@ -68,7 +68,11 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     boolean isLoading;
     public static boolean GOT_REWARD = false;
 
+    private boolean opened = false;
+
     SharedPreferences settings;
+
+    static Intent intent = null;
 
     public static final String TWO_PLAYERS = "two players";
     public static final String
@@ -99,8 +103,10 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
         updateBonus();
 
-        Intent i = getIntent();
-        Bundle b = i.getExtras();
+        if(intent == null) {
+            intent = getIntent();
+        }
+        Bundle b = intent.getExtras();
         String tankType = b.getString(TankTypeActivity.TANK_TYPE, "");
 
         ((TankTextView)findViewById(R.id.tanktype)).setText(tankType);
@@ -141,8 +147,29 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         if(newDay > 0 && firstTime){
             openReward(newDay);
         }
+
+        MessageRegister.getInstance().setServiceListener(this);
+        opened = true;
     }
 
+    protected void onResume() {
+        super.onResume();
+        opened = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        opened = false;
+        super.onDestroy();
+    }
+
+
+    public void onServiceMessageReceived(int games, long time_left) {
+        if(opened){
+            Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left);
+            retryTxt.setText(String.valueOf(games));
+        }
+    }
 
     public int checkNewDay() {
 //        Date date = null;

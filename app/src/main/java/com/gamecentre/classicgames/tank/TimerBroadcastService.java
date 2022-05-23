@@ -9,6 +9,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.utils.MessageRegister;
+import com.gamecentre.classicgames.utils.RemoteMessageListener;
 
 import java.text.SimpleDateFormat;
 
@@ -22,15 +24,18 @@ public class TimerBroadcastService extends Service {
     CountDownTimer cdt = null;
     long time_left, life_time;
     int games;
-    SharedPreferences settings;
+    public static SharedPreferences settings;
     Intent intent = new Intent(LIFE_TIMER);
 
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
+
             life_time = settings.getLong(TankActivity.LIFE_TIME,0);
             games = settings.getInt(TankActivity.RETRY_COUNT,CONST.Tank.MAX_GAME_COUNT);
+
+            Log.d("SERVICE","alive " + games + " " + life_time);
 
             if(life_time != 0 && games < CONST.Tank.MAX_GAME_COUNT) {
                 long currentTime = System.currentTimeMillis();
@@ -38,51 +43,44 @@ public class TimerBroadcastService extends Service {
 
                 if (time_left < 1000) {
                     games++;
-//                    gameCountTxt.setText(String.valueOf(games));
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putInt(TankActivity.RETRY_COUNT, games);
+                    editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
                     editor.commit();
-                    intent.putExtra("NEW_GAME", games);
                 }
-                intent.putExtra("NEW_TIME",time_left);
-
-                sendBroadcast(intent);
-//                SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-//                gameCounter.setText(sdf.format(time_left));
+                Log.d("SERVICE","sending message");
+                MessageRegister.getInstance().registerServiceMessage(games,time_left);
             }
 
             timerHandler.postDelayed(this, 1000);
         }
     };
 
-    public TimerBroadcastService(SharedPreferences settings){
-        this.settings = settings;
-    };
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Log.i(TAG, "Starting timer...");
+        Log.d(TAG, "Starting timer...");
 
         timerHandler.postDelayed(timerRunnable, 0);
     }
 
     @Override
     public void onDestroy() {
-
-        cdt.cancel();
-        Log.i(TAG, "Timer cancelled");
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+        super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
     }
+
+
 }

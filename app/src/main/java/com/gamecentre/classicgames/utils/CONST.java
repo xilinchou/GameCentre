@@ -10,7 +10,7 @@ public class CONST {
 
     public static class Tank {
         public static final int MAX_GAME_COUNT = 5;
-        public static final int LIFE_DURATION_MINS = 2;
+        public static final int LIFE_DURATION_MINS = 30;
     }
 
     public static String GAME_DATA_KEY = "GAME_DATA";

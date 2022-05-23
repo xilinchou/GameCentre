@@ -2,10 +2,14 @@ package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -18,15 +22,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.utils.MessageRegister;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListener{
+public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListener, ServiceListener{
 
 
     public AppCompatActivity activity;
     public Dialog d;
+    private boolean opened = false;
     TankView mTankView;
 
     public Button videoBtn2;
@@ -40,28 +46,28 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
 
     long startTime = 0;
     int countTime = 5;
-    Handler timerHandler = new Handler();
-    Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if(games >= CONST.Tank.MAX_GAME_COUNT){
-                timerHandler.removeCallbacks(this);
-                return;
-            }
-            long currentTime = System.currentTimeMillis();
-            time_left = (CONST.Tank.LIFE_DURATION_MINS*60000)-((currentTime - life_time) % (CONST.Tank.LIFE_DURATION_MINS*60000));
-
-            if(time_left < 1000) {
-                games++;
-                gameCountTxt.setText(String.valueOf(games));
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putInt(TankActivity.RETRY_COUNT,games);
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-            gameCounter.setText(sdf.format(time_left));
-            timerHandler.postDelayed(this, 1000);
-        }
-    };
+//    Handler timerHandler = new Handler();
+//    Runnable timerRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            if(games >= CONST.Tank.MAX_GAME_COUNT){
+//                timerHandler.removeCallbacks(this);
+//                return;
+//            }
+//            long currentTime = System.currentTimeMillis();
+//            time_left = (CONST.Tank.LIFE_DURATION_MINS*60000)-((currentTime - life_time) % (CONST.Tank.LIFE_DURATION_MINS*60000));
+//
+//            if(time_left < 1000) {
+//                games++;
+//                gameCountTxt.setText(String.valueOf(games));
+//                SharedPreferences.Editor editor = settings.edit();
+//                editor.putInt(TankActivity.RETRY_COUNT,games);
+//            }
+//            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+//            gameCounter.setText(sdf.format(time_left));
+//            timerHandler.postDelayed(this, 1000);
+//        }
+//    };
 
     public TankPurchaseGameDialog(AppCompatActivity a, TankView mTankView) {
         super(a);
@@ -125,6 +131,7 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     int games = settings.getInt(TankActivity.RETRY_COUNT,0);
                     ((TankActivity) activity).retryCount.setText(String.valueOf(games));
                 }
+                TankPurchaseGameDialog.this.opened = false;
             }
         });
 
@@ -132,11 +139,20 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
 
 
 //        startTime = System.currentTimeMillis();
-        timerHandler.postDelayed(timerRunnable, 0);
+//        timerHandler.postDelayed(timerRunnable, 0);
+        MessageRegister.getInstance().setServiceListener(this);
+        opened = true;
 
     }
 
-
+    public void onServiceMessageReceived(int games, long time_left) {
+        if(opened){
+            Log.d("SERVICE MESSAGE D", String.valueOf(games) + " " + time_left);
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+            gameCounter.setText(sdf.format(time_left));
+            gameCountTxt.setText(String.valueOf(games));
+        }
+    }
 
     public void setGoldCount() {
 //        golds = settings.getInt(TankActivity.GOLD,0);

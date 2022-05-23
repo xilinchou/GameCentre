@@ -108,16 +108,16 @@ public class Enemy extends Tank{
             int new_direction;
 
             float d = (float)Math.random();
-            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : 0.5) && target.x > 0 && target.y > 0) {
+            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : prob(0.5f,0.9f)) && target.x > 0 && target.y > 0) {
                 int dx = (int)(target.x - x);
                 int dy = (int)(target.y - y);
 
                 d = (float)Math.random();
 
                 if(Math.abs(dx) > Math.abs(dy))
-                    new_direction = (d < 0.5) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
+                    new_direction = (d < prob(0.5f,0.9f)) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
                 else
-                    new_direction = (d < 0.5) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
+                    new_direction = (d < prob(0.5f,0.9f)) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
             }
             else {
                 new_direction = (int)(Math.random()*4)%4;
@@ -141,6 +141,10 @@ public class Enemy extends Tank{
         else {
             dir_time++;
         }
+    }
+
+    private float prob(float min, float max) {
+        return (max-min)*TankView.level/TankView.NUM_LEVELS + min;
     }
 
     public int getDirection() {
@@ -264,6 +268,7 @@ public class Enemy extends Tank{
 //            gotBonus = bonus;
             switch (bonus) {
                 case Bonus.GRENADE:
+                    TankView.getInstance().currentObj[8] = false;
                     break;
                 case Bonus.HELMET:
                     applyShield();

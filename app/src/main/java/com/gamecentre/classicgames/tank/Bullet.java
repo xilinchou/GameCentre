@@ -159,19 +159,39 @@ public class Bullet extends GameObjects {
             switch (direction) {
                 case CONST.Direction.UP:
                     y -= vy;
-                    if(y < 0)y=0;
+                    if(y < 0) {
+                        y = 0;
+                        if(fromPlayer) {
+                            TankView.getInstance().currentObj[9] = false;
+                        }
+                    }
                     break;
                 case CONST.Direction.DOWN:
                     y += vy;
-                    if(y > TankView.HEIGHT)y=TankView.HEIGHT;
+                    if(y > TankView.HEIGHT) {
+                        y = TankView.HEIGHT;
+                        if(fromPlayer) {
+                            TankView.getInstance().currentObj[9] = false;
+                        }
+                    }
                     break;
                 case CONST.Direction.LEFT:
                     x -= vx;
-                    if(x < 0)x=0;
+                    if(x < 0) {
+                        x = 0;
+                        if(fromPlayer) {
+                            TankView.getInstance().currentObj[9] = false;
+                        }
+                    }
                     break;
                 case CONST.Direction.RIGHT:
                     x += vx;
-                    if(x > TankView.WIDTH)x=TankView.WIDTH;
+                    if(x > TankView.WIDTH) {
+                        x = TankView.WIDTH;
+                        if(fromPlayer) {
+                            TankView.getInstance().currentObj[9] = false;
+                        }
+                    }
                     break;
             }
         }

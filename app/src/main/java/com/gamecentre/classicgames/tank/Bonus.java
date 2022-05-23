@@ -71,46 +71,120 @@ public class Bonus extends GameObjects {
 //        bonusTmr = 200;
     }
 
-    private int pollBonus(int count) {
-        int[] b = new int[] {0,0,0,0,0,0,0,0};
+//    private int pollBonus(int count) {
+//        int[] b = new int[] {0,0,0,0,0,0,0,0};
+//
+//        for(int i = 0; i < count; i++) {
+//            float p = (float)Math.random();
+//            if(p < 0.1) {
+//                b[0]++;
+//            }
+//            else if(p < 0.4) {
+//                b[1]++;
+//            }
+//            else if(p < 0.5) {
+//                b[2]++;
+//            }
+//            else if(p < 0.7) {
+//                b[3]++;
+//            }
+//            else if(p < 0.75) {
+//                b[4]++;
+//            }
+//            else if(p < 0.85) {
+//                b[5]++;
+//            }
+//            else if(p < 0.9) {
+//                b[6]++;
+//            }
+//            else {
+//                b[7]++;
+//            }
+//        }
+//        int max = 0;
+//        int bonus = 0;
+//        for(int i = 0; i < 8; i ++) {
+//            if(b[i] > max){
+//                max = b[i];
+//                bonus = i;
+//            }
+//        }
+//        return bonus;
+//    }
 
-        for(int i = 0; i < count; i++) {
-            float p = (float)Math.random();
-            if(p < 0.1) {
-                b[0]++;
-            }
-            else if(p < 0.4) {
-                b[1]++;
-            }
-            else if(p < 0.5) {
-                b[2]++;
-            }
-            else if(p < 0.7) {
-                b[3]++;
-            }
-            else if(p < 0.75) {
-                b[4]++;
-            }
-            else if(p < 0.85) {
-                b[5]++;
-            }
-            else if(p < 0.9) {
-                b[6]++;
-            }
-            else {
-                b[7]++;
-            }
+
+//    private int pollBonus(int count) {
+//        int[] b = new int[] {0,0,0,0,0,0,0,0};
+//
+//        for(int i = 0; i < count; i++) {
+//            float p = (float)Math.random();
+//            if(p < 0.18) {
+//                b[0]++;
+//            }
+//            else if(p < 0.36) {
+//                b[1]++;
+//            }
+//            else if(p < 0.47) {
+//                b[2]++;
+//            }
+//            else if(p < 0.65) {
+//                b[3]++;
+//            }
+//            else if(p < 0.72) {
+//                b[4]++;
+//            }
+//            else if(p < 0.83) {
+//                b[5]++;
+//            }
+//            else if(p < 0.9) {
+//                b[6]++;
+//            }
+//            else {
+//                b[7]++;
+//            }
+//        }
+//        int max = 0;
+//        int bonus = 0;
+//        for(int i = 0; i < 8; i ++) {
+//            if(b[i] > max){
+//                max = b[i];
+//                bonus = i;
+//            }
+//        }
+//        return bonus;
+//    }
+
+
+    private int pollBonus(int count) {
+        float p = (float)Math.random();
+
+        if(p < 0.18) {
+            return 0;
         }
-        int max = 0;
-        int bonus = 0;
-        for(int i = 0; i < 8; i ++) {
-            if(b[i] > max){
-                max = b[i];
-                bonus = i;
-            }
+        else if(p < 0.36) {
+            return 1;
         }
-        return bonus;
+        else if(p < 0.47) {
+            return 2;
+        }
+        else if(p < 0.65) {
+            return 3;
+        }
+        else if(p < 0.72) {
+            return 4;
+        }
+        else if(p < 0.83) {
+            return 5;
+        }
+        else if(p < 0.9) {
+            return 6;
+        }
+        else {
+            return 7;
+        }
     }
+
+
 
     public void setBonus(int x, int y, int b, boolean av, boolean cl, int id) {
         if(Bonus.id > id){

@@ -64,6 +64,7 @@
     <string name="retryGoldAmnt">x2</string>
     <string name="retryWatchAmnt">x1</string>
     <string name="playOnGoldCost">x2</string>
+
     <string name="adGameAmnt">+1</string>
     <string name="game15Amnt">+3</string>
     <string name="game30Time">6h</string>

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +12,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.utils.CONST;
+
 @SuppressLint("ClickableViewAccessibility")
 public class TankTypeActivity extends AppCompatActivity {
     TankTextView classic, arcade;
@@ -63,6 +66,40 @@ public class TankTypeActivity extends AppCompatActivity {
                         openSettings(view);
                     }
                 });
+
+
+        TimerBroadcastService.settings = getSharedPreferences("TankSettings", 0);
+
+        int games = TimerBroadcastService.settings.getInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
+        if(games == CONST.Tank.MAX_GAME_COUNT) {
+            SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
+            editor.putInt(TankActivity.RETRY_COUNT,games);
+            editor.commit();
+        }
+
+
+        long life_time = TimerBroadcastService.settings.getLong(TankActivity.LIFE_TIME,0);
+        if(life_time == 0) {
+            SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
+            editor.putLong(TankActivity.LIFE_TIME,life_time);
+            editor.commit();
+        }
+        else {
+            long current_time = System.currentTimeMillis();
+            long time_passed = current_time - life_time;
+            int added_games = (int)(time_passed/(CONST.Tank.LIFE_DURATION_MINS*60000));
+            games += added_games;
+            if(games > CONST.Tank.MAX_GAME_COUNT) {
+                games = CONST.Tank.MAX_GAME_COUNT;
+            }
+            SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
+            editor.putInt(TankActivity.RETRY_COUNT,games);
+            editor.commit();
+        }
+
+
+
+        startService(new Intent(TankTypeActivity.this, TimerBroadcastService.class));
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
