@@ -75,6 +75,8 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_daily_reward);
+        setCancelable(false);
+
         watchBtn = (TankTextView) findViewById(R.id.watchRwdBtn);
         watchBtn2 = (ImageView) findViewById(R.id.watchRwdPlay);
         cancelBtn = (TankTextView) findViewById(R.id.closeReward);
@@ -133,11 +135,8 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
             if(m.getAction() == MotionEvent.ACTION_DOWN){
 //                int cost;
 //                int goldCount = settings.getInt(TankActivity.GOLD,0);
-                switch (v.getId()) {
-                    case R.id.watchRwdBtn:
-                    case R.id.watchRwdPlay:
-
-//                        cost = Integer.parseInt((activity.getResources().getString(R.string.starboat_gold).replace("x","")));
+                int id = v.getId();
+                if (id == R.id.watchRwdBtn || id == R.id.watchRwdPlay) {//                        cost = Integer.parseInt((activity.getResources().getString(R.string.starboat_gold).replace("x","")));
 //                        if(cost <= goldCount) {
 //                            int star = settings.getInt(TankActivity.STAR,0);
 //                            int boat = settings.getInt(TankActivity.BOAT,0);
@@ -158,14 +157,9 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
 //                            // TODO Not enough gold
 //                            Log.d("PURCHASE STARBOAT", "Not enough gold");
 //                        }
-
-                        break;
-
-                    case R.id.closeReward:
-                        dismiss();
-                        break;
-                    default:
-                        break;
+                }
+                else if (id == R.id.closeReward) {
+                    dismiss();
                 }
             }
             return true;

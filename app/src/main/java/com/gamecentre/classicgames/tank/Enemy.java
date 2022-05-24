@@ -64,12 +64,12 @@ public class Enemy extends Tank{
 
         if(type == ObjectType.ST_TANK_C) {
             bulletSpeed = 1.15f;
-            reloadTmr = (int)(0.8*TankView.TO_SEC);
+            reloadTmr = (int)(0.8*TankView.FPS);
             killScore = "300";
         }
 
         else {
-            reloadTmr = (int)(1*TankView.TO_SEC);
+            reloadTmr = (int)(1*TankView.FPS);
         }
 
         frame = 0;
@@ -228,7 +228,7 @@ public class Enemy extends Tank{
         bullet.id = bId;
         bullets.add((new Bullet(bullet,bx,by)));
 //        SoundManager.playSound(Sounds.TANK.FIRE);
-        reload_time = (int)((0.2*TankView.TO_SEC) + Math.random()*reloadTmr);
+        reload_time = (int)((0.2*TankView.FPS) + Math.random()*reloadTmr);
     }
 
 

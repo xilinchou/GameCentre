@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.utils.CONST;
@@ -30,6 +31,8 @@ public class TankTypeActivity extends AppCompatActivity {
         findViewById(R.id.classic_lo).setOnClickListener(onClickListener);
         findViewById(R.id.arcade).setOnClickListener(onClickListener);
         findViewById(R.id.arcade_lo).setOnClickListener(onClickListener);
+
+
 
 
 
@@ -70,6 +73,7 @@ public class TankTypeActivity extends AppCompatActivity {
 
         TimerBroadcastService.settings = getSharedPreferences("TankSettings", 0);
 
+
         int games = TimerBroadcastService.settings.getInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
         if(games == CONST.Tank.MAX_GAME_COUNT) {
             SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
@@ -94,33 +98,34 @@ public class TankTypeActivity extends AppCompatActivity {
             }
             SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
             editor.putInt(TankActivity.RETRY_COUNT,games);
+            editor.putLong(TankActivity.LIFE_TIME, (long) added_games * CONST.Tank.LIFE_DURATION_MINS*60000 + life_time);
             editor.commit();
         }
 
 
 
         startService(new Intent(TankTypeActivity.this, TimerBroadcastService.class));
+
+        loadSoundSettings();
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Intent i = new Intent(TankTypeActivity.this, TankMenuActivity.class);
-            switch (view.getId()) {
-                case R.id.classic:
-                case R.id.classic_lo:
-                    i.putExtra(TankTypeActivity.TANK_TYPE, "CLASSIC");
-                    startActivity(i);
-                    finish();
-                    break;
-                case R.id.arcade:
-                case R.id.arcade_lo:
-                    i.putExtra(TankTypeActivity.TANK_TYPE, "ARCADE");
-                    startActivity(i);
-                    finish();
-                    break;
-                case R.id.construct:
-                    break;
+            int id = view.getId();
+            if (id == R.id.classic || id == R.id.classic_lo) {
+                i.putExtra(TankTypeActivity.TANK_TYPE, "CLASSIC");
+                startActivity(i);
+                finish();
+            }
+            else if (id == R.id.arcade || id == R.id.arcade_lo) {
+                i.putExtra(TankTypeActivity.TANK_TYPE, "ARCADE");
+                startActivity(i);
+                finish();
+            }
+            else if (id == R.id.construct) {
+                //TODO
             }
         }
     };
@@ -132,5 +137,17 @@ public class TankTypeActivity extends AppCompatActivity {
         lp.copyFrom(cdd.getWindow().getAttributes());
         cdd.show();
         cdd.getWindow().setAttributes(lp);
+    }
+
+    private void loadSoundSettings() {
+        SharedPreferences settings = getSharedPreferences("TankSettings", 0);
+
+        boolean sound = settings.getBoolean(TankMenuActivity.PREF_MUTED,true);
+        boolean vibrate = settings.getBoolean(TankMenuActivity.PREF_VIBRATE,true);
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(TankMenuActivity.PREF_MUTED, sound);
+        editor.putBoolean(TankMenuActivity.PREF_VIBRATE,vibrate);
+        editor.apply();
     }
 }

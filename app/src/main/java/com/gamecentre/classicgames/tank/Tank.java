@@ -34,10 +34,10 @@ public class Tank extends GameObjects {
 //    protected boolean[] collision = new boolean[4];
     protected Bullet bullet;
     public boolean respawn = true;
-    protected final int FreezeTime = (int)(8*TankView.TO_SEC);
-    protected final int ShieldTime = (int)(10*TankView.TO_SEC);
+    protected final int FreezeTime = (int)(8*TankView.FPS);
+    protected final int ShieldTime = (int)(10*TankView.FPS);
     protected final int BoatTime = (int)(3*TankView.TO_SEC);
-    protected final int IceTime = (int)(0.2*TankView.TO_SEC);
+    protected final int IceTime = (int)(0.5*TankView.FPS);
     protected Shield mShield;
     protected Boat mBoat;
     protected boolean freeze, shield, boat, slip;

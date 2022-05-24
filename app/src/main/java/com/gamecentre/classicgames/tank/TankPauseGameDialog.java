@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.gamecentre.classicgames.R;
 
@@ -24,6 +25,8 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
     public AppCompatActivity activity;
     public Dialog d;
     TankView mTankView;
+    ImageView soundBtn, vibrateBtn;
+    boolean sound, vibrate;
 
     private int state = 0;
 
@@ -52,19 +55,45 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_pause_game);
-        continueBtn = (TankTextView) findViewById(R.id.continueBtn);
-        newGameBtn = (TankTextView) findViewById(R.id.newGameBtn);
-        endGameBtn = (TankTextView) findViewById(R.id.endGameBtn);
+        setCancelable(false);
+
+        continueBtn = findViewById(R.id.continueBtn);
+        newGameBtn = findViewById(R.id.newGameBtn);
+        endGameBtn = findViewById(R.id.endGameBtn);
+
+
 
         continueBtn.setOnTouchListener(this);
         newGameBtn.setOnTouchListener(this);
         endGameBtn.setOnTouchListener(this);
+
+        soundBtn = findViewById(R.id.pSoundBtn);
+        vibrateBtn = findViewById(R.id.pVibrateBtn);
+        soundBtn.setOnTouchListener(this);
+        vibrateBtn.setOnTouchListener(this);
 
         closeBtn = (TankTextView) findViewById(R.id.pauseCloseBtn);
         closeBtn.setOnTouchListener(this);
 
         settings = activity.getSharedPreferences("TankSettings", 0);
         games = settings.getInt(TankActivity.RETRY_COUNT,0);
+
+        sound = settings.getBoolean(TankMenuActivity.PREF_MUTED,true);
+        vibrate = settings.getBoolean(TankMenuActivity.PREF_VIBRATE,true);
+
+        if(sound) {
+            soundBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.psound,null));
+        }
+        else {
+            soundBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.xsound,null));
+        }
+
+        if(vibrate) {
+            vibrateBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.pvibrate,null));
+        }
+        else {
+            vibrateBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.xvibrate,null));
+        }
 
 
         setOnDismissListener(new OnDismissListener() {
@@ -89,7 +118,9 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
                         editor = settings.edit();
                         editor.putInt(TankActivity.RETRY_COUNT,games);
                         editor.commit();
-                        ((TankActivity)activity).endGame();
+                        mTankView.notifyEndGame = true;
+                        mTankView.resumeNoAds();
+//                        ((TankActivity)activity).endGame();
                         break;
                 }
             }
@@ -105,22 +136,43 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
     public boolean onTouch(View v, MotionEvent m) {
 
         if(m.getAction() == MotionEvent.ACTION_DOWN){
-            switch (v.getId()) {
-                case R.id.continueBtn:
-                case R.id.pauseCloseBtn:
-                    state = 0;
+            SharedPreferences.Editor editor;
+            int id = v.getId();
+            if (id == R.id.continueBtn || id == R.id.pauseCloseBtn) {
+                state = 0;
+                dismiss();
+            } else if (id == R.id.newGameBtn) {
+                if (games > 0) {
+                    state = 1;
                     dismiss();
-                    break;
-                case R.id.newGameBtn:
-                    if(games > 0) {
-                        state = 1;
-                        dismiss();
-                    }
-                    break;
-                case R.id.endGameBtn:
-                    state = 2;
-                    dismiss();
-                    break;
+                }
+            } else if (id == R.id.endGameBtn) {
+                state = 2;
+                dismiss();
+            } else if (id == R.id.pSoundBtn) {
+                if (sound) {
+                    sound = false;
+                    soundBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.xsound, null));
+                } else {
+                    sound = true;
+                    soundBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.psound, null));
+                }
+                mTankView.setSound(sound);
+                editor = settings.edit();
+                editor.putBoolean(TankMenuActivity.PREF_MUTED, sound);
+                editor.commit();
+            } else if (id == R.id.pVibrateBtn) {
+                if (vibrate) {
+                    vibrate = false;
+                    vibrateBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.xvibrate, null));
+                } else {
+                    vibrate = true;
+                    vibrateBtn.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.pvibrate, null));
+                }
+                mTankView.setVibrate(vibrate);
+                editor = settings.edit();
+                editor.putBoolean(TankMenuActivity.PREF_VIBRATE, vibrate);
+                editor.commit();
             }
         }
         return true;

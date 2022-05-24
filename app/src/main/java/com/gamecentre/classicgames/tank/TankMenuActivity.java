@@ -10,6 +10,7 @@ import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
+import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.MessageRegister;
 import com.gamecentre.classicgames.utils.WifiDialogListener;
 import com.gamecentre.classicgames.wifidirect.WifiDialog;
@@ -54,7 +55,7 @@ import java.util.Locale;
 
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener {
 
-    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt;
+    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, retryTmr;
     ImageView shopImg;
     boolean firstTime = true;
 
@@ -100,6 +101,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         goldTxt = findViewById(R.id.goldCountTxt);
         shopImg = findViewById(R.id.shop);
         retryTxt = findViewById(R.id.retryTxt);
+        retryTmr = findViewById(R.id.menuRetryTmrTxt);
 
         updateBonus();
 
@@ -166,8 +168,15 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
     public void onServiceMessageReceived(int games, long time_left) {
         if(opened){
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
             Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left);
             retryTxt.setText(String.valueOf(games));
+            if(games >= CONST.Tank.MAX_GAME_COUNT) {
+                retryTmr.setText("");
+            }
+            else {
+                retryTmr.setText(sdf.format(time_left));
+            }
         }
     }
 

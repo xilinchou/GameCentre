@@ -48,8 +48,11 @@ public class TimerBroadcastService extends Service {
                     editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
                     editor.commit();
                 }
-                Log.d("SERVICE","sending message");
+//                Log.d("SERVICE","sending message");
                 MessageRegister.getInstance().registerServiceMessage(games,time_left);
+            }
+            else {
+                MessageRegister.getInstance().registerServiceMessage(games,0);
             }
 
             timerHandler.postDelayed(this, 1000);

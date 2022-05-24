@@ -75,6 +75,12 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
         this.mTankView = mTankView;
     }
 
+    public TankPurchaseGameDialog(AppCompatActivity a) {
+        super(a);
+        this.activity = a;
+        this.mTankView = null;
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +94,8 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_purchase_game);
+        setCancelable(false);
+
         videoBtn = (TankTextView) findViewById(R.id.videoGameBtn);
         videoBtn2 = (Button) findViewById(R.id.videoGameBtn2);
 
@@ -127,15 +135,20 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
         setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
+
+                int games = settings.getInt(TankActivity.RETRY_COUNT,0);
+
                 if(activity instanceof TankActivity) {
-                    int games = settings.getInt(TankActivity.RETRY_COUNT,0);
                     ((TankActivity) activity).retryCount.setText(String.valueOf(games));
+                }
+                else if(activity instanceof TankMenuActivity) {
+                    ((TankMenuActivity) activity).retryTxt.setText(String.valueOf(games));
                 }
                 TankPurchaseGameDialog.this.opened = false;
             }
         });
 
-        life_time = ((TankActivity)activity).settings.getLong(TankActivity.LIFE_TIME,System.currentTimeMillis());
+//        life_time = ((TankActivity)activity).settings.getLong(TankActivity.LIFE_TIME,System.currentTimeMillis());
 
 
 //        startTime = System.currentTimeMillis();
@@ -165,44 +178,38 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
     public boolean onTouch(View v, MotionEvent m) {
 
         if(m.getAction() == MotionEvent.ACTION_DOWN){
-            switch (v.getId()) {
-                case R.id.videoGameBtn:
-                case R.id.videoGameBtn2:
-                    if(activity instanceof TankActivity) {
-                        ((TankActivity) activity).showRewardedVideo(this);
-                    }
-                    else if(activity instanceof TankMenuActivity) {
-                        ((TankMenuActivity) activity).showRewardedVideo(this);
-                    }
-                    break;
-                case R.id.gameBuy15:
-                case R.id.gameBuy152:
-                case R.id.gameBuy153:
-                    int cost = Integer.parseInt(activity.getResources().getString(R.string.game15Cost).replace("x", ""));
-                    if (golds >= cost) {
-                        int amnt = Integer.parseInt(activity.getResources().getString(R.string.game15Amnt).replace("+", ""));
-                        golds = settings.getInt(TankActivity.GOLD, 0);
-                        games = settings.getInt(TankActivity.RETRY_COUNT, 0);
+            int id = v.getId();
+            if (id == R.id.videoGameBtn || id == R.id.videoGameBtn2) {
+                if (activity instanceof TankActivity) {
+                    ((TankActivity) activity).showRewardedVideo(this);
+                } else if (activity instanceof TankMenuActivity) {
+                    ((TankMenuActivity) activity).showRewardedVideo(this);
+                }
+            }
+            else if (id == R.id.gameBuy15 || id == R.id.gameBuy152 || id == R.id.gameBuy153) {
+                int cost = Integer.parseInt(activity.getResources().getString(R.string.game15Cost).replace("x", ""));
+                if (golds >= cost) {
+                    int amnt = Integer.parseInt(activity.getResources().getString(R.string.game15Amnt).replace("+", ""));
+                    golds = settings.getInt(TankActivity.GOLD, 0);
+                    games = settings.getInt(TankActivity.RETRY_COUNT, 0);
 
-                        golds -= cost;
-                        games += amnt;
-                        gameCountTxt.setText(String.valueOf(games));
+                    golds -= cost;
+                    games += amnt;
+                    gameCountTxt.setText(String.valueOf(games));
 
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt(TankActivity.GOLD, golds);
-                        editor.putInt(TankActivity.RETRY_COUNT, games);
-                        editor.commit();
-                    } else if(activity instanceof TankActivity) {
-                        ((TankActivity) activity).openStore(this);
-                    }
-                    break;
-                case R.id.gameBuy30:
-                case R.id.gameBuy302:
-                case R.id.gameBuy303:
-                    break;
-                case R.id.closeGameBuyBtn:
-                    dismiss();
-                    break;
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt(TankActivity.GOLD, golds);
+                    editor.putInt(TankActivity.RETRY_COUNT, games);
+                    editor.commit();
+                } else if (activity instanceof TankActivity) {
+                    ((TankActivity) activity).openStore(this);
+                }
+            }
+            else if (id == R.id.gameBuy30 || id == R.id.gameBuy302 || id == R.id.gameBuy303) {
+                // TODO
+            }
+            else if (id == R.id.closeGameBuyBtn) {
+                dismiss();
             }
         }
         return true;

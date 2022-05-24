@@ -62,11 +62,12 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView curtainTxt,gameOverTxt;
 
     public RelativeLayout scoreView;
-    public TankTextView retryCount, hiScore, stageScore, p1Score, p2Score;
+    public TankTextView retryCount, retryGameTmr, hiScore, stageScore, p1Score, p2Score;
     public TankTextView p1AScore, p1BScore, p1CScore, p1DScore;
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
     public TankTextView p2ACount, p2BCount, p2CCount, p2DCount, p2Count;
+    public ImageView gameStars;
 
 
     public TankTextView pauseBtn, gameTimeView;
@@ -93,7 +94,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             LAST_DAY = "LAST_DAY",
             CONSECUTIVE_DAYS = "CONSECUTIVE_DAYS",
 
-            OBJECTIVES = "OBJECTIVES";
+            OBJECTIVES = "OBJECTIVES",
+            LEVEL_STARS = "LEVEL_STARS";
 
     SharedPreferences settings;
 
@@ -206,6 +208,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         }
                     } else if (TankView.stageComplete) {
                         TankView.mNewRound = true;
+                        TankView.level++;
                     }
                 }
                 return true;
@@ -251,6 +254,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         scoreView = findViewById(R.id.scoreView);
         retryCount = findViewById(R.id.retryGameTxt);
+        retryGameTmr = findViewById(R.id.retryGameTmr);
         hiScore = findViewById(R.id.HiScore);
         stageScore = findViewById(R.id.StageScore);
 
@@ -279,6 +283,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         p2DCount = findViewById(R.id.enemyDCountP2);
         p2Count = findViewById(R.id.totalCountP2);
 
+        gameStars = findViewById(R.id.gameStars);
+
 
         SoundManager.getInstance();
         SoundManager.initSounds(this);
@@ -296,6 +302,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                 R.raw.tnkpause,
                 R.raw.tnkearn_gold,
                 R.raw.tnkbuy_item,
+                R.raw.tnk1up,
+                R.raw.tnkslide,
+                R.raw.tnkfindgold,
         };
         SoundManager.loadSounds(sounds);
 
@@ -337,8 +346,15 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
     public void onServiceMessageReceived(int games, long time_left) {
         if(mTankView.showingScore) {
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
             Log.d("SERVICE MESSAGE:SCORES", String.valueOf(games) + " " + time_left);
             retryCount.setText(String.valueOf(games));
+            if(games >= CONST.Tank.MAX_GAME_COUNT) {
+                retryGameTmr.setText("");
+            }
+            else {
+                retryGameTmr.setText(sdf.format(time_left));
+            }
         }
     }
 
@@ -509,11 +525,33 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         }
         Type type = new TypeToken<ArrayList<boolean[]>>() {}.getType();
         Gson gson = new Gson();
-
-//        ArrayList<boolean[]> objectives = gson.fromJson(json,type);
-//        return objectives;
         return gson.fromJson(objectives,type);
     }
+
+
+    public void saveStars(ArrayList<Integer> stars) {
+        SharedPreferences.Editor editor = settings.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(stars);
+        editor.putString(TankActivity.LEVEL_STARS,json);
+        editor.apply();
+    }
+
+    public ArrayList<Integer> loadStars() {
+        String stars = settings.getString(TankActivity.LEVEL_STARS,null);
+        if(stars == null) {
+            ArrayList<Integer> star = new ArrayList<>();
+            for(int i = 0; i < TankView.NUM_LEVELS; i++) {
+                star.add(0);
+            }
+            saveStars(star);
+            return star;
+        }
+        Type type = new TypeToken<ArrayList<Integer>>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stars,type);
+    }
+
 
     public void saveString(String key, String val) {
         SharedPreferences.Editor editor = settings.edit();
@@ -579,7 +617,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
     public void endGame() {
         mTankView.stop();
-        mTankView.release();
+//        mTankView.release();
         Intent i = new Intent(TankActivity.this, TankMenuActivity.class);
         TankActivity.this.startActivity(i);
         TankActivity.this.finish();

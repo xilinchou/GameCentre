@@ -69,6 +69,8 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_end_game);
+        setCancelable(false);
+
         videoBtn = (TankTextView) findViewById(R.id.videoBtn);
         goldBtn = (TankTextView) findViewById(R.id.goldBtn);
         videoBtn2 = (Button) findViewById(R.id.videoBtn2);
@@ -122,31 +124,28 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
     public boolean onTouch(View v, MotionEvent m) {
 
         if(m.getAction() == MotionEvent.ACTION_DOWN){
-            switch (v.getId()) {
-                case R.id.videoBtn:
-                case R.id.videoBtn2:
-                    ((TankActivity) activity).showRewardedVideo(this);
-                    break;
-                case R.id.goldBtn:
-                case R.id.goldBtn2:
-                    int cost = Integer.parseInt(activity.getResources().getString(R.string.playOnGoldCost).replace("x", ""));
-                    if (golds >= cost) {
-                        TankView.CHECKING_RETRY = 3;
-                        mTankView.updateP1Lives(Integer.parseInt(activity.getResources().getString(R.string.retryGoldAmnt).replace("x", "")));
-                        golds = settings.getInt(TankActivity.GOLD, 0);
-                        golds -= cost;
-                        goldCountTxt.setText(String.format(Locale.ENGLISH, "x%d", golds));
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt(TankActivity.GOLD, golds);
-                        editor.commit();
-                        ((TankActivity) activity).updateBonusStack();
-                    } else {
-                        ((TankActivity) activity).openStore(this);
-                    }
-                    break;
-                case R.id.closeBtn:
-                    dismiss();
-                    break;
+            int id = v.getId();
+            if (id == R.id.videoBtn || id == R.id.videoBtn2) {
+                ((TankActivity) activity).showRewardedVideo(this);
+            }
+            else if (id == R.id.goldBtn || id == R.id.goldBtn2) {
+                int cost = Integer.parseInt(activity.getResources().getString(R.string.playOnGoldCost).replace("x", ""));
+                if (golds >= cost) {
+                    TankView.CHECKING_RETRY = 3;
+                    mTankView.updateP1Lives(Integer.parseInt(activity.getResources().getString(R.string.retryGoldAmnt).replace("x", "")));
+                    golds = settings.getInt(TankActivity.GOLD, 0);
+                    golds -= cost;
+                    goldCountTxt.setText(String.format(Locale.ENGLISH, "x%d", golds));
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt(TankActivity.GOLD, golds);
+                    editor.commit();
+                    ((TankActivity) activity).updateBonusStack();
+                } else {
+                    ((TankActivity) activity).openStore(this);
+                }
+            }
+            else if (id == R.id.closeBtn) {
+                dismiss();
             }
         }
         return true;

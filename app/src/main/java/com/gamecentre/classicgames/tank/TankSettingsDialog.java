@@ -41,6 +41,8 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.activity_tank_settings);
+        setCancelable(false);
+
         yes = (Button) findViewById(R.id.saveBtn);
         no = (Button) findViewById(R.id.cancelBtn);
         yes.setOnClickListener(this);
@@ -72,32 +74,27 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.saveBtn:
-                SharedPreferences.Editor editor = settings.edit();
+        int id = v.getId();
+        if (id == R.id.saveBtn) {
+            SharedPreferences.Editor editor = settings.edit();
 
-                if(soundCheck.isChecked()) {
-                    editor.putBoolean(TankMenuActivity.PREF_MUTED,true);
-                }
-                else{
-                    editor.putBoolean(TankMenuActivity.PREF_MUTED,false);
-                }
+            if (soundCheck.isChecked()) {
+                editor.putBoolean(TankMenuActivity.PREF_MUTED, true);
+            } else {
+                editor.putBoolean(TankMenuActivity.PREF_MUTED, false);
+            }
 
 
-                if(vibrateCheck.isChecked()) {
-                    editor.putBoolean(TankMenuActivity.PREF_VIBRATE,true);
-                }
-                else{
-                    editor.putBoolean(TankMenuActivity.PREF_VIBRATE,false);
-                }
-                editor.apply();
-                dismiss();
-                break;
-            case R.id.cancelBtn:
-                dismiss();
-                break;
-            default:
-                break;
+            if (vibrateCheck.isChecked()) {
+                editor.putBoolean(TankMenuActivity.PREF_VIBRATE, true);
+            } else {
+                editor.putBoolean(TankMenuActivity.PREF_VIBRATE, false);
+            }
+            editor.apply();
+            dismiss();
+        }
+        else if (id == R.id.cancelBtn) {
+            dismiss();
         }
     }
 }

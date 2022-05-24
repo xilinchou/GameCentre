@@ -13,8 +13,8 @@
 
 
         <LinearLayout
-            android:layout_width="30dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="70dp"
             android:layout_alignTop="@+id/items"
             android:layout_marginTop="0dp"
             android:layout_marginEnd="15dp"
@@ -22,8 +22,18 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <ImageView
+            <com.gamecentre.classicgames.tank.TankTextView
+                android:id="@+id/menuRetryTmrTxt"
                 android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="10"
+                android:textColor="@color/brick_brown"
+                android:textSize="8sp" />
+
+            <ImageView
+                android:layout_width="30dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/retry_img" />

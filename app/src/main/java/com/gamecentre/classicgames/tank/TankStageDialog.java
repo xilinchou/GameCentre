@@ -2,11 +2,9 @@ package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,6 +28,7 @@ import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.model.Game;
 import com.gamecentre.classicgames.model.TankGameModel;
+import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.CVTR;
 import com.gamecentre.classicgames.utils.MessageRegister;
 import com.gamecentre.classicgames.utils.RemoteMessageListener;
@@ -99,6 +98,8 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
         settings = activity.getSharedPreferences("TankSettings", 0);
         int unlockLevel = settings.getInt(TankMenuActivity.PREF_LEVEL,1);
 
+        ArrayList<Integer> levelStars = loadStars();
+
 
         for(int i = 1 ; i <= 35; i++) {
             CardView selCard = new CardView(this.getContext());
@@ -112,7 +113,22 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
             ImageView img = new ImageView(this.getContext());
 
             if(i <= unlockLevel) {
-                img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.unlocked,null));
+                int star = levelStars.get(i-1);
+                switch(star) {
+                    case 0:
+                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.zerostar,null));
+                        break;
+                    case 1:
+                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.onestar,null));
+                        break;
+                    case 2:
+                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.twostar,null));
+                        break;
+                    case 3:
+                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.threestar,null));
+                        break;
+                }
+//                img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.unlocked,null));
             }
             else {
                 img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.locked,null));
@@ -144,36 +160,50 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
         objectives = loadObjectives();
 
         playBtn = findViewById(R.id.playGameBtn);
-        playBtn.setOnTouchListener(new View.OnTouchListener() {
 
+        playBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    int level = selected + 1;
+                    int games = settings.getInt(TankActivity.RETRY_COUNT,0);
 
-                    if(twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
+                    if(games > 0){
+                        int level = selected + 1;
 
-                        Toast toast = Toast.makeText(activity.getApplicationContext(),
-                                "Wait for player 1 to select stage!",
-                                Toast.LENGTH_SHORT);
+                        if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
 
-                        ViewGroup group = (ViewGroup) toast.getView();
-                        TextView messageTextView = (TextView) group.getChildAt(0);
-                        messageTextView.setTextSize(25);
+                            Toast toast = Toast.makeText(activity.getApplicationContext(),
+                                    "Wait for player 1 to select stage!",
+                                    Toast.LENGTH_SHORT);
 
-                        toast.show();
-                        return true;
+                            ViewGroup group = (ViewGroup) toast.getView();
+                            TextView messageTextView = (TextView) group.getChildAt(0);
+                            messageTextView.setTextSize(25);
+
+                            toast.show();
+                            return true;
+                        }
+                        else if (twoPlayers && WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) {
+                            TankGameModel model = new TankGameModel();
+                            model.mlevelInfo = true;
+                            model.mlevel = level;
+                            WifiDirectManager.getInstance().sendMessage(model);
+                        }
+
+                        TankView.level = level;
+                        --games;
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putInt(TankActivity.RETRY_COUNT, games);
+                        if(games == CONST.Tank.MAX_GAME_COUNT - 1) {
+                            editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+                        }
+                        editor.apply();
+
+                        ((TankMenuActivity) activity).startGame(twoPlayers);
                     }
-
-                    else if(twoPlayers && WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) {
-                        TankGameModel model = new TankGameModel();
-                        model.mlevelInfo = true;
-                        model.mlevel = level;
-                        WifiDirectManager.getInstance().sendMessage(model);
+                    else {
+                        openGamePurchse();
                     }
-
-                    TankView.level = level;
-                    ((TankMenuActivity)activity).startGame(twoPlayers);
                 }
                 return false;
             }
@@ -207,11 +237,30 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
             TankGameModel msg = (TankGameModel)message;
             if(msg.mlevelInfo) {
                 TankView.level = msg.mlevel;
+                int games = settings.getInt(TankActivity.RETRY_COUNT,0);
+                --games;
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(TankActivity.RETRY_COUNT, games);
+                if(games == CONST.Tank.MAX_GAME_COUNT - 1) {
+                    editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+                }
+                editor.apply();
                 dismiss();
                 ((TankMenuActivity) activity).startGame(twoPlayers);
             }
 
         }
+    }
+
+
+    public void openGamePurchse() {
+        TankPurchaseGameDialog wd = new TankPurchaseGameDialog(activity);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(wd.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        wd.show();
+        wd.getWindow().setAttributes(lp);
     }
 
 
@@ -243,6 +292,30 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
 //        ArrayList<boolean[]> objectives = gson.fromJson(json,type);
 //        return objectives;
         return gson.fromJson(objectives,type);
+    }
+
+
+    private void saveStars(ArrayList<Integer> stars) {
+        SharedPreferences.Editor editor = settings.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(stars);
+        editor.putString(TankActivity.LEVEL_STARS,json);
+        editor.apply();
+    }
+
+    private ArrayList<Integer> loadStars() {
+        String stars = settings.getString(TankActivity.LEVEL_STARS,null);
+        if(stars == null) {
+            ArrayList<Integer> star = new ArrayList<>();
+            for(int i = 0; i < TankView.NUM_LEVELS; i++) {
+                star.add(0);
+            }
+            saveStars(star);
+            return star;
+        }
+        Type type = new TypeToken<ArrayList<Integer>>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stars,type);
     }
 
     private void displyObjectives(int level) {

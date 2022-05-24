@@ -108,6 +108,10 @@ public class SoundManager
         }
     }
 
+    public static void setSound(boolean sound) {
+        playSound = sound;
+    }
+
     public static void stopSound(int index)
     {
         mSoundPool.stop(mSoundPoolMap.get(index));

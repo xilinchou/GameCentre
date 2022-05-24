@@ -18,7 +18,7 @@ public class Player extends Tank{
     protected int frame;
     protected int frame_delay;
     public int lives = 3;
-    protected int reloadTmr = (int)(0.1*TankView.TO_SEC);
+    protected int reloadTmr = (int)(0.1*TankView.FPS);
     protected int reload_time = 0;
     protected int MaxBullet = 1;
     protected int starCount = 0;
@@ -306,6 +306,7 @@ public class Player extends Tank{
         if(moving && !slip) {
             slip = true;
             iceTmr = IceTime;
+            SoundManager.playSound(Sounds.TANK.SLIDE, 1, 3);
         }
     }
 
@@ -391,8 +392,15 @@ public class Player extends Tank{
         if(b.isAvailable() && super.collides_with(b)) {
             TankView.getInstance().currentObj[3] = false;
             stageScore += 500;
-            SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
+
             int bonus = b.getBonus();
+
+            if(bonus == Bonus.TANK) {
+                SoundManager.playSound(Sounds.TANK.BONUS1UP, 1, 3);
+            }
+            else {
+                SoundManager.playSound(Sounds.TANK.BONUS, 1, 3);
+            }
             gotBonus = bonus;
             switch (bonus) {
                 case Bonus.GRENADE:
