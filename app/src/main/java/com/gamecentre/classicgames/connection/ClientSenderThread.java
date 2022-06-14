@@ -45,7 +45,7 @@ public class ClientSenderThread extends Thread{
                     while(RUN) {
                         while (!messages.isEmpty()) {
                             oos.writeObject(messages.poll());
-                            oos.flush();
+//                            oos.flush();
                         }
                     }
                 }

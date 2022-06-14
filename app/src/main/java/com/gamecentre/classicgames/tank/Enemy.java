@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
@@ -21,7 +20,8 @@ public class Enemy extends Tank{
     private int dir_time;
     private boolean freeze = false, shield, boat;
     private  int freezeTmr, shieldTmr, boatTmr;
-    public static int lives = 20;
+    private static int MaxLives = 20;
+    public static int lives = MaxLives;
     private  float bulletSpeed = 1;
     protected int reloadTmr = (int)(0.2*TankView.TO_SEC);
     protected int reload_time = 0;
@@ -33,6 +33,7 @@ public class Enemy extends Tank{
     public  int id;
     private static int nxtId = 0;
     private ArrayList<Bullet> dbullets;
+    int bombID = -1;
 
 
     public Enemy(ObjectType type, int x, int y) {
@@ -53,8 +54,8 @@ public class Enemy extends Tank{
         }
 
         if(type == ObjectType.ST_TANK_A) {
-            this.vx = DEFAULT_SPEED*0.7f;
-            this.vy = DEFAULT_SPEED*0.7f;
+            this.vx = DEFAULT_SPEED*0.6f;
+            this.vy = DEFAULT_SPEED*0.6f;
             killScore = "100";
         }
 
@@ -64,12 +65,11 @@ public class Enemy extends Tank{
 
         if(type == ObjectType.ST_TANK_C) {
             bulletSpeed = 1.15f;
-            reloadTmr = (int)(0.8*TankView.FPS);
+            reloadTmr = (int)(1*TankView.FPS);
             killScore = "300";
         }
-
         else {
-            reloadTmr = (int)(1*TankView.FPS);
+            reloadTmr = (int)(1.5*TankView.FPS);
         }
 
         frame = 0;
@@ -108,16 +108,16 @@ public class Enemy extends Tank{
             int new_direction;
 
             float d = (float)Math.random();
-            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : prob(0.5f,0.9f)) && target.x > 0 && target.y > 0) {
+            if(d < (type == ObjectType.ST_TANK_A ? 0.8 : prob(0.2f,0.9f)) && target.x > 0 && target.y > 0) {
                 int dx = (int)(target.x - x);
                 int dy = (int)(target.y - y);
 
                 d = (float)Math.random();
 
                 if(Math.abs(dx) > Math.abs(dy))
-                    new_direction = (d < prob(0.5f,0.9f)) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
+                    new_direction = (d < prob(0.2f,0.9f)) ? (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT) : (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN);
                 else
-                    new_direction = (d < prob(0.5f,0.9f)) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
+                    new_direction = (d < prob(0.2f,0.9f)) ? (dy < 0 ? CONST.Direction.UP : CONST.Direction.DOWN) : (dx < 0 ? CONST.Direction.LEFT : CONST.Direction.RIGHT);
             }
             else {
                 new_direction = (int)(Math.random()*4)%4;
@@ -224,11 +224,19 @@ public class Enemy extends Tank{
         bId++;
         bullet.move(direction);
         bullet.setSpeed(bulletSpeed);
-        bullet.setPlayer(false);
+        bullet.setPlayer(this.player);
         bullet.id = bId;
         bullets.add((new Bullet(bullet,bx,by)));
 //        SoundManager.playSound(Sounds.TANK.FIRE);
-        reload_time = (int)((0.2*TankView.FPS) + Math.random()*reloadTmr);
+        reload_time = (int)((0.4*TankView.FPS) + Math.random()*reloadTmr);
+    }
+
+    public boolean hasBoat () {
+        return boat;
+    }
+
+    public void setBoat(boolean boat) {
+        this.boat = boat;
     }
 
 
@@ -318,27 +326,19 @@ public class Enemy extends Tank{
             return false;
         }
         if(super.collides_with(bullet)) {
-//            if(shield) {
-//                bullet.setDestroyed();
-//                return;
-//            }
             if(boat && TankView.ENEMY_BOOST) {
                 boat = false;
                 bullet.setDestroyed(false);
                 return true;
             }
-//            if(armour >= 3) {
-//                armour = 2;
-//                bullet.setDestroyed();
-//                return;
-//            }
             if(hasBonus) {
                 TankView.bonus.setBonus();
             }
             bullet.setDestroyed();
             if(group == 1) {
                 killed = true;
-                svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+//                svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+                svrKill = TankView.twoPlayers && bullet.fromPlayer() == 1;
                 setDestroyed();
                 return true;
             }
@@ -351,6 +351,16 @@ public class Enemy extends Tank{
         return false;
     }
 
+    public boolean collideBomb(int id) {
+        if(id == bombID){
+            return false;
+        }
+        bombID = id;
+        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+        setDestroyed();
+        return true;
+    }
+
     public boolean canBreakWall() {
         return TankView.ENEMY_BOOST && breakWall;
     }
@@ -361,28 +371,15 @@ public class Enemy extends Tank{
 
     public void setDestroyed() {
         super.setDestroyed();
+        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
     }
 
 
     public void update() {
-//        if(boat && boatTmr > 0){
-//            --boatTmr;
-//        }
-//
-//        if(shield && shieldTmr > 0){
-//            --shieldTmr;
-//        }
 
         if(reload_time > 0) {
             --reload_time;
         }
-
-//        if(respawn) {
-//            destroyed = false;
-//            direction = CONST.Direction.DOWN;
-//            frame = 0;
-//            respawn = false;
-//        }
 
         for(int i = 0; i < bullets.size(); i++) {
             if(bullets.get(i).recycle) {
@@ -396,13 +393,6 @@ public class Enemy extends Tank{
         move();
         fire();
 
-//        for(int i = 0; i < bullets.size(); i++) {
-//            if(bullets.get(i).isDestroyed()) {
-//                dbullets.add(bullets.get(i));
-//                bullets.set(i,null);
-//            }
-//        }
-
         for(Bullet bullet:bullets) {
             bullet.move();
         }
@@ -414,29 +404,38 @@ public class Enemy extends Tank{
             this.x = (int) (model.x * scale);
             this.y = (int) (model.y * scale);
             this.direction = model.dirction;
-//        this.setShield(model.shield);
-//        this.setBoat(model.boat);
-//        this.armour = model.armour;
-//        if(!destroyed) {
-//            destroyed = model.tDestroyed;
-//        }
+            this.setBoat(model.boat);
             lives = model.lives;
-//            this.group = model.group;
             if(model.group < this.group){
                 this.group = model.group;
             }
             this.typeVal = model.typeVal;
+            switch (typeVal) {
+                case 0:
+                    type = ObjectType.ST_TANK_A;
+                    break;
+                case 1:
+                    type = ObjectType.ST_TANK_B;
+                    break;
+                case 2:
+                    type = ObjectType.ST_TANK_C;
+                    break;
+                case 3:
+                    type = ObjectType.ST_TANK_D;
+                    break;
+            }
             this.respawn = model.respawn;
             this.id = model.id;
             this.hasBonus = model.hasBonus;
 
-            if (model.tDestroyed && !destroyed) {
+            if (model.tDestroyed && !destroyed && model.svrKill) {
                 setDestroyed();
+                svrKill = model.svrKill;
             }
 
             for (int i = 0; i < bullets.size(); i++) {
                 if (!(bullets.get(i).isDestroyed()) || bullets.get(i).recycle) {
-                    bullets.set(i, null);
+                    bullets.set(i, null);   // remove bullets not destroyed and bullets ready for recycling
                 }
             }
 
@@ -450,37 +449,59 @@ public class Enemy extends Tank{
                         break;
                     }
                 }
-                if (!found) {
-                    if (model.bullets.get(i)[3] == 1) {
+                if (!found) {                               // bullet has not previously been destroyed
+                    if (model.bullets.get(i)[3] == 1) {     // bullet should be destroyed now
                         bullet.setDestroyed();
-                    } else {
+                        bullet.svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
+                    } else {                                // bullet should not be destroyed now
                         bullet.destroyed = false;
                     }
 
 
-                    bullet.id = model.bullets.get(i)[4];
-                    bullet.move(direction);
-                    bullet.setPlayer(false);
+                    bullet.id = model.bullets.get(i)[4];    // bullet id
+                    bullet.move(model.bullets.get(i)[2]);   // bullet direction
+                    bullet.setPlayer(0);
+
                     bullets.add((new Bullet(bullet, (int) (model.bullets.get(i)[0] * scale), (int) (model.bullets.get(i)[1] * scale))));
                     bullet.destroyed = false;
                 }
             }
+
+            ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TankView.setEnemyCountView();
+
+                }
+            });
+
         }
         else {
             if(model.group < group){
                 group = model.group;
             }
 
-            if (model.tDestroyed && !destroyed) {
+            for (int i = 0; i < model.bullets.size(); i++) {
+                for (int j = 0; j < bullets.size(); j++) {
+                    if (model.bullets.get(i)[4] == bullets.get(j).id) {
+                        if (model.bullets.get(i)[3] == 1 && !bullets.get(j).isDestroyed()) {     // bullet should be destroyed now
+                            bullets.get(j).setDestroyed(model.bullets.get(i)[6] == 1);
+                            bullets.get(j).svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (model.tDestroyed && !destroyed && !model.svrKill) {
                 setDestroyed();
+                svrKill = model.svrKill;
             }
         }
     }
 
 
     public void draw(Canvas canvas) {
-        Bitmap bm;
-        int bx, by, bw, bh;
         if(respawn) {
             if(frame >= spsprite.frame_count) {
                 respawn = false;

@@ -18,27 +18,31 @@ public class TimerBroadcastService extends Service {
 
     private final static String TAG = "BroadcastService";
 
-    public static final String LIFE_TIMER = "LIFE_TIMER";
-
-
-    CountDownTimer cdt = null;
     long time_left, life_time;
     int games;
     public static SharedPreferences settings;
-    Intent intent = new Intent(LIFE_TIMER);
 
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
 
-            life_time = settings.getLong(TankActivity.LIFE_TIME,0);
-            games = settings.getInt(TankActivity.RETRY_COUNT,CONST.Tank.MAX_GAME_COUNT);
+            long currentTime = System.currentTimeMillis();
 
-            Log.d("SERVICE","alive " + games + " " + life_time);
+            long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
+            if(game6h > 0 && game6h > currentTime) {
+                life_time = game6h - currentTime;
+                games = CONST.Tank.MAX_GAME_COUNT;
+            }
+            else {
+                life_time = settings.getLong(TankActivity.LIFE_TIME, 0);
+                games = settings.getInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
+            }
+
+//            Log.d("SERVICE","alive " + games + " " + life_time);
 
             if(life_time != 0 && games < CONST.Tank.MAX_GAME_COUNT) {
-                long currentTime = System.currentTimeMillis();
+                currentTime = System.currentTimeMillis();
                 time_left = (CONST.Tank.LIFE_DURATION_MINS * 60000) - ((currentTime - life_time) % (CONST.Tank.LIFE_DURATION_MINS * 60000));
 
                 if (time_left < 1000) {
@@ -84,6 +88,5 @@ public class TimerBroadcastService extends Service {
     public IBinder onBind(Intent arg0) {
         return null;
     }
-
 
 }

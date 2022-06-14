@@ -7,10 +7,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
@@ -27,6 +29,7 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
     TankView mTankView;
     ImageView soundBtn, vibrateBtn;
     boolean sound, vibrate;
+    LinearLayout view;
 
     private int state = 0;
 
@@ -56,6 +59,8 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
 
         setContentView(R.layout.activity_tank_pause_game);
         setCancelable(false);
+
+        view = findViewById(R.id.settings_dialog);
 
         continueBtn = findViewById(R.id.continueBtn);
         newGameBtn = findViewById(R.id.newGameBtn);
@@ -111,6 +116,7 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
                         editor.putInt(TankActivity.RETRY_COUNT,games);
                         editor.commit();
                         mTankView.resumeNoAds();
+                        mTankView.sendPlayerInfo(TankView.RESTART);
                         mTankView.retryStage();
                         break;
                     case 2:
@@ -123,6 +129,16 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
 //                        ((TankActivity)activity).endGame();
                         break;
                 }
+            }
+        });
+
+        setOnShowListener(new OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                ViewGroup.LayoutParams viewParam = view.getLayoutParams();
+//                viewParam.height*;
+//                int w = viewParam.width;
+//                view.setLayoutParams(viewParam);
             }
         });
 

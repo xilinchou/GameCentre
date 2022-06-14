@@ -22,13 +22,14 @@ public class Bullet extends GameObjects {
     private final Sprite dsprite;
     private int frame;
     private int frame_delay;
-    private final float DEFAULT_SPEED = TankView.tile_dim*0.7f;
-    private boolean fromPlayer;
-    private boolean explode = true;
+    private final float DEFAULT_SPEED = TankView.tile_dim*12f/TankView.FPS;
+    private int fromPlayer;
+    public boolean explode = true;
     private float speed = 1;
     public int id = 0;
+    public boolean sent = false;
 
-    public Bullet(ObjectType type, int x, int y, boolean fromPlayer) {
+    public Bullet(ObjectType type, int x, int y, int fromPlayer) {
         super(x,y);
         this.fromPlayer = fromPlayer;
         direction = CONST.Direction.UP;
@@ -105,11 +106,11 @@ public class Bullet extends GameObjects {
         return speed;
     }
 
-    public boolean fromPlayer() {
+    public int fromPlayer() {
         return fromPlayer;
     }
 
-    public void setPlayer(boolean player) {
+    public void setPlayer(int player) {
         fromPlayer = player;
     }
 
@@ -125,22 +126,22 @@ public class Bullet extends GameObjects {
                 case CONST.Direction.UP:
                     r.left -= TankView.tile_dim/2;
                     r.right += TankView.tile_dim/2;
-                    r.bottom += TankView.tile_dim/2;
+//                    r.bottom += TankView.tile_dim/2;
                     break;
                 case CONST.Direction.DOWN:
                     r.left -= TankView.tile_dim/2;
                     r.right += TankView.tile_dim/2;
-                    r.top -= TankView.tile_dim/2;
+//                    r.top -= TankView.tile_dim/2;
                     break;
                 case CONST.Direction.LEFT:
                     r.bottom += TankView.tile_dim/2;
                     r.top -= TankView.tile_dim/2;
-                    r.right += TankView.tile_dim/2;
+//                    r.right += TankView.tile_dim/2;
                     break;
                 case CONST.Direction.RIGHT:
                     r.bottom += TankView.tile_dim/2;
                     r.top -= TankView.tile_dim/2;
-                    r.left -= TankView.tile_dim/2;
+//                    r.left -= TankView.tile_dim/2;
                     break;
             }
 
@@ -150,7 +151,7 @@ public class Bullet extends GameObjects {
     public void move() {
         if(!destroyed) {
             if(collides_with_wall()){
-                if(fromPlayer) {
+                if(fromPlayer > 0) {
                     SoundManager.playSound(Sounds.TANK.STEEL, 1, 1);
                 }
                 setDestroyed();
@@ -161,7 +162,7 @@ public class Bullet extends GameObjects {
                     y -= vy;
                     if(y < 0) {
                         y = 0;
-                        if(fromPlayer) {
+                        if(fromPlayer > 0) {
                             TankView.getInstance().currentObj[9] = false;
                         }
                     }
@@ -170,7 +171,7 @@ public class Bullet extends GameObjects {
                     y += vy;
                     if(y > TankView.HEIGHT) {
                         y = TankView.HEIGHT;
-                        if(fromPlayer) {
+                        if(fromPlayer > 0) {
                             TankView.getInstance().currentObj[9] = false;
                         }
                     }
@@ -179,7 +180,7 @@ public class Bullet extends GameObjects {
                     x -= vx;
                     if(x < 0) {
                         x = 0;
-                        if(fromPlayer) {
+                        if(fromPlayer > 0) {
                             TankView.getInstance().currentObj[9] = false;
                         }
                     }
@@ -188,7 +189,7 @@ public class Bullet extends GameObjects {
                     x += vx;
                     if(x > TankView.WIDTH) {
                         x = TankView.WIDTH;
-                        if(fromPlayer) {
+                        if(fromPlayer > 0) {
                             TankView.getInstance().currentObj[9] = false;
                         }
                     }
@@ -204,7 +205,8 @@ public class Bullet extends GameObjects {
 
     public void setDestroyed() {
         super.setDestroyed();
-        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+//        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+        svrKill = TankView.twoPlayers && fromPlayer == 1;
         frame = 0;
         frame_delay = dsprite.frame_time;
         explode = true;

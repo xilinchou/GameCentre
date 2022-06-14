@@ -45,5 +45,9 @@ public enum ObjectType {
 
     ST_CURTAIN,
 
+    ST_BOMB,
+
+    ST_FIRE,
+
     ST_NONE
 }

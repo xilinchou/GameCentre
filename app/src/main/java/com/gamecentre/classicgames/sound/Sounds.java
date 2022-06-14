@@ -27,6 +27,8 @@ public class Sounds {
         public static final int BONUS1UP = 14;
         public static final int SLIDE = 15;
         public static final int FIND_GOLD = 16;
+        public static final int BOMB = 17;
+        public static final int BOMB2 = 18;
     }
 
 }

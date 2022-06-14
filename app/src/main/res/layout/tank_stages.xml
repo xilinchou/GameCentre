@@ -25,9 +25,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginStart="50dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
-            android:layout_marginEnd="50dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"
             android:layout_weight="10"
             android:orientation="horizontal">
@@ -194,11 +194,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -293,11 +293,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -392,11 +392,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -491,11 +491,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -590,11 +590,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -689,11 +689,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -788,11 +788,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -887,11 +887,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -986,11 +986,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -1085,11 +1085,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>
@@ -1184,11 +1184,11 @@
                                 <com.gamecentre.classicgames.tank.TankTextView
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_marginEnd="10dp"
+                                    android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
                                     android:text="COMPLETED"
-                                    android:textSize="9sp"
+                                    android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
                             </LinearLayout>

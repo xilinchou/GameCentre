@@ -23,7 +23,7 @@ public class Tank extends GameObjects {
     protected final Sprite sprite;
     protected final Sprite dsprite;
     protected final Sprite spsprite;
-    protected float DEFAULT_SPEED = TankView.tile_dim*0.3f;
+    protected float DEFAULT_SPEED = TankView.tile_dim*6f/TankView.FPS;
     protected int armour = 0;
     protected int frame;
     protected int frame_delay;
@@ -40,7 +40,7 @@ public class Tank extends GameObjects {
     protected final int IceTime = (int)(0.5*TankView.FPS);
     protected Shield mShield;
     protected Boat mBoat;
-    protected boolean freeze, shield, boat, slip;
+    protected boolean freeze, shield, boat, slip, bBomb;
     protected int freezeTmr, shieldTmr, boatTmr, iceTmr;
     public ObjectType type;
     public int typeVal;
@@ -51,7 +51,8 @@ public class Tank extends GameObjects {
     protected Rect cRct;
     protected final int TileScale = 2;
     public int bId = 0;
-    public int player = 1;
+    public int player;
+    protected Bomb bomb;
 
 
     public Tank(ObjectType type, int x, int y, int player) {
@@ -106,7 +107,7 @@ public class Tank extends GameObjects {
 
         this.vx = DEFAULT_SPEED;
         this.vy = DEFAULT_SPEED;
-        bullet = new Bullet(ObjectType.ST_BULLET,0,0,player>0);
+        bullet = new Bullet(ObjectType.ST_BULLET,0,0,player);
 
 
         frame = 0;
@@ -118,6 +119,8 @@ public class Tank extends GameObjects {
 //        for(int i=0; i<collision.length; i++) {
 //            collision[i] = false;
 //        }
+
+        bomb = new Bomb(x,y, player>0);
     }
 
     public void move() {
@@ -160,6 +163,19 @@ public class Tank extends GameObjects {
 
     public void stopShooting() {
         shooting = false;
+    }
+
+    public void dropBomb() {
+        if(bomb.isDropped() || bomb.isExploding()) {
+            return;
+        }
+        bomb.setPosition(x,y);
+        bomb.drop(direction);
+        SoundManager.playSound(Sounds.TANK.BOMB2);
+    }
+
+    public void activateBomb() {
+        bomb.activate();
     }
 
     public void startShooting() {

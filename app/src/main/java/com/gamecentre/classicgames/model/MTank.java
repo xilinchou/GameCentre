@@ -24,6 +24,9 @@ public class MTank implements Serializable {
     public boolean hasBonus = false;
     public boolean svrKill = false;
     public int gotBonus = 0;
+    public int player = 0;
+    public boolean freeze = false;
+    public boolean bBomb = false;
 
     public  MTank(ObjectType type, int x, int y, int dirction) {
         this.x = x;
@@ -46,18 +49,43 @@ public class MTank implements Serializable {
         respawn = p.respawn;
         svrKill = p.svrKill;
         gotBonus = p.gotBonus;
+        player = p.player;
+        freeze = p.isFrozen();
+        bBomb = p.getBBomb();
+
 
 
         bullets = new ArrayList<>();
         ArrayList<Bullet> pBullets = p.getBullets();
         for(Bullet b:pBullets) {
-            if(b.isDestroyed() && !b.svrKill && WifiDirectManager.getInstance().isServer()) {
+            if(b == null || b.recycle) {
                 continue;
             }
-            if(b != null) {
-                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0,b.id};
-                bullets.add(bt);
+//            if(b.isDestroyed() && !b.svrKill && WifiDirectManager.getInstance().isServer()) {
+//                continue;
+//            }
+//
+//            if(b.isDestroyed() && b.svrKill && !WifiDirectManager.getInstance().isServer()) {
+//                continue;
+//            }
+
+            if(b.isDestroyed()) {
+                if(b.sent) {
+                    continue;
+                }
+                b.sent = true;
             }
+
+
+            int[] bt = {
+                    b.x,
+                    b.y,
+                    b.getDirection(),
+                    b.isDestroyed()?1:0,
+                    b.id,
+                    b.svrKill?1:0
+            };
+            bullets.add(bt);
         }
     }
 
@@ -69,7 +97,7 @@ public class MTank implements Serializable {
         svrKill = e.svrKill;
         dirction = e.getDirection();
         tDestroyed = e.isDestroyed();
-//        boat = p.hasBoat();
+        boat = e.hasBoat();
 //        shield = p.hasShield();
 //        armour = p.armour;
         lives = Enemy.lives;
@@ -85,10 +113,25 @@ public class MTank implements Serializable {
         bullets = new ArrayList<>();
         ArrayList<Bullet> pBullets = e.getBullets();
         for(Bullet b:pBullets) {
-            if(b != null) {
-                int[] bt = {b.x, b.y, b.getDirection(),b.isDestroyed()?1:0,b.id};
-                bullets.add(bt);
+            if(b == null) {
+                continue;
             }
+//            if(b.isDestroyed() && !b.svrKill && WifiDirectManager.getInstance().isServer()) {
+//                continue;
+//            }
+//
+//            if(b.isDestroyed() && b.svrKill && !WifiDirectManager.getInstance().isServer()) {
+//                continue;
+//            }
+
+            int[] bt = {b.x,
+                        b.y,
+                        b.getDirection(),
+                        b.isDestroyed()?1:0,
+                        b.id,
+                        b.svrKill?1:0,
+                        b.explode?1:0};
+            bullets.add(bt);
         }
     }
 }

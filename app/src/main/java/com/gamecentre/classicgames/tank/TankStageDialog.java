@@ -191,7 +191,8 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
                         }
 
                         TankView.level = level;
-                        --games;
+                        //TODO
+//                        --games;
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(TankActivity.RETRY_COUNT, games);
                         if(games == CONST.Tank.MAX_GAME_COUNT - 1) {

@@ -2,6 +2,7 @@ package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +21,8 @@ import com.gamecentre.classicgames.sound.Sounds;
 
 import java.util.ArrayList;
 
-public class TankDailyRewardDialog extends Dialog implements View.OnTouchListener{
+public class TankDailyRewardDialog extends Dialog implements View.OnTouchListener {
+
     TankView mTankView;
 
     public AppCompatActivity activity;
@@ -30,6 +32,7 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
     SharedPreferences settings;
     int goldCount;
     int day;
+    private boolean doubleReward = false;
 
     ArrayList<RelativeLayout> rewardCover = new ArrayList<>();
 
@@ -77,9 +80,11 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
         setContentView(R.layout.activity_tank_daily_reward);
         setCancelable(false);
 
-        watchBtn = (TankTextView) findViewById(R.id.watchRwdBtn);
-        watchBtn2 = (ImageView) findViewById(R.id.watchRwdPlay);
-        cancelBtn = (TankTextView) findViewById(R.id.closeReward);
+        settings = activity.getSharedPreferences("TankSettings", 0);
+
+        watchBtn = findViewById(R.id.watchRwdBtn);
+        watchBtn2 = findViewById(R.id.watchRwdPlay);
+        cancelBtn = findViewById(R.id.closeReward);
         watchBtn.setOnTouchListener(this);
         watchBtn2.setOnTouchListener(this);
         cancelBtn.setOnTouchListener(this);
@@ -120,12 +125,94 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
         }
 
 
+
+
 //        goldCountTxt = (TankTextView)findViewById(R.id.stashTxt);
 //
 //        settings = activity.getSharedPreferences("TankSettings", 0);
 //
 //        goldCount = settings.getInt(TankActivity.GOLD, 0);
 //        goldCountTxt.setText(String.format("x%s", goldCount));
+
+        setOnDismissListener(new OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                SharedPreferences.Editor editor = settings.edit();
+                int bonus;
+                switch (day) {
+                    case 1:
+                        bonus = settings.getInt(TankActivity.SHIELD,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.SHIELD,bonus);
+                        break;
+                    case 2:
+                        bonus = settings.getInt(TankActivity.CLOCK,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.CLOCK,bonus);
+                        break;
+                    case 3:
+                        bonus = settings.getInt(TankActivity.GRENADE,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.GRENADE,bonus);
+
+                        bonus = settings.getInt(TankActivity.BOAT,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.BOAT,bonus);
+                        break;
+                    case 4:
+                        bonus = settings.getInt(TankActivity.STAR,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.STAR,bonus);
+
+                        bonus = settings.getInt(TankActivity.CLOCK,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.CLOCK,bonus);
+                        break;
+                    case 5:
+                        bonus = settings.getInt(TankActivity.GUN,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.GUN,bonus);
+
+                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.GOLD,bonus);
+                        break;
+                    case 6:
+                        bonus = settings.getInt(TankActivity.TANK,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.TANK,bonus);
+
+                        bonus = settings.getInt(TankActivity.SHOVEL,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.SHOVEL,bonus);
+
+                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.GOLD,bonus);
+                        break;
+                    case 7:
+                        bonus = settings.getInt(TankActivity.TANK,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.TANK,bonus);
+
+                        bonus = settings.getInt(TankActivity.GUN,0);
+                        bonus  = doubleReward ? bonus+2 : bonus+1;
+                        editor.putInt(TankActivity.GUN,bonus);
+
+                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus  = doubleReward ? bonus+4 : bonus+2;
+                        editor.putInt(TankActivity.GOLD,bonus);
+                        break;
+                }
+                editor.apply();
+            }
+        });
+
+    }
+
+
+    public void setDoubleReward() {
+        doubleReward = true;
     }
 
 
@@ -133,30 +220,9 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
     public boolean onTouch(View v, MotionEvent m) {
         {
             if(m.getAction() == MotionEvent.ACTION_DOWN){
-//                int cost;
-//                int goldCount = settings.getInt(TankActivity.GOLD,0);
                 int id = v.getId();
-                if (id == R.id.watchRwdBtn || id == R.id.watchRwdPlay) {//                        cost = Integer.parseInt((activity.getResources().getString(R.string.starboat_gold).replace("x","")));
-//                        if(cost <= goldCount) {
-//                            int star = settings.getInt(TankActivity.STAR,0);
-//                            int boat = settings.getInt(TankActivity.BOAT,0);
-//
-//                            int amount = Integer.parseInt((activity.getResources().getString(R.string.starboat_count).replace("x","")));
-//                            star += amount;
-//                            boat += amount;
-//                            goldCount -= cost;
-//                            goldCountTxt.setText(String.format("x%s", goldCount));
-//                            SharedPreferences.Editor editor = settings.edit();
-//                            editor.putInt(TankActivity.STAR,star);
-//                            editor.putInt(TankActivity.STAR,boat);
-//                            editor.putInt(TankActivity.GOLD,goldCount);
-//                            editor.apply();
-//                            SoundManager.playSound(Sounds.TANK.BUY_ITEM);
-//                        }
-//                        else {
-//                            // TODO Not enough gold
-//                            Log.d("PURCHASE STARBOAT", "Not enough gold");
-//                        }
+                if (id == R.id.watchRwdBtn || id == R.id.watchRwdPlay) {
+                    ((TankMenuActivity)activity).showRewardedVideo(this);
                 }
                 else if (id == R.id.closeReward) {
                     dismiss();

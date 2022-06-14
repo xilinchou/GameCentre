@@ -49,6 +49,7 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
         decorView.setSystemUiVisibility(uiOptions);
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         setContentView(R.layout.activity_wifi);
+        setCancelable(false);
 
         playerListView = findViewById(R.id.search_list);
         adapter = new ArrayAdapter<String>(playerListView.getContext(),
@@ -61,7 +62,7 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
                 String peerName = (String) ((TextView) view).getText();
                 WifiP2pDevice device = WifiDirectManager.getInstance().getDevice(peerName);
                 if (device != null) {
-//                    conState.setText("Connecting");
+                    conState.setText("Connecting");
                     WifiDirectManager.getInstance().connect(conState);
                 }
             }
@@ -86,33 +87,6 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
                 WifiDirectManager.getInstance().discoverPeers();
                 break;
             case R.id.wifiClose:
-//                String message = MessageParser.getInstance().getMessage(1,2,3,4,5,6,7);
-//                WifiDirectManager.getInstance().sendMessage(message);
-//                if(!WifiDirectManager.getInstance().isConnected()) {
-//                    AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-//                    alert.setTitle("You need to connect to a player");
-//
-//                    alert.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int whichButton) {
-//                        }
-//                    });
-//
-//                    alert.setNegativeButton("Cancel",
-//                            new DialogInterface.OnClickListener() {
-//                                public void onClick(DialogInterface dialog, int whichButton) {
-//                                    Intent intent = new Intent(activity, Pong.class);
-//                                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                                    activity.startActivity(intent);
-//                                    activity.finish();
-//                                }
-//                            });
-//
-//                    alert.show();
-//                }
-//                else{
-//                    activity.getPongView().update(true);
-//                    dismiss();
-//                }
                 MessageRegister.getInstance().registerWifiDialog();
                 dismiss();
                 break;

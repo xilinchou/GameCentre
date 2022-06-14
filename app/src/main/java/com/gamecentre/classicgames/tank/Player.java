@@ -3,6 +3,7 @@ package com.gamecentre.classicgames.tank;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.gamecentre.classicgames.model.MTank;
 import com.gamecentre.classicgames.sound.SoundManager;
@@ -22,7 +23,7 @@ public class Player extends Tank{
     protected int reload_time = 0;
     protected int MaxBullet = 1;
     protected int starCount = 0;
-    protected int direction;
+//    protected int direction;
     private int newDirection;
     private boolean clearBush = false;
     private boolean breakWall = false;
@@ -36,9 +37,10 @@ public class Player extends Tank{
     boolean killed = false;
     public int gotBonus = 0;
     private boolean freezeOn = false;
-    private int freezeOnTmr, freezBlinkTime = 5;
+    private int freezeOnTmr = 0, freezBlinkTime = 5;
     public int bulletIntercept = 0;
     public ArrayList<Long> killTime = new ArrayList<>();
+    public int bonusID = -10;
 
 
 
@@ -250,7 +252,7 @@ public class Player extends Tank{
         bId++;
         bullet.move(direction);
         bullet.setSpeed(bulletSpeed);
-        bullet.setPlayer(true);
+        bullet.setPlayer(this.player);
         bullet.id = bId;
         bullets.add((new Bullet(bullet,bx,by)));
         SoundManager.playSound(Sounds.TANK.FIRE);
@@ -264,11 +266,19 @@ public class Player extends Tank{
         if(lives < 0) {
             lives = 0;
         }
-        if (this.type == ObjectType.ST_PLAYER_1) {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
-        } else {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
-        }
+
+
+        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+                } else {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+                }
+
+            }
+        });
 
     }
 
@@ -287,8 +297,9 @@ public class Player extends Tank{
     }
 
     public void setFreeze() {
-        TankView.freeze = true;
-        TankView.freezeTmr = TankView.FreezeTime;
+        freeze = true;
+//        TankView.freeze = true;
+//        TankView.freezeTmr = TankView.FreezeTime;
     }
 
 
@@ -300,6 +311,18 @@ public class Player extends Tank{
 
     public void unFreeze() {
         freeze = false;
+    }
+
+    public boolean isFrozen() {
+        return freeze;
+    }
+
+    public void setBBomb(boolean bBomb) {
+        this.bBomb = bBomb;
+    }
+
+    public boolean getBBomb() {
+        return bBomb;
     }
 
     public void iceSlippage() {
@@ -332,11 +355,17 @@ public class Player extends Tank{
 
     public void applyTank() {
         ++lives;
-        if (this.type == ObjectType.ST_PLAYER_1) {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
-        } else {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
-        }
+        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+                } else {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+                }
+            }
+        });
+
     }
 
     public void applyGun() {
@@ -390,6 +419,11 @@ public class Player extends Tank{
 
     public int collidsWithBonus(Bonus b) {
         if(b.isAvailable() && super.collides_with(b)) {
+            if(bonusID == Bonus.id) {
+                b.clearBonus();
+                return -1;
+            }
+            bonusID = Bonus.id;
             TankView.getInstance().currentObj[3] = false;
             stageScore += 500;
 
@@ -425,7 +459,7 @@ public class Player extends Tank{
                     applyBoat();
                     break;
             }
-            if(player == 1) {
+            if(player != 0) {
                 b.clearBonus();
             }
             return bonus;
@@ -439,7 +473,7 @@ public class Player extends Tank{
         }
         if(super.collides_with(bullet)) {
             TankView.getInstance().currentObj[0] = false;
-            if(TankView.twoPlayers && this.player == 2) {
+            if(TankView.twoPlayers && bullet.fromPlayer() > 0) {
                 bullet.recycle = true;
                 return true;
             }
@@ -462,6 +496,7 @@ public class Player extends Tank{
                 return true;
             }
             svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+//            svrKill = TankView.twoPlayers && this.player == 1;
             setDestroyed();
             bullet.setDestroyed();
 
@@ -503,11 +538,20 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        if (this.type == ObjectType.ST_PLAYER_1) {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
-        } else {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
-        }
+
+        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+                } else {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+                }
+            }
+        });
+
+
+
         changeDirection(direction);
     }
 
@@ -525,11 +569,16 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        if (this.type == ObjectType.ST_PLAYER_1) {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(lives));
-        } else {
-            ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(lives));
-        }
+        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+                } else {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+                }
+            }
+        });
         changeDirection(direction);
     }
 
@@ -544,16 +593,25 @@ public class Player extends Tank{
 
         if(shield && shieldTmr > 0){
             --shieldTmr;
-        }
-        else {
-            shield = false;
+            if(shieldTmr == 0) {
+                shield = false;
+            }
         }
 
         if(freeze && freezeTmr > 0){
             --freezeTmr;
+            if(freezeTmr == 0) {
+                freeze = false;
+            }
         }
-        else {
-            freeze = false;
+
+        if(bomb.isDropped() && bomb.fuseTmr > 0) {
+            --bomb.fuseTmr;
+            if(bomb.fuseTmr == 0) {
+                Log.d("PLAYER BOMB", "Explosion");
+                bomb.setExplosion();
+                SoundManager.playSound(Sounds.TANK.BOMB);
+            }
         }
 
         for(int i = 0; i < bullets.size(); i++) {
@@ -575,6 +633,8 @@ public class Player extends Tank{
         for(Bullet bullet:bullets) {
             bullet.move();
         }
+
+        bomb.update();
     }
 
     public void setModel(MTank model, float scale) {
@@ -584,17 +644,25 @@ public class Player extends Tank{
         this.setShield(model.shield);
         this.setBoat(model.boat);
         this.armour = model.armour;
+        this.freeze = model.freeze;
         if(model.lives != this.lives){
             this.lives = model.lives;
-            if (this.type == ObjectType.ST_PLAYER_1) {
-                ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(this.lives));
-            } else {
-                ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(this.lives));
-            }
+            ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Player.this.type == ObjectType.ST_PLAYER_1) {
+                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+                    } else {
+                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+                    }
+
+                }
+            });
         }
         this.respawn = model.respawn;
         if(!destroyed && model.tDestroyed) {
             setDestroyed();
+            svrKill = model.svrKill;
         }
 
         for(int i = 0; i < bullets.size(); i++) {
@@ -616,6 +684,7 @@ public class Player extends Tank{
             if(!found) {
                 if (model.bullets.get(i)[3] == 1) {
                     bullet.setDestroyed();
+                    bullet.svrKill = model.bullets.get(i)[5] == 1;
                 }
                 else{
                     bullet.destroyed = false;
@@ -623,8 +692,9 @@ public class Player extends Tank{
 
 
                 bullet.id = model.bullets.get(i)[4];
-                bullet.move(direction);
-                bullet.setPlayer(false);
+                bullet.move(model.bullets.get(i)[2]);
+                bullet.setPlayer(model.player);
+
                 bullets.add((new Bullet(bullet, (int) (model.bullets.get(i)[0] * scale), (int) (model.bullets.get(i)[1] * scale))));
                 bullet.destroyed = false;
             }
@@ -705,6 +775,10 @@ public class Player extends Tank{
             if(bullet != null) {
                 bullet.draw(canvas);
             }
+        }
+
+        if(bomb.isDropped() || bomb.isExploding()){
+            bomb.draw(canvas);
         }
     }
 }

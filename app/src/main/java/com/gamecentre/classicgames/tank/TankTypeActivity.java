@@ -33,35 +33,6 @@ public class TankTypeActivity extends AppCompatActivity {
         findViewById(R.id.arcade_lo).setOnClickListener(onClickListener);
 
 
-
-
-
-
-
-//        classic.setOnTouchListener(new View.OnTouchListener() {
-//
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                    startActivity(new Intent(TankTypeActivity.this, TankMenuActivity.class));
-//                    finish();
-//                }
-//                return true;
-//            }
-//        });
-//
-//        arcade.setOnTouchListener(new View.OnTouchListener() {
-//
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                    startActivity(new Intent(TankTypeActivity.this, TankMenuActivity.class));
-//                    finish();
-//                }
-//                return true;
-//            }
-//        });
-
         this.findViewById(R.id.settingsBtn)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -72,6 +43,13 @@ public class TankTypeActivity extends AppCompatActivity {
 
 
         TimerBroadcastService.settings = getSharedPreferences("TankSettings", 0);
+
+        long game6h = TimerBroadcastService.settings.getLong(TankActivity.LIFE_TIME_6H,0);
+        if(game6h == 0) {
+            SharedPreferences.Editor editor = TimerBroadcastService.settings.edit();
+            editor.putLong(TankActivity.LIFE_TIME_6H,game6h);
+            editor.commit();
+        }
 
 
         int games = TimerBroadcastService.settings.getInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);

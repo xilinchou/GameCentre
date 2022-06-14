@@ -63,26 +63,62 @@ public class Brick extends GameObjects{
         }
     }
 
+//    public boolean collidsWithBullet(int dir) {
+//        ++dstate;
+//        this.dir = dir;
+//        if(dstate > 1) {
+//            return  false;
+//        }
+//        if(dstate == 1){
+//            currentBitmap = d1bitmaps.get(dir);
+//        }
+//        if(dir == CONST.Direction.DOWN) {
+//            drwy += H/2;
+//        }
+//        else if(dir == CONST.Direction.RIGHT) {
+//            drwx += W/2;
+//        }
+//        return true;
+//    }
+
     public boolean collidsWithBullet(int dir) {
         ++dstate;
-        this.dir = dir;
+        getRect();
+
         if(dstate > 1) {
             return  false;
         }
         if(dstate == 1){
             currentBitmap = d1bitmaps.get(dir);
         }
-        if(dir == CONST.Direction.DOWN) {
-            drwy += H/2;
-        }
-        else if(dir == CONST.Direction.RIGHT) {
-            drwx += W/2;
+
+//        Log.d("BRICK",h+", "+w);
+        switch (dir) {
+            case CONST.Direction.UP:
+                super.h -= (int)(H/2);
+                rect.bottom -= (int)(H/2);
+                break;
+            case CONST.Direction.DOWN:
+                super.h -= H/2;
+                super.y += H/2;
+                rect.top += H/2;
+                drwy += H/2;
+                break;
+            case CONST.Direction.LEFT:
+                super.w -= W/2;
+                rect.right -= W/2;
+                break;
+            case CONST.Direction.RIGHT:
+                super.w -= W/2;
+                rect.left += W/2;
+                super.x += W/2;
+                drwx += W/2;
+                break;
         }
         return true;
     }
 
     public void draw(Canvas canvas) {
-//        canvas.drawBitmap(currentBitmap,x,y,null);
         canvas.drawBitmap(currentBitmap,drwx,drwy,null);
     }
 }

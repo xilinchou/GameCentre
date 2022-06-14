@@ -262,42 +262,50 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
     protected void setListeners () {
         this.findViewById(R.id.tnkP1menu)
-                .setOnClickListener(new View.OnClickListener() {
+                .setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        openStages(v, false);
+                    public boolean onTouch(View v, MotionEvent m) {
+                        if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            openStages(v, false);
+                        }
+                        return true;
                     }
                 });
 
         this.findViewById(R.id.tnkP2menu)
-                .setOnClickListener(new View.OnClickListener() {
+                .setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        if((WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) ||
-                                (!WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted)) {
-                            openStages(v, true);
-                        }
-                        else {
-                            Toast toast = Toast.makeText(TankMenuActivity.this.getApplicationContext(),
-                                    "Invite a player first",
-                                    Toast.LENGTH_SHORT);
+                    public boolean onTouch(View v, MotionEvent m) {
+                        if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            if ((WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) ||
+                                    (!WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted)) {
+                                openStages(v, true);
+                            } else {
+                                Toast toast = Toast.makeText(TankMenuActivity.this.getApplicationContext(),
+                                        "Invite a player first",
+                                        Toast.LENGTH_SHORT);
 
-                            ViewGroup group = (ViewGroup) toast.getView();
-                            TextView messageTextView = (TextView) group.getChildAt(0);
-                            messageTextView.setTextSize(20);
+                                ViewGroup group = (ViewGroup) toast.getView();
+                                TextView messageTextView = (TextView) group.getChildAt(0);
+                                messageTextView.setTextSize(20);
 
-                            toast.show();
+                                toast.show();
+                            }
                         }
+                        return true;
                     }
                 });
 
         this.findViewById(R.id.tnkExitmenu)
-                .setOnClickListener(new View.OnClickListener() {
+                .setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        Intent i = new Intent(TankMenuActivity.this, TankTypeActivity.class);
-                        TankMenuActivity.this.startActivity(i);
-                        TankMenuActivity.this.finish();
+                    public boolean onTouch(View v, MotionEvent m) {
+                        if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            Intent i = new Intent(TankMenuActivity.this, TankTypeActivity.class);
+                            TankMenuActivity.this.startActivity(i);
+                            TankMenuActivity.this.finish();
+                        }
+                        return true;
                     }
                 });
 
@@ -541,6 +549,15 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                                 editor.putInt(TankActivity.RETRY_COUNT, retryCount + 1);
                                 editor.apply();
                                 SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            }
+
+                            if(purchaseDialog instanceof TankDailyRewardDialog) {
+//                                int goldCount = settings.getInt(TankActivity.GOLD, 0);
+//                                ((TankPurchaseDialog) purchaseDialog).goldCountTxt.setText(String.format("x%s", goldCount + 1));
+//                                editor.putInt(TankActivity.GOLD, goldCount + 1);
+//                                editor.apply();
+//                                SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                                ((TankDailyRewardDialog) purchaseDialog).setDoubleReward();
                             }
                         }
                         TankMenuActivity.this.loadRewardedAd();

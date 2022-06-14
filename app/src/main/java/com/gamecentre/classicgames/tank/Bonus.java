@@ -67,6 +67,7 @@ public class Bonus extends GameObjects {
             bonusBm = bitmaps.get(bonus);
             on = true;
             available = true;
+            cleared = false;
         }
 //        bonusTmr = 200;
     }
@@ -194,6 +195,9 @@ public class Bonus extends GameObjects {
         Bonus.id = id;
 
         if(b == -1) {
+            bonus = -1;
+            available = false;
+            cleared = true;
             return;
         }
         if(cl){
@@ -201,17 +205,18 @@ public class Bonus extends GameObjects {
             bonusTmr = 200;
             scoreTmr = 5;
             available = false;
+            cleared = true;
             return;
         }
-        if(x == this.x && y == this.y && b == this.bonus ) {
-            available = av;
-            return;
-        }
+//        if(x == this.x && y == this.y && b == this.bonus ) {
+//            available = av;
+//            return;
+//        }
         bonusBm = bitmaps.get(b);
         this.x = x;
         this.y = y;
         this.bonus = b;
-        available = av;
+        available = true;
 
     }
 
