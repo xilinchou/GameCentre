@@ -334,10 +334,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         MessageRegister.getInstance().setServiceListener(this);
 
-//        if(!twoPlayers) {
-//            mTankView.update();
-//        }
-//        mTankView.update();
         first_start = true;
     }
 

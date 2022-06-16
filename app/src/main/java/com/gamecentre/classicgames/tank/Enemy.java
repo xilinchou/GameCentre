@@ -93,9 +93,14 @@ public class Enemy extends Tank{
         frame = 0;
     }
 
-    public void setFreeze() {
-        freeze = true;
-        freezeTmr = FreezeTime;
+//    public void setFreeze() {
+//        freeze = true;
+//        freezeTmr = FreezeTime;
+//    }
+
+    public static void freeze() {
+        TankView.freeze = true;
+        TankView.freezeTmr = TankView.FreezeTime;
     }
 
     public void changeDirection() {

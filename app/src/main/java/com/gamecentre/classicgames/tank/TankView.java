@@ -1538,7 +1538,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 }
                 break;
             case 2:
-                p.setFreeze();
+//                p.setFreeze();
+                Enemy.freeze();
                 break;
             case 3:
                 protectEagle = true;
@@ -2386,6 +2387,15 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         drawing = true;
         gold.draw(canvas);
 
+        if(!twoPlayers || (twoPlayers && !updatingRemote)) {
+            for (ArrayList<GameObjects> rowsObjs : levelObjects) {
+                for (GameObjects obj : rowsObjs) {
+                    if (obj != null) {
+                        obj.draw(canvas);
+                    }
+                }
+            }
+        }
 
         if(P1 != null) {
             P1.draw(canvas);
@@ -2400,16 +2410,6 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(!twoPlayers || (twoPlayers && !updatingRemote)){
             for (Tank e : Enemies) {
                 e.draw(canvas);
-            }
-        }
-
-        if(!twoPlayers || (twoPlayers && !updatingRemote)) {
-            for (ArrayList<GameObjects> rowsObjs : levelObjects) {
-                for (GameObjects obj : rowsObjs) {
-                    if (obj != null) {
-                        obj.draw(canvas);
-                    }
-                }
             }
         }
 
@@ -2592,6 +2592,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     }
 
     public void interrupt() {
+        sendPlayerInfo(PAUSE);
+        enablePause(false);
+        ((TankActivity)context).disableControls();
         mCurrentState = TankView.State.Stopped;
         mLastState = State.Running;
 //        ((TankActivity)context).pauseBtn.setText(R.string.continueTxt);

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 
 public class TankGameModel extends Game implements Serializable {
     public long time;
+    public boolean playerInfo = false;
+    public boolean playerReady = false;
     public ArrayList<MTank> mEnemies = new ArrayList<>();
     public ArrayList<int[]> lObjects = new ArrayList<>();
     public ArrayList<Integer> lBushes = new ArrayList<>();

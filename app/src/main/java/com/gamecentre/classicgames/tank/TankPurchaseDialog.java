@@ -221,6 +221,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnTouchListener{
                 else if (id == R.id.buyCancelBtn) {
                     if (activity instanceof TankActivity) {
                         ((TankActivity) activity).updateBonusStack();
+                        mTankView.resumeNoAds();
                     } else if (activity instanceof TankMenuActivity) {
                         ((TankMenuActivity) activity).updateBonus();
                     }

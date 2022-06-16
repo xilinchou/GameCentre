@@ -3,15 +3,20 @@ package com.gamecentre.classicgames.tank;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.activity.MenuActivity;
 import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
+import com.gamecentre.classicgames.model.Game;
+import com.gamecentre.classicgames.model.TankGameModel;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.MessageRegister;
+import com.gamecentre.classicgames.utils.RemoteMessageListener;
 import com.gamecentre.classicgames.utils.WifiDialogListener;
 import com.gamecentre.classicgames.wifidirect.WifiDialog;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
@@ -53,7 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener {
+public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener, RemoteMessageListener {
 
     TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, retryTmr;
     ImageView shopImg;
@@ -88,6 +93,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_tank_menu);
+        MessageRegister.getInstance().setMsgListener(this);
         settings = getSharedPreferences("TankSettings", 0);
 
         grenadeTxt = findViewById(R.id.grenadeCountTxt);
@@ -177,6 +183,22 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
             else {
                 retryTmr.setText(sdf.format(time_left));
             }
+        }
+    }
+
+    @Override
+    public void onMessageReceived(Game message) {
+        if(message instanceof TankGameModel) {
+            TankGameModel msg = (TankGameModel)message;
+
+            if(WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted)
+            {
+                if (msg.playerInfo) {
+                    TankStageDialog.p2Ready = msg.playerReady;
+                    Log.d("Msg From P2", "Ready: " +" "+ TankStageDialog.p2Ready);
+                }
+            }
+
         }
     }
 
@@ -291,6 +313,22 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
                                 toast.show();
                             }
+                        }
+                        return true;
+                    }
+                });
+
+        this.findViewById(R.id.tnkConstmenu)
+                .setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent m) {
+                        if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            Log.d("Construction", "Opening fragment");
+                            FragmentManager fragmentManager = getSupportFragmentManager();
+                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                            fragmentTransaction.replace(R.id.fragmentFrame,new ConstructionFragment());
+                            fragmentTransaction.addToBackStack("cFragment");
+                            fragmentTransaction.commit();
                         }
                         return true;
                     }

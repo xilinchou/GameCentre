@@ -345,7 +345,7 @@
             android:id="@+id/tnkExitmenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/titleCard"
+            android:layout_alignTop="@+id/titleBounds"
             android:layout_alignParentStart="true"
             android:layout_marginStart="22dp"
             android:layout_marginTop="18dp"
@@ -355,42 +355,53 @@
             android:textSize="15sp"
             android:textStyle="bold" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/titleCard"
+        <RelativeLayout
+            android:id="@+id/titleBounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="30dp"
-            app:cardCornerRadius="20dp">
+            android:layout_marginTop="30dp">
 
-            <LinearLayout
-                android:layout_width="400dp"
-                android:layout_height="60dp"
-                android:background="@drawable/bghud5"
-                android:gravity="center"
-                android:orientation="vertical">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/titleCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                app:cardCornerRadius="20dp">
 
-                <com.gamecentre.classicgames.tank.TankTextView
-                    android:id="@+id/tanktype"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="30sp" />
+                <LinearLayout
+                    android:layout_width="400dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/bghud5"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    <com.gamecentre.classicgames.tank.TankTextView
+                        android:id="@+id/tanktype"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="30sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
 
 
-        <Button
+
+
+        <ImageView
             android:id="@+id/inviteBtn"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignTop="@+id/PStatus"
             android:layout_alignBottom="@+id/PStatus"
             android:layout_marginStart="6dp"
-            android:layout_marginTop="78dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginBottom="38dp"
             android:layout_toEndOf="@+id/PStatus"
             android:background="@drawable/tnk_invite" />
 
@@ -412,10 +423,9 @@
 
         <LinearLayout
             android:id="@+id/PStatus"
-            android:layout_width="150dp"
+            android:layout_width="160dp"
             android:layout_height="120dp"
             android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
             android:layout_marginStart="12dp"
             android:layout_marginTop="30dp"
             android:gravity="center"
@@ -431,7 +441,7 @@
                 android:text="1 Player"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <com.gamecentre.classicgames.tank.TankTextView
@@ -444,11 +454,30 @@
                 android:text="2 Players"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+
+            <com.gamecentre.classicgames.tank.TankTextView
+                android:id="@+id/tnkConstmenu"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="15dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Construction"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
 
         </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/fragmentFrame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <!--        <Button-->
         <!--            android:id="@+id/settingsBtn"-->

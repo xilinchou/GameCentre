@@ -20,7 +20,7 @@ public class TankIntroActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         setContentView(R.layout.activity_tank_intro);
 
-        new CountDownTimer(5000, 500) {
+        new CountDownTimer(500, 500) {
             @Override
             public void onTick(long millisUntilFinished) {}
 

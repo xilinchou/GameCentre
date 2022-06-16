@@ -2,9 +2,11 @@ package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,21 +43,22 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class TankStageDialog extends Dialog implements View.OnTouchListener, RemoteMessageListener {
-    CheckBox soundCheck;
-    CheckBox vibrateCheck;
+
 
     public AppCompatActivity activity;
     public Dialog d;
 //    public Button yes, no;
     SharedPreferences settings;
     boolean twoPlayers;
-    TankTextView playBtn,completedTxt;
+    TankTextView playBtn, backBtn, completedTxt;
 
     GridLayout stageBtns, objGrid;
     LinearLayout.LayoutParams cardParams, cardParamsSel;
     ScrollView scrollView;
     int selected = 0;
     ArrayList<boolean[]> objectives;
+    private boolean selfDismiss = true;
+    public static boolean p2Ready = false, opened = false;
 
     public TankStageDialog(AppCompatActivity a, boolean twoPlayers) {
         super(a);
@@ -76,6 +79,7 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
         getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         setContentView(R.layout.tank_stages);
+        setCancelable(false);
         MessageRegister.getInstance().setMsgListener(this);
         float SCALE = activity.getResources().getDisplayMetrics().density;
         stageBtns = (GridLayout) findViewById(R.id.stage_grid);
@@ -160,6 +164,7 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
         objectives = loadObjectives();
 
         playBtn = findViewById(R.id.playGameBtn);
+        backBtn = findViewById(R.id.backGameBtn);
 
         playBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -184,10 +189,24 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
                             return true;
                         }
                         else if (twoPlayers && WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) {
-                            TankGameModel model = new TankGameModel();
-                            model.mlevelInfo = true;
-                            model.mlevel = level;
-                            WifiDirectManager.getInstance().sendMessage(model);
+                            if(p2Ready) {
+                                TankGameModel model = new TankGameModel();
+                                model.mlevelInfo = true;
+                                model.mlevel = level;
+                                WifiDirectManager.getInstance().sendMessage(model);
+                            }
+                            else{
+                                Toast toast = Toast.makeText(activity.getApplicationContext(),
+                                        "Player 2 not ready!",
+                                        Toast.LENGTH_SHORT);
+
+                                ViewGroup group = (ViewGroup) toast.getView();
+                                TextView messageTextView = (TextView) group.getChildAt(0);
+                                messageTextView.setTextSize(25);
+
+                                toast.show();
+                                return true;
+                            }
                         }
 
                         TankView.level = level;
@@ -210,9 +229,39 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
             }
         });
 
+
+
         displyObjectives(selected);
         int completed = getCompleted(selected+1);
         completedTxt.setText(String.format(Locale.ENGLISH,"CHALLENGES %d/%d", completed, TankView.NUM_OBJECTIVES));
+
+        selfDismiss = true;
+        opened = true;
+        if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
+
+            TankGameModel model = new TankGameModel();
+            model.playerInfo = true;
+            model.playerReady = true;
+            WifiDirectManager.getInstance().sendMessage(model);
+        }
+
+        backBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    selfDismiss = true;
+                    if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
+
+                        TankGameModel model = new TankGameModel();
+                        model.playerInfo = true;
+                        model.playerReady = false;
+                        WifiDirectManager.getInstance().sendMessage(model);
+                    }
+                    dismiss();
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -236,18 +285,27 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
     public void onMessageReceived(Game message) {
         if(message instanceof TankGameModel) {
             TankGameModel msg = (TankGameModel)message;
-            if(msg.mlevelInfo) {
-                TankView.level = msg.mlevel;
-                int games = settings.getInt(TankActivity.RETRY_COUNT,0);
-                --games;
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putInt(TankActivity.RETRY_COUNT, games);
-                if(games == CONST.Tank.MAX_GAME_COUNT - 1) {
-                    editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+            if(twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
+                if (msg.mlevelInfo) {
+                    TankView.level = msg.mlevel;
+                    int games = settings.getInt(TankActivity.RETRY_COUNT, 0);
+                    --games;
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt(TankActivity.RETRY_COUNT, games);
+                    if (games == CONST.Tank.MAX_GAME_COUNT - 1) {
+                        editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+                    }
+                    editor.apply();
+                    selfDismiss = false;
+                    dismiss();
+                    ((TankMenuActivity) activity).startGame(twoPlayers);
                 }
-                editor.apply();
-                dismiss();
-                ((TankMenuActivity) activity).startGame(twoPlayers);
+            }
+            else if(twoPlayers && WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted)
+            {
+                if (msg.playerInfo) {
+                    p2Ready = msg.playerReady;
+                }
             }
 
         }
@@ -342,9 +400,4 @@ public class TankStageDialog extends Dialog implements View.OnTouchListener, Rem
         }
         return completed;
     }
-
-//    @Override
-//    public void onShow(DialogInterface dialogInterface) {
-//        loadObjectives();
-//    }
 }

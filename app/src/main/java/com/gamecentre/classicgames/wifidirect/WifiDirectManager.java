@@ -322,10 +322,6 @@ public class WifiDirectManager implements WifiP2pManager.ConnectionInfoListener,
     }
 
     private void terminateTask() {
-//        if(task != null) {
-//            task.cancel(true);
-//            task = null;
-//        }
         if(svSender != null) {
             svSender.disconnect();
         }
