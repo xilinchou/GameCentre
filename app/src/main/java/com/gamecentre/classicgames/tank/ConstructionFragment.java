@@ -1,10 +1,12 @@
 package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -14,12 +16,18 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.wifidirect.WifiDialog;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -32,6 +40,9 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
 
 
     View rootView;
+
+    SharedPreferences settings;
+    AppCompatActivity activity;
     LinearLayout stage;
     ImageView stone,brick,water,bush,ice,delObj;
     ImageView playStage,loadStage,saveStage;
@@ -46,10 +57,15 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
     int pointerLimit;
     final int REDO_SIZE = 100;
 
-    private String[][] stageObjects;
+    private char[][] stageObjects;
+    private ArrayList<String>stageNames;
 
     public ConstructionFragment() {
         // Required empty public constructor
+    }
+
+    public ConstructionFragment(AppCompatActivity activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -63,7 +79,9 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView =  inflater.inflate(R.layout.fragment_construction, container, false);
-        Log.d("Construction Fragment", "Fragment opened");
+        settings = activity.getSharedPreferences("TankSettings", 0);
+        stageNames = loadStageNames();
+
         stage = (LinearLayout) rootView.findViewById(R.id.stage);
         stage.setOrientation(LinearLayout.VERTICAL);
         stage.setOnTouchListener(this);
@@ -127,7 +145,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-
+                    openSaveDialog();
                 }
                 return true;
             }
@@ -137,21 +155,21 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-
+                    openLoadDialog();
                 }
                 return true;
             }
         });
 
-        rootView.findViewById(R.id.playStage).setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-
-                }
-                return true;
-            }
-        });
+//        rootView.findViewById(R.id.playStage).setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+//
+//                }
+//                return true;
+//            }
+//        });
 
 
         rootView.findViewById(R.id.backStage).setOnTouchListener(new View.OnTouchListener() {
@@ -174,7 +192,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
         redoPointer = 0;
         pointerLimit = 0;
 
-        stageObjects = new String[26][26];
+        stageObjects = new char[26][26];
 
         return rootView;
     }
@@ -260,7 +278,6 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                 else if(view.getId() == R.id.water) {
                     newObjId = 4;
                 }
-
                 else if(view.getId() == R.id.ice) {
                     newObjId = 5;
                 }
@@ -302,14 +319,19 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
         switch(id) {
             case 1:
                 d = stone.getBackground();
+                break;
             case 2:
                 d = brick.getBackground();
+                break;
             case 3:
                 d = bush.getBackground();
+                break;
             case 4:
                 d = water.getBackground();
+                break;
             case 5:
                 d = ice.getBackground();
+                break;
         }
         return d;
     }
@@ -317,17 +339,121 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
     private void updateStageObj(int row, int col, int id) {
         switch(id) {
             case 0:
-                stageObjects[row][col] = null;
+                stageObjects[row][col] = 0;
+                break;
             case 1:
-                stageObjects[row][col] = "@";
+                stageObjects[row][col] = '@';
+                break;
             case 2:
-                stageObjects[row][col] = "#";
+                stageObjects[row][col] = '#';
+                break;
             case 3:
-                stageObjects[row][col] = "%";
+                stageObjects[row][col] = '%';
+                break;
             case 4:
-                stageObjects[row][col] = "~";
+                stageObjects[row][col] = '~';
+                break;
             case 5:
-                stageObjects[row][col] = "-";
+                stageObjects[row][col] = '-';
+                break;
         }
+    }
+
+    public void updateStage(char[][] stageIDs) {
+        for(int row = 0; row < 26; row++) {
+            for(int col = 0; col < 26; col++) {
+                if(row == 0 || row == 1) {
+                    if(col == 0 || col == 1 || col == 12 || col == 13 || col == 24 || col == 25) {
+                        continue;
+                    }
+                }
+                else if(row >= 23) {
+                    if(col >= 11 && col <= 14) {
+                        continue;
+                    }
+                    if(row >= 24) {
+                        if(col == 8 || col == 9 || col == 16 || col == 17) {
+                            continue;
+                        }
+                    }
+                }
+
+                char id = stageIDs[row][col];
+                ImageView pos = (ImageView) ((LinearLayout)((LinearLayout)stage).getChildAt(row)).getChildAt(col);
+                if(id==0) {
+                    pos.setBackground(null);
+                }
+                else if(id=='@') {
+                    pos.setBackground(stone.getBackground());
+                }
+                else if(id=='#') {
+                    pos.setBackground(brick.getBackground());
+                }
+                else if(id=='%') {
+                    pos.setBackground(bush.getBackground());
+                }
+                else if(id=='~') {
+                    pos.setBackground(water.getBackground());
+                }
+                else if(id=='-') {
+                    pos.setBackground(ice.getBackground());
+                }
+
+            }
+        }
+    }
+
+    private void saveStage(String name, char[][] stage) {
+        SharedPreferences.Editor editor = settings.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(stage);
+        editor.putString(name,json);
+        editor.apply();
+    }
+
+    private void saveStageNames(ArrayList<String> stageNames) {
+        SharedPreferences.Editor editor = settings.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(stageNames);
+        editor.putString(TankMenuActivity.STAGE_NAMES,json);
+        editor.apply();
+    }
+
+    private ArrayList<String> loadStageNames() {
+        String stageNames = settings.getString(TankMenuActivity.STAGE_NAMES,null);
+        if(stageNames == null) {
+            return new ArrayList<>();
+        }
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stageNames,type);
+    }
+
+    private char[][] loadStage(String name) {
+        String stage = settings.getString(name,null);
+        if(stage == null) {
+            return new char[26][26];
+        }
+        Type type = new TypeToken<char[][]>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stage,type);
+    }
+
+    public void openSaveDialog() {
+        TankSaveDialog cdd = new TankSaveDialog(activity, stageNames, stageObjects);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(cdd.getWindow().getAttributes());
+        cdd.show();
+        cdd.getWindow().setAttributes(lp);
+    }
+
+    public void openLoadDialog() {
+        TankLoadDialog cdd = new TankLoadDialog(activity, this);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(cdd.getWindow().getAttributes());
+        cdd.show();
+        cdd.getWindow().setAttributes(lp);
     }
 }

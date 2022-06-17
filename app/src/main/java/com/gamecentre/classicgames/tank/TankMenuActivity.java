@@ -84,7 +84,9 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     public static final String
             PREF_MUTED = "muted",
             PREF_VIBRATE = "vibrate",
-            PREF_LEVEL = "level";
+            PREF_LEVEL = "level",
+
+            STAGE_NAMES = "STAGE_NAMES";
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -326,7 +328,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             Log.d("Construction", "Opening fragment");
                             FragmentManager fragmentManager = getSupportFragmentManager();
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                            fragmentTransaction.replace(R.id.fragmentFrame,new ConstructionFragment());
+                            fragmentTransaction.replace(R.id.fragmentFrame,new ConstructionFragment(TankMenuActivity.this));
                             fragmentTransaction.addToBackStack("cFragment");
                             fragmentTransaction.commit();
                         }
@@ -385,12 +387,20 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
 
     public void openStages(View view, boolean twoPlayers) {
-        TankStageDialog cdd = new TankStageDialog(this, twoPlayers);
+//        TankStageDialog cdd = new TankStageDialog(this, twoPlayers);
+//
+//        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+//        lp.copyFrom(cdd.getWindow().getAttributes());
+//        cdd.show();
+//        cdd.getWindow().setAttributes(lp);
 
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(cdd.getWindow().getAttributes());
-        cdd.show();
-        cdd.getWindow().setAttributes(lp);
+
+        Log.d("Stage Fragment", "Opening fragment");
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentFrame,new TankStageFragment(this, twoPlayers));
+        fragmentTransaction.addToBackStack("cFragment");
+        fragmentTransaction.commit();
     }
 
     public void openPlayerSearchView() {
