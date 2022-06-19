@@ -44,7 +44,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
     SharedPreferences settings;
     AppCompatActivity activity;
     LinearLayout stage;
-    ImageView stone,brick,water,bush,ice,delObj;
+    ImageView stone,brick,water,bush,ice,delObj,clearStage;
     ImageView playStage,loadStage,saveStage;
     Drawable selectedObject = null;
     int newObjId = 1;
@@ -92,6 +92,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
         water = rootView.findViewById(R.id.water);
         ice = rootView.findViewById(R.id.ice);
         delObj = rootView.findViewById(R.id.delete);
+        clearStage = rootView.findViewById(R.id.clear);
 
         stone.setOnTouchListener(objSelectListener);
         brick.setOnTouchListener(objSelectListener);
@@ -99,6 +100,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
         water.setOnTouchListener(objSelectListener);
         ice.setOnTouchListener(objSelectListener);
         delObj.setOnTouchListener(objSelectListener);
+        clearStage.setOnTouchListener(objSelectListener);
 
         selectedObject = stone.getBackground();
 
@@ -284,6 +286,32 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                 else if(view.getId() == R.id.delete) {
                     newObjId = 0;
                 }
+                else if(view.getId() == R.id.clear) {
+                    for(int row = 0; row < 26; row++) {
+                        for(int col = 0; col < 26; col++) {
+                            if(row == 0 || row == 1) {
+                                if(col == 0 || col == 1 || col == 12 || col == 13 || col == 24 || col == 25) {
+                                    continue;
+                                }
+                            }
+                            else if(row >= 23) {
+                                if(col >= 11 && col <= 14) {
+                                    continue;
+                                }
+                                if(row >= 24) {
+                                    if(col == 8 || col == 9 || col == 16 || col == 17) {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            ImageView pos = (ImageView) ((LinearLayout)((LinearLayout)stage).getChildAt(row)).getChildAt(col);
+                            pos.setBackground(null);
+                            updateStageObj(row,col,0);
+
+                        }
+                    }
+                }
 //                else if(view.getId() == R.id.undo) {
 //                    int pointer = redoPointer - 1;
 //                    pointer %= REDO_SIZE;
@@ -305,10 +333,19 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                 ((RelativeLayout)water.getParent()).setBackgroundColor(Color.TRANSPARENT);
                 ((RelativeLayout)ice.getParent()).setBackgroundColor(Color.TRANSPARENT);
                 ((RelativeLayout)delObj.getParent()).setBackgroundColor(Color.TRANSPARENT);
+                ((RelativeLayout)clearStage.getParent()).setBackgroundColor(Color.TRANSPARENT);
 
                 RelativeLayout cursor = (RelativeLayout) view.getParent();
                 cursor.setBackgroundColor(Color.YELLOW);
                 selectedObject = view.getBackground();
+            }
+
+            if(motionEvent.getAction() == MotionEvent.ACTION_UP && view.getId() == R.id.clear) {
+                RelativeLayout cursor = (RelativeLayout) view.getParent();
+                cursor.setBackgroundColor(Color.GRAY);
+                ((RelativeLayout)stone.getParent()).setBackgroundColor(Color.YELLOW);
+                selectedObject = stone.getBackground();
+                newObjId = 1;
             }
             return true;
         }
@@ -398,6 +435,8 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                 else if(id=='-') {
                     pos.setBackground(ice.getBackground());
                 }
+
+                stageObjects[row][col] = id;
 
             }
         }

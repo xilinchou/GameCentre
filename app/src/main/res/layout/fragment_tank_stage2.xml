@@ -34,10 +34,11 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:layout_weight="1"
+                    android:alpha="0.3"
+                    android:background="@drawable/stages"
                     android:text="STAGES"
                     android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:background="@drawable/stages"/>
+                    android:textSize="20sp" />
 
             </RelativeLayout>
 
@@ -55,14 +56,15 @@
                     android:text="STAGES"
                     android:textColor="@color/white"
                     android:textSize="20sp"
-                    android:background="@drawable/constructions"
-                    android:alpha="0.3"/>
+                    android:background="@drawable/constructions"/>
 
             </RelativeLayout>
 
 
 
         </LinearLayout>
+
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -74,44 +76,19 @@
             android:layout_weight="10"
             android:orientation="horizontal">
 
-
-            <ScrollView
+            <ListView
+                android:id="@+id/stageList"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/bghud5"
+                android:background="@drawable/bghud8"
                 android:layout_weight="1"
                 android:scrollbars="vertical"
                 android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp">
-
-                <HorizontalScrollView
-
-                    android:id="@+id/scroll"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <GridLayout
-                            android:id="@+id/stage_grid"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:columnCount="4"
-                            android:rowCount="5">
-
-
-                        </GridLayout>
-                    </LinearLayout>
-                </HorizontalScrollView>
-            </ScrollView>
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="10dp"/>
 
             <LinearLayout
+                android:id="@+id/scrollBound"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -119,7 +96,8 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/bghud8"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:alpha="0.2">
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/completedTxt"
@@ -239,7 +217,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -338,7 +316,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -437,7 +415,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -536,7 +514,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -635,7 +613,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -734,7 +712,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -833,7 +811,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -932,7 +910,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -1031,7 +1009,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -1130,7 +1108,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 
@@ -1229,7 +1207,7 @@
                                     android:layout_marginEnd="5dp"
                                     android:layout_weight="1.7"
                                     android:gravity="center"
-                                    android:text="COMPLETED"
+                                    android:text=""
                                     android:textSize="8sp"
                                     android:textColor="@color/green"/>
 

@@ -41,11 +41,14 @@ import com.gamecentre.classicgames.utils.MessageRegister;
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.utils.RemoteMessageListener;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -60,6 +63,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private long refReceiveStartTime = System.currentTimeMillis();
     protected static final int FPS = 20;
     public static final float TO_SEC = 1000f/FPS;
+    public static boolean CONSTRUCTION = false;
     public static final int
             STAGE_COMPLETE = 1,
             GAME_OVER = 2,
@@ -496,6 +500,78 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     }
 
+    private void loadConstructionLevel(int level) {
+        levelObjects = new ArrayList<>();
+        levelBushes = new ArrayList<>();
+        gold = new Gold();
+
+//        level = level-1;
+
+        ArrayList<String>stageNames = loadStageNames();
+        if(level > stageNames.size()) {
+            level = 1;
+        }
+        String stageName = stageNames.get(level-1);
+        char[][] stage = loadStage(stageName);
+
+        if(twoPlayers) {
+            levelBushesUpdate = new ArrayList<>();
+        }
+        if(twoPlayers) {
+            levelObjectsUpdate = new ArrayList<>();
+        }
+//        BufferedReader reader;
+//        int row_count = 0;
+        try {
+//            InputStream inputStream = context.getAssets().open(String.valueOf(level));
+//            reader = new BufferedReader(new InputStreamReader(inputStream));
+//            String line = reader.readLine();
+
+            for (int row = 0; row < 26; row++){
+                ArrayList<GameObjects> rowObj = new ArrayList<>();
+//                Log.d("LEVEL", line);
+                for (int col = 0; col < 26; col++){
+                    GameObjects obj;
+//                    char c = line.charAt(i);
+                    switch (stage[row][col]){
+                        case '#' :
+                            obj = new Brick(col,row);
+                            break;
+                        case '@' :
+                            obj = new StoneWall(col,row);
+                            break;
+                        case '%' :
+                            levelBushes.add(new Bush(col,row));
+                            obj =  null;
+                            break;
+                        case '~' :
+                            obj = new Water(col,row);
+                            break;
+                        case '-' :
+                            obj = new Ice(col,row);
+                            break;
+                        default: obj = null;
+                    }
+                    rowObj.add(obj);
+                }
+                levelObjects.add(rowObj);
+//                ++row_count;
+//                line = reader.readLine();
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        Log.d("LOADING LEVEL", String.valueOf(levelObjects.size()) + " " + levelObjects.get(0).size());
+        for (int[] eaglePo : eaglePos) {
+            levelObjects.get(eaglePo[1]).set(eaglePo[0], new Brick(eaglePo[0], eaglePo[1]));
+        }
+        eagle = new Eagle();
+
+    }
+
     private void initializeGame() {
         SCALE = getResources().getDisplayMetrics().density;
 
@@ -757,7 +833,14 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
 //        level;
         clearLevel();
-        loadLevel(level);
+        if(CONSTRUCTION) {
+            if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                loadConstructionLevel(level);
+            }
+        }
+        else {
+            loadLevel(level);
+        }
         ((TankActivity)context).StageTxt.setText(String.valueOf(level));
 
         closingCurtain = true;
@@ -1049,6 +1132,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     private void clearLevel() {
         levelObjects = null;
+        levelBushes = null;
     }
 
 
@@ -2749,26 +2833,23 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     }
 
-//    public void toggleMuted() {
-//        this.setMuted(!mSound);
-//    }
+    private char[][] loadStage(String name) {
+        String stage = ((TankActivity)context).settings.getString(name,null);
+        if(stage == null) {
+            return new char[26][26];
+        }
+        Type type = new TypeToken<char[][]>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stage,type);
+    }
 
-//    public void setMuted(boolean b) {
-//        // Set the in-memory flag
-//        mSound = b;
-//
-//        // Grab a preference editor
-//        Context ctx = this.getContext();
-//        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
-//        SharedPreferences.Editor editor = settings.edit();
-//
-//        // Save the value
-//        editor.putBoolean(Pong.PREF_MUTED, b);
-//        editor.apply();
-//
-//        // TODO
-//        // Output a toast to the user
-////        int rid = (mMuted) ? R.string.sound_disabled : R.string.sound_enabled;
-////        Toast.makeText(ctx, rid, Toast.LENGTH_SHORT).show();
-//    }
+    private ArrayList<String> loadStageNames() {
+        String stageNames = ((TankActivity)context).settings.getString(TankMenuActivity.STAGE_NAMES,null);
+        if(stageNames == null) {
+            return new ArrayList<>();
+        }
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stageNames,type);
+    }
 }

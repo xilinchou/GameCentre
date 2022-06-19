@@ -5,14 +5,6 @@ import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,12 +12,22 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.connection.ClientConnectionThread;
@@ -45,7 +47,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 
-public class TankStageFragment extends Fragment implements View.OnTouchListener, RemoteMessageListener {
+public class TankStage2Fragment extends Fragment implements View.OnTouchListener, RemoteMessageListener {
 
     View rootView;
 
@@ -59,17 +61,25 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
 
     GridLayout stageBtns, objGrid;
     LinearLayout.LayoutParams cardParams, cardParamsSel;
+    LinearLayout scrollBound;
     ScrollView scrollView;
     int selected = 0;
     ArrayList<boolean[]> objectives;
     private boolean selfDismiss = true;
     public static boolean p2Ready = false, opened = false;
 
-    public TankStageFragment() {
+
+    ArrayList<String> savedNames;
+    char[][] stage;
+    ListView stageListView;
+    ArrayAdapter adapter;
+    String stageName;
+
+    public TankStage2Fragment() {
 
     }
 
-    public TankStageFragment(AppCompatActivity a, boolean twoPlayers) {
+    public TankStage2Fragment(AppCompatActivity a, boolean twoPlayers) {
         this.activity = a;
         this.twoPlayers = twoPlayers;
     }
@@ -84,16 +94,27 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        rootView = inflater.inflate(R.layout.fragment_tank_stage, container, false);
+        rootView = inflater.inflate(R.layout.fragment_tank_stage2, container, false);
+        settings = activity.getSharedPreferences("TankSettings", 0);
 
         MessageRegister.getInstance().setMsgListener(this);
-        float SCALE = activity.getResources().getDisplayMetrics().density;
-        stageBtns = (GridLayout) rootView.findViewById(R.id.stage_grid);
+        savedNames = loadStageNames();
+
+//        float SCALE = activity.getResources().getDisplayMetrics().density;
+//        stageBtns = (GridLayout) rootView.findViewById(R.id.stage_grid);
         objGrid = (GridLayout) rootView.findViewById(R.id.objective_grid);
         scrollView = (ScrollView) rootView.findViewById(R.id.objScroll);
-        completedTxt = (TankTextView) rootView.findViewById(R.id.completedTxt) ;
 
-        rootView.findViewById(R.id.construction_title).setOnTouchListener(new View.OnTouchListener() {
+        scrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
+        scrollBound = (LinearLayout)rootView.findViewById(R.id.scrollBound);
+        scrollBound.setEnabled(false);
+
+        rootView.findViewById(R.id.stage_title).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switchStage();
@@ -101,81 +122,25 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
             }
         });
 
-//        cardParams = new LinearLayout.LayoutParams((int) CVTR.toDp(80), (int) CVTR.toDp(80));
-        cardParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        cardParamsSel = new LinearLayout.LayoutParams((int) CVTR.toDp(80), (int) CVTR.toDp(80));
+        stageListView = rootView.findViewById(R.id.stageList);
 
-        cardParams.setMargins((int)CVTR.toDp(2),(int)CVTR.toDp(2),(int)CVTR.toDp(2),(int)CVTR.toDp(2));
-        cardParamsSel.setMargins((int)CVTR.toDp(20),(int)CVTR.toDp(20),(int)CVTR.toDp(0),(int)CVTR.toDp(0));
+        adapter = new ArrayAdapter<String>(stageListView.getContext(),
+                R.layout.save_list_view, savedNames);
+        stageListView.setAdapter(adapter);
 
-
-        LinearLayout.LayoutParams txtParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        txtParams.setMargins(0,0,0,0);
-        txtParams.gravity = Gravity.CENTER;
-
-        settings = activity.getSharedPreferences("TankSettings", 0);
-        int unlockLevel = settings.getInt(TankMenuActivity.PREF_LEVEL,1);
-
-        ArrayList<Integer> levelStars = loadStars();
-
-
-        for(int i = 1 ; i <= 35; i++) {
-            CardView selCard = new CardView(this.getContext());
-            selCard.setLayoutParams(cardParamsSel);
-            selCard.setRadius((int)CVTR.toDp(10));
-            selCard.setCardBackgroundColor(Color.TRANSPARENT);
-
-            CardView card = new CardView(this.getContext());
-            card.setLayoutParams(cardParams);
-            card.setCardBackgroundColor(Color.TRANSPARENT);
-            ImageView img = new ImageView(this.getContext());
-
-            if(i <= unlockLevel) {
-                int star = levelStars.get(i-1);
-                switch(star) {
-                    case 0:
-                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.zerostar,null));
-                        break;
-                    case 1:
-                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.onestar,null));
-                        break;
-                    case 2:
-                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.twostar,null));
-                        break;
-                    case 3:
-                        img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.threestar,null));
-                        break;
+        stageListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                stageName = (String) ((TextView) view).getText();
+                int count = adapterView.getCount();
+                for(int c = 0; c < count; c++) {
+                    ((TextView) adapterView.getChildAt(c)).setBackground(null);
                 }
-//                img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.unlocked,null));
+                view.setBackgroundColor(Color.LTGRAY);
+                selected = adapterView.getPositionForView(view);
+                Log.d("Adapter", "Clicked on view " + selected);
             }
-            else {
-                img.setBackground(ResourcesCompat.getDrawable(activity.getResources(),R.drawable.locked,null));
-            }
-            card.setRadius((int)CVTR.toDp(10));
-            TankTextView stg = new TankTextView(this.getContext());
-            stg.setText(String.valueOf(i));
-            stg.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            stg.setTextSize(CVTR.toDp(10));
-            stg.setBackgroundColor(Color.TRANSPARENT);
-
-            stg.setLayoutParams(txtParams);
-            int h = (int)((selCard.getLayoutParams().height - stg.getTextSize() )/2);
-            txtParams.setMargins(0,h,0,0);
-            stg.setLayoutParams(txtParams);
-            card.addView(img);
-            card.addView(stg);
-            if(i <= unlockLevel) {
-                card.setOnTouchListener(this);
-            }
-            card.setTag(i);
-            selCard.addView(card);
-            stageBtns.addView(selCard);
-        }
-
-        ((CardView)stageBtns.getChildAt(selected)).setCardBackgroundColor(Color.WHITE);
-
-        objectives = new ArrayList<>();
-        objectives = loadObjectives();
+        });
 
         playBtn = rootView.findViewById(R.id.playGameBtn);
         backBtn = rootView.findViewById(R.id.backGameBtn);
@@ -187,6 +152,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
                     int games = settings.getInt(TankActivity.RETRY_COUNT,0);
 
                     if(games > 0){
+
                         int level = selected + 1;
 
                         if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
@@ -224,6 +190,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
                         }
 
                         TankView.level = level;
+                        TankView.CONSTRUCTION = true;
                         //TODO
 //                        --games;
                         SharedPreferences.Editor editor = settings.edit();
@@ -245,9 +212,9 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
 
 
 
-        displyObjectives(selected);
-        int completed = getCompleted(selected+1);
-        completedTxt.setText(String.format(Locale.ENGLISH,"CHALLENGES %d/%d", completed, TankView.NUM_OBJECTIVES));
+//        displyObjectives(selected);
+//        int completed = getCompleted(selected+1);
+//        completedTxt.setText(String.format(Locale.ENGLISH,"CHALLENGES %d/%d", completed, TankView.NUM_OBJECTIVES));
 
         selfDismiss = true;
         opened = true;
@@ -431,9 +398,29 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
         if (fragmentManager.getBackStackEntryCount() > 0) {
             fragmentManager.popBackStack();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentFrame,new TankStage2Fragment(activity, twoPlayers));
+            fragmentTransaction.replace(R.id.fragmentFrame,new TankStageFragment(activity, twoPlayers));
             fragmentTransaction.addToBackStack("cFragment");
             fragmentTransaction.commit();
         }
+    }
+
+    private char[][] loadStage(String name) {
+        String stage = settings.getString(name,null);
+        if(stage == null) {
+            return new char[26][26];
+        }
+        Type type = new TypeToken<char[][]>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stage,type);
+    }
+
+    private ArrayList<String> loadStageNames() {
+        String stageNames = settings.getString(TankMenuActivity.STAGE_NAMES,null);
+        if(stageNames == null) {
+            return new ArrayList<>();
+        }
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        Gson gson = new Gson();
+        return gson.fromJson(stageNames,type);
     }
 }
