@@ -17,6 +17,7 @@ import android.media.SoundPool;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -263,6 +264,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             updatingGame = true;
             TankView.this.update();
             updatingGame = false;
+            SystemClock.sleep(10);
             TankView.this.invalidate(); // Mark the view as 'dirty'
 
 
@@ -320,9 +322,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //                    updatingRemote = false;
 //                    TankView.this.invalidate();
 
-                            updatingRemote = true;
-                            TankView.this.getRemoteUpdate();
-                            updatingRemote = false;
+                    updatingRemote = true;
+                    TankView.this.getRemoteUpdate();
+                    updatingRemote = false;
+
+
                     ((TankActivity)context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1192,10 +1196,16 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             }
         }
         if(!p.collidesWithObject(eagle)) {
+            int col = p.x/tile_dim;
+            int row = p.y/tile_dim;
+            int minRow = Math.max(0,row-2);
+            int maxRow = Math.min(levelObjects.size(),row+3);
+            int minCol = Math.max(0,col-2);
+            int maxCol = Math.min(levelObjects.get(0).size(),col+3);
             boolean stop = false;
-            for(int i = 0; i < levelObjects.size(); i++){
-                for(int j = 0; j < levelObjects.get(i).size(); j++){
-                    if(levelObjects.get(i).get(j) != null & (levelObjects.get(i).get(j) instanceof Brick || levelObjects.get(i).get(j) instanceof StoneWall || (levelObjects.get(i).get(j) instanceof Water && !p.hasBoat()))) {
+            for(int i = minRow; i < maxRow; i++){
+                for(int j = minCol; j < maxCol; j++){
+                    if(levelObjects.get(i).get(j) != null && (levelObjects.get(i).get(j) instanceof Brick || levelObjects.get(i).get(j) instanceof StoneWall || (levelObjects.get(i).get(j) instanceof Water && !p.hasBoat()))) {
 
                         if(p.collidesWithObject(levelObjects.get(i).get(j))) {
                             stop = true;
@@ -1249,9 +1259,15 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                         break;
                     }
                     else {
+                        int col = Enemies.get(e1).x/tile_dim;
+                        int row = Enemies.get(e1).y/tile_dim;
+                        int minRow = Math.max(0,row-2);
+                        int maxRow = Math.min(levelObjects.size(),row+3);
+                        int minCol = Math.max(0,col-2);
+                        int maxCol = Math.min(levelObjects.get(0).size(),col+3);
                         boolean stop = false;
-                        for(int i = 0; i < levelObjects.size(); i++){
-                            for(int j = 0; j < levelObjects.get(i).size(); j++){
+                        for(int i = minRow; i < maxRow; i++){
+                            for(int j = minCol; j < maxCol; j++){
                                 if(levelObjects.get(i).get(j) != null && (levelObjects.get(i).get(j) instanceof Brick || levelObjects.get(i).get(j) instanceof StoneWall || (levelObjects.get(i).get(j) instanceof Water && !enemyBoat))) {
                                     if(Enemies.get(e1).collidesWithObject(levelObjects.get(i).get(j))) {
                                         stop = true;
@@ -1315,10 +1331,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 }
                 int col = pbullet.x/tile_dim;
                 int row = pbullet.y/tile_dim;
-                int minRow = Math.max(0,row-4);
-                int maxRow = Math.min(levelObjects.size(),row+4);
-                int minCol = Math.max(0,col-4);
-                int maxCol = Math.min(levelObjects.get(0).size(),col+4);
+                int minRow = Math.max(0,row-2);
+                int maxRow = Math.min(levelObjects.size(),row+2);
+                int minCol = Math.max(0,col-2);
+                int maxCol = Math.min(levelObjects.get(0).size(),col+2);
                 boolean stop = false;
                 int count = 0;
                 for(int i = minRow; i < maxRow; i++){
@@ -1422,10 +1438,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(p.bomb.isMoving()) {
             int col = p.bomb.x/tile_dim;
             int row = p.bomb.y/tile_dim;
-            int minRow = Math.max(0,row-4);
-            int maxRow = Math.min(levelObjects.size(),row+4);
-            int minCol = Math.max(0,col-4);
-            int maxCol = Math.min(levelObjects.get(0).size(),col+4);
+            int minRow = Math.max(0,row-2);
+            int maxRow = Math.min(levelObjects.size(),row+3);
+            int minCol = Math.max(0,col-2);
+            int maxCol = Math.min(levelObjects.get(0).size(),col+3);
 
             for(int i = minRow; i < maxRow; i ++) {
                 for(int j = minCol; j < maxCol; j ++) {
@@ -1449,10 +1465,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         else if(p.bomb.isExploding()) {
             int col = p.bomb.x/tile_dim;
             int row = p.bomb.y/tile_dim;
-            int minRow = Math.max(0,row-4);
-            int maxRow = Math.min(levelObjects.size(),row+4);
-            int minCol = Math.max(0,col-4);
-            int maxCol = Math.min(levelObjects.get(0).size(),col+4);
+            int minRow = Math.max(0,row-2);
+            int maxRow = Math.min(levelObjects.size(),row+3);
+            int minCol = Math.max(0,col-2);
+            int maxCol = Math.min(levelObjects.get(0).size(),col+3);
 
             for(int i = minRow; i < maxRow; i ++) {
                 for(int j = minCol; j < maxCol; j ++) {
@@ -1516,10 +1532,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
                     int col = bullet.x/tile_dim;
                     int row = bullet.y/tile_dim;
-                    int minRow = Math.max(0,row-4);
-                    int maxRow = Math.min(levelObjects.size(),row+4);
-                    int minCol = Math.max(0,col-4);
-                    int maxCol = Math.min(levelObjects.get(0).size(),col+4);
+                    int minRow = Math.max(0,row-2);
+                    int maxRow = Math.min(levelObjects.size(),row+2);
+                    int minCol = Math.max(0,col-2);
+                    int maxCol = Math.min(levelObjects.get(0).size(),col+2);
 
                     boolean stop = false;
                     int count = 0;

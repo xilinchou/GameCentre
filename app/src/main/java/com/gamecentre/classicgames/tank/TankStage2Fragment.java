@@ -95,6 +95,12 @@ public class TankStage2Fragment extends Fragment implements View.OnTouchListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_tank_stage2, container, false);
+        rootView.findViewById(R.id.frag2View).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
         settings = activity.getSharedPreferences("TankSettings", 0);
 
         MessageRegister.getInstance().setMsgListener(this);

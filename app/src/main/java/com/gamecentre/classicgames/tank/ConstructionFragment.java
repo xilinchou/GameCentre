@@ -79,6 +79,12 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView =  inflater.inflate(R.layout.fragment_construction, container, false);
+        rootView.findViewById(R.id.construction_View).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
         settings = activity.getSharedPreferences("TankSettings", 0);
         stageNames = loadStageNames();
 
