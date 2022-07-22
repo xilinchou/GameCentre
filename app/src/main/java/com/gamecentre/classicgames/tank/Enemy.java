@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 public class Enemy extends Tank{
 
+    public int sx,sy;
     private Point target;
     private int change_dir_time;
     private int dir_time;
@@ -34,6 +35,7 @@ public class Enemy extends Tank{
     private static int nxtId = 0;
     private ArrayList<Bullet> dbullets;
     int bombID = -1;
+
 
 
     public Enemy(ObjectType type, int x, int y) {
@@ -141,10 +143,40 @@ public class Enemy extends Tank{
                 else if(py_tile + tile_y - y < tile_y/TileScale) y = py_tile+tile_y;
             }
 
-
+            setStopPoint(change_dir_time, direction);
         }
         else {
             dir_time++;
+        }
+    }
+
+    private void setStopPoint(int move_time, int direction) {
+
+        switch (direction) {
+            case CONST.Direction.UP:
+                sy = (int)(y-vy*move_time);
+                if(sy < 0){
+                    sy = 0;
+                }
+                break;
+            case CONST.Direction.DOWN:
+                sy = (int)(y+vy*move_time);
+                if(sy >= TankView.HEIGHT - h){
+                    sy = TankView.HEIGHT - h;
+                }
+                break;
+            case CONST.Direction.LEFT:
+                sx = (int)(y-vx*move_time);
+                if(sx < 0) {
+                    sx = 0;
+                }
+                break;
+            case CONST.Direction.RIGHT:
+                sx = (int)(y+vx*move_time);
+                if(sx > TankView.WIDTH - w) {
+                    sx = TankView.WIDTH - w;
+                }
+                break;
         }
     }
 
@@ -157,6 +189,47 @@ public class Enemy extends Tank{
     }
 
     public void move() {
+        if(respawn || destroyed) {
+            return;
+        }
+        if(TankView.freeze) {
+            return;
+        }
+        getRect();
+
+        switch (direction) {
+            case CONST.Direction.UP:
+                if(collision || y <= 0 || y <= sy)return;
+                y -= vy;
+                if(y < 0){
+                    y = 0;
+                }
+                break;
+            case CONST.Direction.DOWN:
+                if(collision || y >= TankView.HEIGHT - h || y >= sy)return;
+                y += vy;
+                if(y >= TankView.HEIGHT - h){
+                    y = TankView.HEIGHT - h;
+                }
+                break;
+            case CONST.Direction.LEFT:
+                if(collision || x <= 0 || x <= sx)return;
+                x -= vx;
+                if(x < 0) {
+                    x = 0;
+                }
+                break;
+            case CONST.Direction.RIGHT:
+                if(collision || x >= TankView.WIDTH - w || x >= sx)return;
+                x += vx;
+                if(x > TankView.WIDTH - w) {
+                    x = TankView.WIDTH - w;
+                }
+                break;
+        }
+    }
+
+    public void moveToStopPoint() {
         if(respawn || destroyed) {
             return;
         }
@@ -406,9 +479,15 @@ public class Enemy extends Tank{
 
     public void setModel(MTank model, float scale, boolean server) {
         if(!server){
-            this.x = (int) (model.x * scale);
-            this.y = (int) (model.y * scale);
-            this.direction = model.dirction;
+            if(this.direction != model.dirction) {
+                this.direction = model.dirction;
+                this.x = (int) (model.x * scale);
+                this.y = (int) (model.y * scale);
+            }
+
+            this.sx = (int) (model.sx * scale);
+            this.sy = (int) (model.sy * scale);
+
             this.setBoat(model.boat);
             lives = model.lives;
             if(model.group < this.group){

@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MTank implements Serializable {
-    public int x,y;
+    public int x,y,sx,sy;
     public ObjectType type;
     public int dirction;
     public int armour;
@@ -93,6 +93,8 @@ public class MTank implements Serializable {
     public MTank(Enemy e) {
         x = e.x;
         y = e.y;
+        sx = e.sx;
+        sy = e.sy;
         type = e.type;
         svrKill = e.svrKill;
         dirction = e.getDirection();

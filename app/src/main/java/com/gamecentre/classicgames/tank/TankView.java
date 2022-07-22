@@ -1914,6 +1914,12 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 e.update();
             }
         }
+        else {
+            checkCollisionEnemy();
+            for (Enemy e : Enemies) {
+                e.move();
+            }
+        }
 
         sendToWifi();
     }
@@ -2213,7 +2219,23 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     }
                 }
                 if(!found) {
-                    Enemy e = new Enemy(ObjectType.ST_TANK_A,model.mEnemies.get(i).group, 0, 0);
+                    ObjectType eType = ObjectType.ST_TANK_A;
+                    switch (model.mEnemies.get(i).typeVal) {
+                        case 0:
+                            eType = ObjectType.ST_TANK_A;
+                            break;
+                        case 1:
+                            eType = ObjectType.ST_TANK_B;
+                            break;
+                        case 2:
+                            eType = ObjectType.ST_TANK_C;
+                            break;
+                        case 3:
+                            eType = ObjectType.ST_TANK_D;
+                            break;
+                    }
+//                    Enemy e = new Enemy(ObjectType.ST_TANK_A,model.mEnemies.get(i).group, 0, 0);
+                    Enemy e = new Enemy(eType,model.mEnemies.get(i).group, 0, 0);
                     e.setModel(model.mEnemies.get(i), scale, false);
                     Enemies.add(e);
                 }
