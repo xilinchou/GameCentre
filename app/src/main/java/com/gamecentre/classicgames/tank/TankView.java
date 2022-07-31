@@ -62,7 +62,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private static final String TAG = "TankView";
     private long refSendStartTime = System.currentTimeMillis();
     private long refReceiveStartTime = System.currentTimeMillis();
-    protected static final int FPS = 20;
+    protected static final int FPS = 30;
     public static final float TO_SEC = 1000f/FPS;
     public static boolean CONSTRUCTION = false;
     public static final int
@@ -264,7 +264,6 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             updatingGame = true;
             TankView.this.update();
             updatingGame = false;
-            SystemClock.sleep(10);
             TankView.this.invalidate(); // Mark the view as 'dirty'
 
 
@@ -317,15 +316,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 //we can't update the UI from here so we'll signal our handler and it will do it for us.
 //                mRemoteUpdateHandler.sendMessage(null);
                 if (gameModel != null && !gameModel.isEmpty() && !drawing && !updatingGame) {
-//                    updatingRemote = true;
-//                    TankView.this.getRemoteUpdate();
-//                    updatingRemote = false;
-//                    TankView.this.invalidate();
 
                     updatingRemote = true;
                     TankView.this.getRemoteUpdate();
                     updatingRemote = false;
-
 
                     ((TankActivity)context).runOnUiThread(new Runnable() {
                         @Override
@@ -1320,6 +1314,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                             if (pbullet.collides_with(ebullet)) {
                                 pbullet.setDestroyed(false);
                                 ebullet.setDestroyed(false);
+                                Log.d("COLLISION", "Bullet collision from " + (WifiDirectManager.getInstance().isServer()?"Server":"Client"));
                                 ++P1.bulletIntercept;
                                 break;
                             }
@@ -1860,6 +1855,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             checkCollisionPlayer(P1);
             checkCollisionPlayerWithGold();
             P1.update();
+            if(twoPlayers) {
+                P2.updateBullets();
+            }
 
         if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
             // Get target
@@ -1911,13 +1909,13 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             checkCollisionEnemy();
 
             for (Enemy e : Enemies) {
-                e.update();
+                e.update(false);
             }
         }
         else {
             checkCollisionEnemy();
             for (Enemy e : Enemies) {
-                e.move();
+                e.update(true);
             }
         }
 
@@ -2210,7 +2208,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             for (int i = 0; i < model.mEnemies.size(); i++) {
                 found = false;
                 for (int j = 0; j < Enemies.size(); j++) {
-                    if(model.mEnemies.get(i).id == Enemies.get(j).id){
+                    if(model.mEnemies.get(i).id == Enemies.get(j).id){  // enemy exists
                         if(!Enemies.get(j).isDestroyed()) {
                             Enemies.get(j).setModel(model.mEnemies.get(i), scale,false);
                         }
@@ -2218,7 +2216,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                         break;
                     }
                 }
-                if(!found) {
+                if(!found) {                                            // enemy does not exist. create one
                     ObjectType eType = ObjectType.ST_TANK_A;
                     switch (model.mEnemies.get(i).typeVal) {
                         case 0:
@@ -2234,7 +2232,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                             eType = ObjectType.ST_TANK_D;
                             break;
                     }
-//                    Enemy e = new Enemy(ObjectType.ST_TANK_A,model.mEnemies.get(i).group, 0, 0);
+
                     Enemy e = new Enemy(eType,model.mEnemies.get(i).group, 0, 0);
                     e.setModel(model.mEnemies.get(i), scale, false);
                     Enemies.add(e);
@@ -2346,6 +2344,19 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             Bonus.cleared = false;
             P1.gotBonus = 0;
             P1.setBBomb(false);
+
+            for(Bullet b: P1.bullets) {
+                if(b.launched) {
+                    b.launched = false;
+                }
+            }
+            for(Enemy e: Enemies) {
+                for(Bullet b: e.bullets) {
+                    if(b.launched) {
+                        b.launched = false;
+                    }
+                }
+            }
 
         }
     }

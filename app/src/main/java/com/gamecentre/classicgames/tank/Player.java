@@ -582,6 +582,12 @@ public class Player extends Tank{
         changeDirection(direction);
     }
 
+    public void updateBullets() {
+        for(Bullet bullet:bullets) {
+            bullet.move();
+        }
+    }
+
     public void update() {
         if(MaxBullet > 1 && reload_time > 0) {
             --reload_time;
@@ -630,9 +636,9 @@ public class Player extends Tank{
         if(iceTmr == 1) {
             stopSlip();
         }
-        for(Bullet bullet:bullets) {
-            bullet.move();
-        }
+
+        updateBullets();
+
 
         bomb.update();
     }
@@ -666,8 +672,11 @@ public class Player extends Tank{
         }
 
         for(int i = 0; i < bullets.size(); i++) {
-            if(!bullets.get(i).isDestroyed() || bullets.get(i).recycle) {
-                bullets.set(i,null);
+//            if(!bullets.get(i).isDestroyed() || bullets.get(i).recycle) {
+//                bullets.set(i,null);
+//            }
+            if (bullets.get(i).recycle) {
+                bullets.set(i, null);   // remove bullets ready for recycling
             }
         }
 
@@ -678,11 +687,17 @@ public class Player extends Tank{
             for(int j = 0; j < bullets.size(); j++) {
                 if (model.bullets.get(i)[4] == bullets.get(j).id) {
                     found = true;
+                    if (model.bullets.get(i)[3] == 1 && !bullets.get(j).isDestroyed()) {     // bullet should be destroyed now
+                        bullets.get(j).x = (int) (model.bullets.get(i)[0] * scale);
+                        bullets.get(j).y = (int) (model.bullets.get(i)[1] * scale);
+                        bullets.get(j).setDestroyed();
+                        bullets.get(j).svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
+                    }
                     break;
                 }
             }
             if(!found) {
-                if (model.bullets.get(i)[3] == 1) {
+                if (model.bullets.get(i)[3] == 1 && model.bullets.get(i)[7] == 1) {
                     bullet.setDestroyed();
                     bullet.svrKill = model.bullets.get(i)[5] == 1;
                 }

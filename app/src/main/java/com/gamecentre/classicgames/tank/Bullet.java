@@ -28,6 +28,7 @@ public class Bullet extends GameObjects {
     private float speed = 1;
     public int id = 0;
     public boolean sent = false;
+    public boolean launched;
 
     public Bullet(ObjectType type, int x, int y, int fromPlayer) {
         super(x,y);
@@ -53,6 +54,7 @@ public class Bullet extends GameObjects {
         super.h = sprite.h;
         frame_delay = dsprite.frame_time;
         frame = 0;
+        launched = true;
     }
 
     public Bullet(Bullet bullet,int x, int y) {
@@ -75,6 +77,7 @@ public class Bullet extends GameObjects {
         super.h = sprite.h;
         frame_delay = dsprite.frame_time;
         destroyed = bullet.isDestroyed();
+        launched = true;
     }
 
     public Bitmap[] getBitmap() {
@@ -149,7 +152,7 @@ public class Bullet extends GameObjects {
     }
 
     public void move() {
-        if(!destroyed) {
+        if(!destroyed && !recycle) {
             if(collides_with_wall()){
                 if(fromPlayer > 0) {
                     SoundManager.playSound(Sounds.TANK.STEEL, 1, 1);
@@ -204,6 +207,9 @@ public class Bullet extends GameObjects {
 
 
     public void setDestroyed() {
+        if(isDestroyed()) {
+            return;
+        }
         super.setDestroyed();
 //        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
         svrKill = TankView.twoPlayers && fromPlayer == 1;
@@ -214,7 +220,7 @@ public class Bullet extends GameObjects {
 
     public void setDestroyed(boolean explode) {
         setDestroyed();
-        super.recycle();
+//        super.recycle();
         this.explode = explode;
     }
 
@@ -223,6 +229,10 @@ public class Bullet extends GameObjects {
             canvas.drawBitmap(bitmap[direction], x - (float) sprite.w / 2, y - (float) sprite.h / 2, null);
         }
         else if(!recycle){
+            if(!this.explode) {
+                super.recycle();
+                return;
+            }
             if (frame < dsprite.frame_count) {
                 canvas.drawBitmap(dbitmap[frame], x - (int) (dsprite.w / 2), y - (int) (dsprite.h / 2), null);
                 if(frame_delay <= 0) {

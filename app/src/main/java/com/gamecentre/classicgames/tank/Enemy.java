@@ -453,10 +453,11 @@ public class Enemy extends Tank{
     }
 
 
-    public void update() {
-
-        if(reload_time > 0) {
-            --reload_time;
+    public void update(boolean remote) {
+        if(!remote) {
+            if (reload_time > 0) {
+                --reload_time;
+            }
         }
 
         for(int i = 0; i < bullets.size(); i++) {
@@ -469,7 +470,9 @@ public class Enemy extends Tank{
         while(bullets.remove(null));
 
         move();
-        fire();
+        if(!remote) {
+            fire();
+        }
 
         for(Bullet bullet:bullets) {
             bullet.move();
@@ -518,8 +521,11 @@ public class Enemy extends Tank{
             }
 
             for (int i = 0; i < bullets.size(); i++) {
-                if (!(bullets.get(i).isDestroyed()) || bullets.get(i).recycle) {
-                    bullets.set(i, null);   // remove bullets not destroyed and bullets ready for recycling
+//                if (!(bullets.get(i).isDestroyed()) || bullets.get(i).recycle) {
+//                    bullets.set(i, null);   // remove bullets not destroyed and bullets ready for recycling
+//                }
+                if (bullets.get(i).recycle) {
+                    bullets.set(i, null);   // remove bullets ready for recycling
                 }
             }
 
@@ -530,10 +536,19 @@ public class Enemy extends Tank{
                 for (int j = 0; j < bullets.size(); j++) {
                     if (model.bullets.get(i)[4] == bullets.get(j).id) {
                         found = true;
+                        if (model.bullets.get(i)[3] == 1 && !bullets.get(j).isDestroyed()) {     // bullet should be destroyed now
+                            bullets.get(j).x = (int) (model.bullets.get(i)[0] * scale);
+                            bullets.get(j).y = (int) (model.bullets.get(i)[1] * scale);
+                            bullets.get(j).setDestroyed();
+                            bullets.get(j).svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
+                        }
                         break;
                     }
                 }
-                if (!found) {                               // bullet has not previously been destroyed
+                if (!found && model.bullets.get(i)[7] == 1) {                               // bullet has not previously been destroyed
+//                    if(Math.abs(model.bullets.get(i)[0] * scale - x) > 10*vx || Math.abs(model.bullets.get(i)[1] * scale - x) > 10*vy) {
+//                        break;
+//                    }
                     if (model.bullets.get(i)[3] == 1) {     // bullet should be destroyed now
                         bullet.setDestroyed();
                         bullet.svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
@@ -565,10 +580,14 @@ public class Enemy extends Tank{
                 group = model.group;
             }
 
+            this.setBoat(model.boat);
+
             for (int i = 0; i < model.bullets.size(); i++) {
                 for (int j = 0; j < bullets.size(); j++) {
                     if (model.bullets.get(i)[4] == bullets.get(j).id) {
                         if (model.bullets.get(i)[3] == 1 && !bullets.get(j).isDestroyed()) {     // bullet should be destroyed now
+                            bullets.get(j).x = (int) (model.bullets.get(i)[0] * scale);
+                            bullets.get(j).y = (int) (model.bullets.get(i)[1] * scale);
                             bullets.get(j).setDestroyed(model.bullets.get(i)[6] == 1);
                             bullets.get(j).svrKill = model.bullets.get(i)[5] == 1;  // which player caused the bullet destruction
                         }

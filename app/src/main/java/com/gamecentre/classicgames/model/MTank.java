@@ -83,7 +83,9 @@ public class MTank implements Serializable {
                     b.getDirection(),
                     b.isDestroyed()?1:0,
                     b.id,
-                    b.svrKill?1:0
+                    b.svrKill?1:0,
+                    b.explode?1:0,
+                    b.launched?1:0
             };
             bullets.add(bt);
         }
@@ -132,7 +134,8 @@ public class MTank implements Serializable {
                         b.isDestroyed()?1:0,
                         b.id,
                         b.svrKill?1:0,
-                        b.explode?1:0};
+                        b.explode?1:0,
+                        b.launched?1:0};
             bullets.add(bt);
         }
     }
