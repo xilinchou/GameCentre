@@ -40,6 +40,11 @@ public class TankGameModel extends Game implements Serializable {
     public boolean bnsAv;
     public boolean bnsClr;
 
+    public int[] kills;
+    public int totalKills;
+    public int totalScore;
+    public int stageScore;
+
     public void loadEnemies(ArrayList<Enemy> enemies) {
         for(Enemy enemy:enemies) {
 //            mEnemies.add(new MTank(enemy.type,enemy.x,enemy.y,enemy.getDirection()));
@@ -85,5 +90,12 @@ public class TankGameModel extends Game implements Serializable {
         bonus = new int[] {x, y, b, id};
         bnsAv = av;
         bnsClr = cl;
+    }
+
+    public void loadPlayerKills(int  kills[]) {
+        this.kills = new int[kills.length];
+        for (int i=0; i < kills.length; i++) {
+            this.kills[i] = kills[i];
+        }
     }
 }

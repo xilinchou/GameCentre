@@ -166,13 +166,13 @@ public class Enemy extends Tank{
                 }
                 break;
             case CONST.Direction.LEFT:
-                sx = (int)(y-vx*move_time);
+                sx = (int)(x-vx*move_time);
                 if(sx < 0) {
                     sx = 0;
                 }
                 break;
             case CONST.Direction.RIGHT:
-                sx = (int)(y+vx*move_time);
+                sx = (int)(x+vx*move_time);
                 if(sx > TankView.WIDTH - w) {
                     sx = TankView.WIDTH - w;
                 }

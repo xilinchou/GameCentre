@@ -1007,20 +1007,27 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             return;
         }
         if(!showingScore) {
+            //TODO why is retry count default 3 here?
             int retries = ((TankActivity)context).settings.getInt(TankActivity.RETRY_COUNT,3);
 
-//            if(retries <= 0 && gameover) {
-//                ((TankActivity)context).nxtBtn.setEnabled(false);
-//                ((TankActivity)context).nxtBtn.setVisibility(View.INVISIBLE);
-//            }
-//            else {
-//                ((TankActivity)context).nxtBtn.setEnabled(true);
-//                ((TankActivity)context).nxtBtn.setVisibility(View.VISIBLE);
-//            }
             ((TankActivity) context).retryCount.setText(String.valueOf(retries));
-            ((TankActivity) context).p1Score.setText(String.valueOf(P1.totalScore += P1.stageScore));
             ((TankActivity) context).stageScore.setText(String.valueOf(level));
+
+
+            if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                ((TankActivity) context).p1Score.setText(String.valueOf(P1.totalScore += P1.stageScore));
+
+                if(twoPlayers) {
+                    ((TankActivity) context).p2Score.setText(String.valueOf(P2.totalScore += P2.stageScore));
+                }
+            }
+            else{
+                ((TankActivity) context).p2Score.setText(String.valueOf(P1.totalScore += P1.stageScore));
+                ((TankActivity) context).p1Score.setText(String.valueOf(P2.totalScore += P2.stageScore));
+            }
+
             ((TankActivity) context).scoreView.setVisibility(View.VISIBLE);
+
             showingScore = true;
             scoreFrameTmr = scoreFrameTime;
             enemyFrame = 0;
@@ -1028,69 +1035,168 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         }
 
+        int p1Kills = 0,p2Kills = 0;
+        int p1TKills = 0,p2TKills = 0;
+
+
+        if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+            if(enemyFrame < P1.kills.length) {
+                p1Kills = P1.kills[enemyFrame];
+            }
+            p1TKills = P1.totalKills;
+
+            if(twoPlayers) {
+                if(enemyFrame < P1.kills.length) {
+                    p2Kills = P2.kills[enemyFrame];
+                }
+                p2TKills = P2.totalKills;
+            }
+        }
+        else{
+            if(enemyFrame < P1.kills.length) {
+                p1Kills = P2.kills[enemyFrame];
+                p2Kills = P1.kills[enemyFrame];
+            }
+
+            p1TKills = P2.totalKills;
+            p2TKills = P1.totalKills;
+        }
+
         if(scoreFrameTmr <= 0) {
-            int p1killCount, p2killCount;
+            int p1killCount, p2killCount=0;
 
             switch (enemyFrame) {
                 case 0:
-                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
+//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
 
-//                    if(twoPlayers) {
+                        if(twoPlayers) {
+                            p2killCount = Integer.parseInt((String) ((TankActivity) context).p2ACount.getText());
+                        }
+//                    }
+//                    else{
+//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2ACount.getText());
 //                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
 //                    }
-                    if (p1killCount < P1.kills[enemyFrame]) {
-                        p1killCount++;
-                        ((TankActivity) context).p1AScore.setText(String.valueOf(p1killCount*100));
-                        ((TankActivity) context).p1ACount.setText(String.valueOf(p1killCount));
+
+                    if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
+                        if(p1killCount < p1Kills) {
+                            p1killCount++;
+                            ((TankActivity) context).p1AScore.setText(String.valueOf(p1killCount * 100));
+                            ((TankActivity) context).p1ACount.setText(String.valueOf(p1killCount));
+                        }
+
+                        if(twoPlayers && p2killCount < p2Kills) {
+                            p2killCount++;
+                            ((TankActivity) context).p2AScore.setText(String.valueOf(p2killCount * 100));
+                            ((TankActivity) context).p2ACount.setText(String.valueOf(p2killCount));
+                        }
                         SoundManager.playSound(Sounds.TANK.SCORE);
                     }
-//                    else if (twoPlayers && p1killCount < P1.kills[enemyFrame]) {
-//                        p1killCount++;
-//                        ((TankActivity) context).p1AScore.setText(String.valueOf(p1killCount*100));
-//                        ((TankActivity) context).p1ACount.setText(String.valueOf(p1killCount));
-//                        SoundManager.playSound(Sounds.TANK.SCORE);
-//                    }
                     else {
                         enemyFrame++;
                     }
                     break;
                 case 1:
-                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
-                    if (p1killCount < P1.kills[enemyFrame]) {
-                        p1killCount++;
-                        ((TankActivity) context).p1BScore.setText(String.valueOf(p1killCount*200));
-                        ((TankActivity) context).p1BCount.setText(String.valueOf(p1killCount));
+//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
+
+                        if(twoPlayers) {
+                            p2killCount = Integer.parseInt((String) ((TankActivity) context).p2BCount.getText());
+                        }
+//                    }
+//                    else{
+//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2BCount.getText());
+//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
+//                    }
+
+                    if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
+                        if(p1killCount < p1Kills) {
+                            p1killCount++;
+                            ((TankActivity) context).p1BScore.setText(String.valueOf(p1killCount * 200));
+                            ((TankActivity) context).p1BCount.setText(String.valueOf(p1killCount));
+                        }
+
+                        if(twoPlayers && p2killCount < p2Kills) {
+                            p2killCount++;
+                            ((TankActivity) context).p2BScore.setText(String.valueOf(p2killCount * 200));
+                            ((TankActivity) context).p2BCount.setText(String.valueOf(p2killCount));
+                        }
                         SoundManager.playSound(Sounds.TANK.SCORE);
-                    } else {
+                    }
+                    else {
                         enemyFrame++;
                     }
                     break;
                 case 2:
-                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
-                    if (p1killCount < P1.kills[enemyFrame]) {
-                        p1killCount++;
-                        ((TankActivity) context).p1CScore.setText(String.valueOf(p1killCount*300));
-                        ((TankActivity) context).p1CCount.setText(String.valueOf(p1killCount));
+//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
+
+                        if(twoPlayers) {
+                            p2killCount = Integer.parseInt((String) ((TankActivity) context).p2CCount.getText());
+                        }
+//                    }
+//                    else{
+//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2CCount.getText());
+//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
+//                    }
+
+                    if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
+                        if(p1killCount < p1Kills) {
+                            p1killCount++;
+                            ((TankActivity) context).p1CScore.setText(String.valueOf(p1killCount * 300));
+                            ((TankActivity) context).p1CCount.setText(String.valueOf(p1killCount));
+                        }
+
+                        if(twoPlayers && p2killCount < p2Kills) {
+                            p2killCount++;
+                            ((TankActivity) context).p2CScore.setText(String.valueOf(p2killCount * 300));
+                            ((TankActivity) context).p2CCount.setText(String.valueOf(p2killCount));
+                        }
                         SoundManager.playSound(Sounds.TANK.SCORE);
-                    } else {
+                    }
+                    else {
                         enemyFrame++;
                     }
                     break;
                 case 3:
-                    p1killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
-                    if (p1killCount < P1.kills[enemyFrame]) {
-                        p1killCount++;
-                        ((TankActivity) context).p1DScore.setText(String.valueOf(p1killCount*400));
-                        ((TankActivity) context).p1DCount.setText(String.valueOf(p1killCount));
+//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
+                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
+
+                        if(twoPlayers) {
+                            p2killCount = Integer.parseInt((String) ((TankActivity) context).p2DCount.getText());
+                        }
+//                    }
+//                    else{
+//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2DCount.getText());
+//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
+//                    }
+
+                    if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
+                        if(p1killCount < p1Kills) {
+                            p1killCount++;
+                            ((TankActivity) context).p1DScore.setText(String.valueOf(p1killCount * 400));
+                            ((TankActivity) context).p1DCount.setText(String.valueOf(p1killCount));
+                        }
+
+                        if(twoPlayers && p2killCount < p2Kills) {
+                            p2killCount++;
+                            ((TankActivity) context).p2DScore.setText(String.valueOf(p2killCount * 400));
+                            ((TankActivity) context).p2DCount.setText(String.valueOf(p2killCount));
+                        }
                         SoundManager.playSound(Sounds.TANK.SCORE);
-                    } else {
+                    }
+                    else {
                         enemyFrame++;
                     }
                     break;
 
                 case 4:
 
-                    ((TankActivity) context).p1Count.setText(String.valueOf(P1.totalKills));
+                    ((TankActivity) context).p1Count.setText(String.valueOf(p1TKills));
+                    if(twoPlayers) {
+                        ((TankActivity) context).p2Count.setText(String.valueOf(p2TKills));
+                    }
                     switch (numStars) {
                         case 0:
                             ((TankActivity) context).gameStars.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.star0,null));
@@ -1729,6 +1835,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(((Enemy.lives <= 0 && Enemies.size() <= 0) || notifyStageComplete) && !stageComplete) {
             pauseNoAds();
             TankView.EVENT = TankView.STAGE_COMPLETE;
+            sendPlayerInfo(STAGE_COMPLETE);
             if(((TankActivity)context).mInterstitialAd == null) {
                 ((TankActivity) context).loadInterstitialAd();
             }
@@ -1740,6 +1847,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             if(eagle != null && eagle.isDestroyed()) {
                 pauseNoAds();
                 TankView.EVENT = TankView.GAME_OVER;
+                sendPlayerInfo(GAME_OVER);
                 if (((TankActivity) context).mInterstitialAd == null) {
                     ((TankActivity) context).loadInterstitialAd();
                 }
@@ -1759,6 +1867,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     CHECKING_RETRY = 0;
                     pauseNoAds();
                     TankView.EVENT = TankView.GAME_OVER;
+                    sendPlayerInfo(GAME_OVER);
                     if (((TankActivity) context).mInterstitialAd == null) {
                         ((TankActivity) context).loadInterstitialAd();
                     }
@@ -1995,7 +2104,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         SoundManager.playSound(Sounds.TANK.GAMEOVER);
         displayGameOver();
         showScoreTmr = showScoreDelay;
-        sendPlayerInfo(GAME_OVER);
+//        sendPlayerInfo(GAME_OVER);
         ((TankActivity)context).stop_timer();
 
 
@@ -2089,7 +2198,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         stageComplete = true;
         enemyFrame = 0;
         showScoreTmr = showScoreDelay;
-        sendPlayerInfo(STAGE_COMPLETE);
+//        sendPlayerInfo(STAGE_COMPLETE);
         ((TankActivity)context).stop_timer();
 
         for(int i = 0; i < currentObj.length; i++) {
@@ -2160,10 +2269,22 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         if(model.gameOver){
             notifyGameOver = true;
+            P2.totalKills = model.totalKills;
+            P2.totalScore = model.totalScore;
+            P2.stageScore = model.stageScore;
+            for(int i = 0; i < P2.kills.length; i++) {
+                P2.kills[i] = model.kills[i];
+            }
             return;
         }
         else if(model.stageComplete) {
             notifyStageComplete = true;
+            P2.totalKills = model.totalKills;
+            P2.totalScore = model.totalScore;
+            P2.stageScore = model.stageScore;
+            for(int i = 0; i < P2.kills.length; i++) {
+                P2.kills[i] = model.kills[i];
+            }
             return;
         }
         else if(model.pause) {
@@ -2362,13 +2483,24 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     }
 
     public void sendPlayerInfo(int info) {
+        if(!twoPlayers) {
+            return;
+        }
         TankGameModel model = new TankGameModel();
         switch (info) {
             case STAGE_COMPLETE:
                 model.stageComplete = true;
+                model.loadPlayerKills(P1.kills);
+                model.totalKills = P1.totalKills;
+                model.totalScore = P1.totalScore;
+                model.stageScore = P1.stageScore;
                 break;
             case GAME_OVER:
                 model.gameOver = true;
+                model.loadPlayerKills(P1.kills);
+                model.totalKills = P1.totalKills;
+                model.totalScore = P1.totalScore;
+                model.stageScore = P1.stageScore;
                 break;
             case PAUSE:
                 model.pause = true;
