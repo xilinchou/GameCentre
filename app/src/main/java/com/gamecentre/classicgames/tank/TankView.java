@@ -1067,17 +1067,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
             switch (enemyFrame) {
                 case 0:
-//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
                         p1killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
 
                         if(twoPlayers) {
                             p2killCount = Integer.parseInt((String) ((TankActivity) context).p2ACount.getText());
                         }
-//                    }
-//                    else{
-//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2ACount.getText());
-//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1ACount.getText());
-//                    }
 
                     if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
                         if(p1killCount < p1Kills) {
@@ -1098,17 +1092,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     }
                     break;
                 case 1:
-//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
                         p1killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
 
                         if(twoPlayers) {
                             p2killCount = Integer.parseInt((String) ((TankActivity) context).p2BCount.getText());
                         }
-//                    }
-//                    else{
-//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2BCount.getText());
-//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1BCount.getText());
-//                    }
 
                     if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
                         if(p1killCount < p1Kills) {
@@ -1129,17 +1117,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     }
                     break;
                 case 2:
-//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
                         p1killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
 
                         if(twoPlayers) {
                             p2killCount = Integer.parseInt((String) ((TankActivity) context).p2CCount.getText());
                         }
-//                    }
-//                    else{
-//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2CCount.getText());
-//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1CCount.getText());
-//                    }
 
                     if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
                         if(p1killCount < p1Kills) {
@@ -1160,17 +1142,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     }
                     break;
                 case 3:
-//                    if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
                         p1killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
 
                         if(twoPlayers) {
                             p2killCount = Integer.parseInt((String) ((TankActivity) context).p2DCount.getText());
                         }
-//                    }
-//                    else{
-//                        p1killCount = Integer.parseInt((String) ((TankActivity) context).p2DCount.getText());
-//                        p2killCount = Integer.parseInt((String) ((TankActivity) context).p1DCount.getText());
-//                    }
 
                     if (p1killCount < p1Kills || (twoPlayers && p2killCount < p2Kills)) {
                         if(p1killCount < p1Kills) {
