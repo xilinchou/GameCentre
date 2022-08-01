@@ -32,6 +32,7 @@ public class TankGameModel extends Game implements Serializable {
     public boolean resume = false;
     public boolean restart = false;
     public boolean end_game = false;
+    public boolean gift_life = false;
     public boolean eagleDestroyed;
     public boolean mlevelInfo = false;
     public int mlevel = 0;

@@ -68,7 +68,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
     public TankTextView p2ACount, p2BCount, p2CCount, p2DCount, p2Count;
-    public ImageView enemyCountImg,gameStars;
+    public ImageView enemyCountImg,gameStars, giftBtn;
+
+    private long lastGiftTime = 0;
 
 
     public TankTextView pauseBtn;//, gameTimeView;
@@ -237,6 +239,20 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             }
         });
 
+        giftBtn = findViewById(R.id.giftLife);
+        giftBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    if(System.currentTimeMillis() - lastGiftTime >= 500) {
+                        mTankView.giftLife();
+                        lastGiftTime = System.currentTimeMillis();
+                    }
+                }
+                return true;
+            }
+        });
+
 
         enableControls();
 
@@ -268,6 +284,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         enemyCountTxt.setTypeface(typeface);
         enemyCountTxt.setTextSize(8);
         enemyCountTxt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
 
         StageTxt.setTypeface(typeface);
         StageTxt.setTextSize(10);
@@ -650,6 +667,22 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn.setEnabled(false);
         rtBtn.setEnabled(false);
         lftBtn.setEnabled(false);
+    }
+
+    public void enableGift() {
+        giftBtn.setEnabled(true);
+    }
+
+    public void disableGift() {
+        giftBtn.setEnabled(false);
+    }
+
+    public void showGift() {
+        giftBtn.setVisibility(View.VISIBLE);
+    }
+
+    public void hideGift() {
+        giftBtn.setVisibility(View.INVISIBLE);
     }
 
     protected void onStop() {

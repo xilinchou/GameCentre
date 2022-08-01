@@ -267,6 +267,10 @@ public class Player extends Tank{
             lives = 0;
         }
 
+        if(lives == 1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).disableGift();
+        }
+
 
         ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
             @Override
@@ -358,6 +362,9 @@ public class Player extends Tank{
         ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if(lives > 1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).enableGift();
+                }
                 if (Player.this.type == ObjectType.ST_PLAYER_1) {
                     ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
                 } else {

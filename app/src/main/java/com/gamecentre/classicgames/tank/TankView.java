@@ -17,7 +17,6 @@ import android.media.SoundPool;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -71,7 +70,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             PAUSE = 3,
             END_GAME = 4,
             RESUME = 5,
-            RESTART = 6;
+            RESTART = 6,
+            GIFT_LIFE = 7;
 
     public static int GOLD_LEVEL = 0;
 
@@ -118,6 +118,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     protected boolean notifyPause = false;
     public boolean notifyEndGame = false;
     public boolean notifyRetryStage = false;
+    public boolean notifyGiftLife = false;
+    public boolean notifyReceivedLife = false;
 
     /** Preferences loaded at startup */
     private int mTankSpeedModifier;
@@ -771,6 +773,21 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         stageComplete = false;
         showingScore = false;
         sendModel = new TankGameModel();
+
+        if(twoPlayers) {
+            if(WifiDirectManager.getInstance().isServer()) {
+                ((TankActivity)context).giftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.p1_gift,null));
+            }
+            else {
+                ((TankActivity)context).giftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.p2_gift,null));
+            }
+            ((TankActivity)context).showGift();
+            ((TankActivity)context).enableGift();
+        }
+        else {
+            ((TankActivity)context).hideGift();
+            ((TankActivity)context).disableGift();
+        }
 
     }
 
@@ -1759,7 +1776,6 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     break;
             }
         }
-
     }
 
     private void checkCollisionPlayerWithGold() {
@@ -1778,6 +1794,12 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         P1.lives += life;
     }
 
+    public void giftLife() {
+        if(twoPlayers &&  P1.lives > 1) {
+            notifyGiftLife = true;
+        }
+    }
+
     private void doGameLogic(){
 //        if(twoPlayers && !playerReady && !WifiDirectManager.getInstance().isServer()) {
 //            waitPlayer();
@@ -1787,6 +1809,15 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //            notifyPause = false;
 //            pause();
 //        }
+        if(notifyGiftLife) {
+            notifyGiftLife = false;
+            sendPlayerInfo(GIFT_LIFE);
+            P1.loseLife();
+        }
+        if(notifyReceivedLife) {
+            notifyReceivedLife = false;
+            P1.applyTank();
+        }
         if(notifyRetryStage) {
             int games  = ((TankActivity)context).settings.getInt(TankActivity.RETRY_COUNT,0);
             games--;
@@ -2243,7 +2274,12 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             eagle.destroyed = model.eagleDestroyed;
         }
 
-        if(model.gameOver){
+        if(model.gift_life) {
+            notifyReceivedLife = true;
+            return;
+        }
+
+        else if(model.gameOver){
             notifyGameOver = true;
             P2.totalKills = model.totalKills;
             P2.totalScore = model.totalScore;
@@ -2490,6 +2526,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             case END_GAME:
                 model.end_game = true;
                 break;
+            case GIFT_LIFE:
+                model.gift_life = true;
+                break;
+
         }
         WifiDirectManager.getInstance().sendMessage(model);
     }
