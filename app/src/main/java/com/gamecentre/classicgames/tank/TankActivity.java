@@ -649,6 +649,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn.setEnabled(true);
         rtBtn.setEnabled(true);
         lftBtn.setEnabled(true);
+        if(twoPlayers) {
+            enableGift();
+        }
     }
 
 
@@ -667,6 +670,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn.setEnabled(false);
         rtBtn.setEnabled(false);
         lftBtn.setEnabled(false);
+        if(twoPlayers) {
+            disableGift();
+        }
     }
 
     public void enableGift() {

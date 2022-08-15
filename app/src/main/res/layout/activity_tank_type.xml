@@ -86,7 +86,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
-                                    android:text="ARCADE"
+                                    android:text="CAMPAIGN"
                                     android:textAlignment="center"
                                     android:textColor="@color/white"
                                     android:textSize="30sp"
@@ -96,35 +96,35 @@
                         </androidx.cardview.widget.CardView>
 
 
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="400dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="20dp"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginEnd="20dp"
-                            android:layout_marginBottom="20dp"
-                            android:background="@android:color/transparent"
-                            app:cardCornerRadius="50sp">
+<!--                        <androidx.cardview.widget.CardView-->
+<!--                            android:layout_width="400dp"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:layout_marginStart="20dp"-->
+<!--                            android:layout_marginTop="20dp"-->
+<!--                            android:layout_marginEnd="20dp"-->
+<!--                            android:layout_marginBottom="20dp"-->
+<!--                            android:background="@android:color/transparent"-->
+<!--                            app:cardCornerRadius="50sp">-->
 
-                            <RelativeLayout
-                                android:id="@+id/construct_lo"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@drawable/bghud5">
+<!--                            <RelativeLayout-->
+<!--                                android:id="@+id/construct_lo"-->
+<!--                                android:layout_width="match_parent"-->
+<!--                                android:layout_height="match_parent"-->
+<!--                                android:background="@drawable/bghud5">-->
 
-                                <com.gamecentre.classicgames.tank.TankTextView
-                                    android:id="@+id/construct"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_centerInParent="true"
-                                    android:text="CONSTRUCTION"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/white"
-                                    android:textSize="30sp"
-                                    android:textStyle="bold" />
-                            </RelativeLayout>
+<!--                                <com.gamecentre.classicgames.tank.TankTextView-->
+<!--                                    android:id="@+id/construct"-->
+<!--                                    android:layout_width="match_parent"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:layout_centerInParent="true"-->
+<!--                                    android:text="CONSTRUCTION"-->
+<!--                                    android:textAlignment="center"-->
+<!--                                    android:textColor="@color/white"-->
+<!--                                    android:textSize="30sp"-->
+<!--                                    android:textStyle="bold" />-->
+<!--                            </RelativeLayout>-->
 
-                        </androidx.cardview.widget.CardView>
+<!--                        </androidx.cardview.widget.CardView>-->
                     </GridLayout>
                 </LinearLayout>
 

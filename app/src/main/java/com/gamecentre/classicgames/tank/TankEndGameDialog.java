@@ -32,23 +32,6 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
     SharedPreferences settings;
     int tanks, golds;
 
-//    long startTime = 0;
-//    int countTime = 5;
-//    Handler timerHandler = new Handler();
-//    Runnable timerRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//
-//            timerTxt.setText(String.valueOf(countTime));
-//            if(countTime <= 0) {
-//                timerHandler.removeCallbacks(this);
-//                TankEndGameDialog.this.dismiss();
-//                return;
-//            }
-//            --countTime;
-//            timerHandler.postDelayed(this, 1000);
-//        }
-//    };
 
     public TankEndGameDialog(AppCompatActivity a, TankView mTankView) {
         super(a);
@@ -85,8 +68,6 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
 
         goldCountTxt = (TankTextView) findViewById(R.id.retryGoldCnt);
 
-
-
 //        timerTxt = (TankTextView)findViewById(R.id.timer);
 
         settings = activity.getSharedPreferences("TankSettings", 0);
@@ -105,13 +86,7 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
                 mTankView.resumeNoAds();
             }
         });
-
-//        startTime = System.currentTimeMillis();
-//        timerHandler.postDelayed(timerRunnable, 0);
-
     }
-
-
 
     public void setGoldCount() {
         golds = settings.getInt(TankActivity.GOLD,0);

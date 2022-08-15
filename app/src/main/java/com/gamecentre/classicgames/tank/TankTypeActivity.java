@@ -98,13 +98,13 @@ public class TankTypeActivity extends AppCompatActivity {
                 finish();
             }
             else if (id == R.id.arcade || id == R.id.arcade_lo) {
-                i.putExtra(TankTypeActivity.TANK_TYPE, "ARCADE");
+                i.putExtra(TankTypeActivity.TANK_TYPE, "CAMPAIGN");
                 startActivity(i);
                 finish();
             }
-            else if (id == R.id.construct) {
-                //TODO
-            }
+//            else if (id == R.id.construct) {
+//                //TODO
+//            }
         }
     };
 
