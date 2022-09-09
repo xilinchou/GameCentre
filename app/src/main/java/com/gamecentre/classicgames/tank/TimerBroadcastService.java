@@ -59,7 +59,7 @@ public class TimerBroadcastService extends Service {
             else {
                 if(game6h > currentTime) {
                     Log.d("SERVICE","alive true " + games + " " + life_time);
-                    MessageRegister.getInstance().registerServiceMessage(games, time_left, true);
+                    MessageRegister.getInstance().registerServiceMessage(games, life_time, true);
                 }
                 else {
                     Log.d("SERVICE","alive false" + games + " " + life_time);

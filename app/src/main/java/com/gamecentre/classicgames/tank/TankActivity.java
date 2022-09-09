@@ -52,6 +52,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -388,18 +390,25 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
     public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(mTankView.showingScore) {
-            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss", Locale.ENGLISH);
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             retryCount.setText(String.valueOf(games));
             if(games >= CONST.Tank.MAX_GAME_COUNT && !h6) {
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " false");
                 retryGameTmr.setText("");
                 gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
             else if(h6) {
                 Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " true");
+                sdf = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 retryGameTmr.setText(sdf.format(time_left));
+//                retryCount.setText((""));
                 gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.game6h,null));
             }
             else{
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " false");
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 retryGameTmr.setText(sdf.format(time_left));
                 gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }

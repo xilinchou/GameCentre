@@ -872,7 +872,7 @@
                 android:gravity="center"
                 android:text="10"
                 android:textColor="@color/brick_brown"
-                android:textSize="8sp" />
+                android:textSize="7sp" />
 
             <ImageView
                 android:id="@+id/retryGameImg"

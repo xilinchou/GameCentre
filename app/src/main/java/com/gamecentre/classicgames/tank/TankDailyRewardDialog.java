@@ -29,6 +29,7 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
     public Dialog dialog;
     public TankTextView watchBtn, cancelBtn;
     public ImageView watchBtn2;
+    public RelativeLayout watch;
     SharedPreferences settings;
     int goldCount;
     int day;
@@ -82,6 +83,7 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
 
         settings = activity.getSharedPreferences("TankSettings", 0);
 
+        watch = findViewById(R.id.watchBtn0);
         watchBtn = findViewById(R.id.watchRwdBtn);
         watchBtn2 = findViewById(R.id.watchRwdPlay);
         cancelBtn = findViewById(R.id.closeReward);
@@ -141,65 +143,65 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
                 int bonus;
                 switch (day) {
                     case 1:
-                        bonus = settings.getInt(TankActivity.SHIELD,0);
+                        bonus = settings.getInt(TankActivity.SHIELD,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.SHIELD,bonus);
                         break;
                     case 2:
-                        bonus = settings.getInt(TankActivity.CLOCK,0);
+                        bonus = settings.getInt(TankActivity.CLOCK,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.CLOCK,bonus);
                         break;
                     case 3:
-                        bonus = settings.getInt(TankActivity.GRENADE,0);
+                        bonus = settings.getInt(TankActivity.GRENADE,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.GRENADE,bonus);
 
-                        bonus = settings.getInt(TankActivity.BOAT,0);
+                        bonus = settings.getInt(TankActivity.BOAT,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.BOAT,bonus);
                         break;
                     case 4:
-                        bonus = settings.getInt(TankActivity.STAR,0);
+                        bonus = settings.getInt(TankActivity.STAR,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.STAR,bonus);
 
-                        bonus = settings.getInt(TankActivity.CLOCK,0);
+                        bonus = settings.getInt(TankActivity.CLOCK,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.CLOCK,bonus);
                         break;
                     case 5:
-                        bonus = settings.getInt(TankActivity.GUN,0);
+                        bonus = settings.getInt(TankActivity.GUN,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.GUN,bonus);
 
-                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus = settings.getInt(TankActivity.GOLD,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.GOLD,bonus);
                         break;
                     case 6:
-                        bonus = settings.getInt(TankActivity.TANK,0);
+                        bonus = settings.getInt(TankActivity.TANK,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.TANK,bonus);
 
-                        bonus = settings.getInt(TankActivity.SHOVEL,0);
+                        bonus = settings.getInt(TankActivity.SHOVEL,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.SHOVEL,bonus);
 
-                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus = settings.getInt(TankActivity.GOLD,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.GOLD,bonus);
                         break;
                     case 7:
-                        bonus = settings.getInt(TankActivity.TANK,0);
+                        bonus = settings.getInt(TankActivity.TANK,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.TANK,bonus);
 
-                        bonus = settings.getInt(TankActivity.GUN,0);
+                        bonus = settings.getInt(TankActivity.GUN,3);
                         bonus  = doubleReward ? bonus+2 : bonus+1;
                         editor.putInt(TankActivity.GUN,bonus);
 
-                        bonus = settings.getInt(TankActivity.GOLD,0);
+                        bonus = settings.getInt(TankActivity.GOLD,3);
                         bonus  = doubleReward ? bonus+4 : bonus+2;
                         editor.putInt(TankActivity.GOLD,bonus);
                         break;
@@ -216,13 +218,19 @@ public class TankDailyRewardDialog extends Dialog implements View.OnTouchListene
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent m) {
         {
             if(m.getAction() == MotionEvent.ACTION_DOWN){
                 int id = v.getId();
                 if (id == R.id.watchRwdBtn || id == R.id.watchRwdPlay) {
-                    ((TankMenuActivity)activity).showRewardedVideo(this);
+                    boolean ret = ((TankMenuActivity)activity).showRewardedVideo(this);
+                    if(ret) {
+                        watch.setAlpha(0.2f);
+                        watchBtn.setOnTouchListener(null);
+                        watchBtn2.setOnTouchListener(null);
+                    }
                 }
                 else if (id == R.id.closeReward) {
                     dismiss();

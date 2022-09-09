@@ -51,6 +51,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener, RemoteMessageListener {
 
@@ -171,18 +173,24 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
     public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(opened){
-            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("mm:ss", Locale.ENGLISH);
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             retryTxt.setText(String.valueOf(games));
             if(games >= CONST.Tank.MAX_GAME_COUNT && !h6) {
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " false");
                 retryTmr.setText("");
                 retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
             else if(h6) {
                 Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " true");
+                sdf = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 retryTmr.setText(sdf.format(time_left));
+//                retryTxt.setText("");
                 retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.game6h,null));
             }
             else {
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " false");
                 retryTmr.setText(sdf.format(time_left));
                 retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
@@ -533,11 +541,11 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     }
 
 
-    public void showRewardedVideo(Dialog purchaseDialog) {
+    public boolean showRewardedVideo(Dialog purchaseDialog) {
 
         if (mRewardedAd == null) {
             Log.d("TAG", "The rewarded ad wasn't ready yet.");
-            return;
+            return false;
         }
 
         mRewardedAd.setFullScreenContentCallback(
@@ -619,5 +627,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
 
                     }
                 });
+
+        return true;
     }
 }
