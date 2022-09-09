@@ -52,15 +52,23 @@
     <string name="clockshovel_gold">x5</string>
     <string name="gunhelmet_gold">x5</string>
     <string name="tankgrenade_gold">x5</string>
+    <string name="game_gold">x10</string>
+    <string name="game3_gold">x20</string>
+    <string name="game6h_gold">x30</string>
+    <string name="adCoin">x20</string>
+    <string name="vidGold">5</string>
 
 
     <string name="starboat_count">x2</string>
     <string name="clockshovel_count">x2</string>
     <string name="gunhelmet_count">x2</string>
     <string name="tankgrenade_count">x2</string>
+    <string name="game_count">x1</string>
+    <string name="game6h_count">x1</string>
+    <string name="adGold_count">x10</string>
 
     <string name="gold_cost">$0.99</string>
-    <string name="goldbar_count">x20</string>
+    <string name="goldbar_count">x200</string>
     <string name="retryGoldAmnt">x2</string>
     <string name="retryWatchAmnt">x1</string>
     <string name="playOnGoldCost">x2</string>

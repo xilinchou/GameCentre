@@ -221,20 +221,20 @@
 
 
                     <LinearLayout
-                        android:id="@+id/gameBuy15"
+                        android:id="@+id/gameBuy3"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center">
 
                         <ImageView
-                            android:id="@+id/gameBuy152"
+                            android:id="@+id/gameBuy32"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:background="@drawable/gold_bar" />
 
                         <com.gamecentre.classicgames.tank.TankTextView
-                            android:id="@+id/gameBuy153"
+                            android:id="@+id/gameBuy33"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/game15Cost"
@@ -296,20 +296,20 @@
 
 
                     <LinearLayout
-                        android:id="@+id/gameBuy30"
+                        android:id="@+id/gameBuy6"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center">
 
                         <ImageView
-                            android:id="@+id/gameBuy302"
+                            android:id="@+id/gameBuy62"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:background="@drawable/gold_bar" />
 
                         <com.gamecentre.classicgames.tank.TankTextView
-                            android:id="@+id/gameBuy303"
+                            android:id="@+id/gameBuy63"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/game30Cost"

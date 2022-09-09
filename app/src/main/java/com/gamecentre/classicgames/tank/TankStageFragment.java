@@ -231,13 +231,16 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
 
                         TankView.level = level;
                         //TODO
-//                        --games;
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt(TankActivity.RETRY_COUNT, games);
-                        if(games == CONST.Tank.MAX_GAME_COUNT - 1) {
-                            editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+                        long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
+                        if(game6h < System.currentTimeMillis()) {
+                            --games;
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putInt(TankActivity.RETRY_COUNT, games);
+                            if (games == CONST.Tank.MAX_GAME_COUNT - 1) {
+                                editor.putLong(TankActivity.LIFE_TIME, System.currentTimeMillis());
+                            }
+                            editor.apply();
                         }
-                        editor.apply();
 
                         ((TankMenuActivity) activity).startGame(twoPlayers);
                     }

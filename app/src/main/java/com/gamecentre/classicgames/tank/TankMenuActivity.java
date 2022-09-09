@@ -7,7 +7,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.gamecentre.classicgames.R;
-import com.gamecentre.classicgames.activity.MenuActivity;
 import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.model.Game;
@@ -22,13 +21,11 @@ import com.gamecentre.classicgames.wifidirect.WifiDialog;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -53,15 +50,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener, RemoteMessageListener {
 
     TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, retryTmr;
-    ImageView shopImg;
+    ImageView shopImg, retryImg;
     boolean firstTime = true;
 
     TankTextView inviteTxt;
@@ -98,20 +92,21 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         MessageRegister.getInstance().setMsgListener(this);
         settings = getSharedPreferences("TankSettings", 0);
 
-        grenadeTxt = findViewById(R.id.grenadeCountTxt);
-        helmetTxt = findViewById(R.id.shieldCountTxt);
-        clockTxt = findViewById(R.id.clockCountTxt);
-        shovelTxt = findViewById(R.id.shovelCountTxt);
-        tankTxt = findViewById(R.id.tankCountTxt);
-        starTxt = findViewById(R.id.starCountTxt);
-        gunTxt = findViewById(R.id.gunCountTxt);
-        boatTxt = findViewById(R.id.boatCountTxt);
+//        grenadeTxt = findViewById(R.id.grenadeCountTxt);
+//        helmetTxt = findViewById(R.id.shieldCountTxt);
+//        clockTxt = findViewById(R.id.clockCountTxt);
+//        shovelTxt = findViewById(R.id.shovelCountTxt);
+//        tankTxt = findViewById(R.id.tankCountTxt);
+//        starTxt = findViewById(R.id.starCountTxt);
+//        gunTxt = findViewById(R.id.gunCountTxt);
+//        boatTxt = findViewById(R.id.boatCountTxt);
         goldTxt = findViewById(R.id.goldCountTxt);
         shopImg = findViewById(R.id.shop);
+        retryImg = findViewById(R.id.gameImg);
         retryTxt = findViewById(R.id.retryTxt);
         retryTmr = findViewById(R.id.menuRetryTmrTxt);
 
-        updateBonus();
+        updateStore();
 
         if(intent == null) {
             intent = getIntent();
@@ -174,16 +169,22 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     }
 
 
-    public void onServiceMessageReceived(int games, long time_left) {
+    public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(opened){
             SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-            Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left);
             retryTxt.setText(String.valueOf(games));
-            if(games >= CONST.Tank.MAX_GAME_COUNT) {
+            if(games >= CONST.Tank.MAX_GAME_COUNT && !h6) {
                 retryTmr.setText("");
+                retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
+            }
+            else if(h6) {
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " true");
+                retryTmr.setText(sdf.format(time_left));
+                retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.game6h,null));
             }
             else {
                 retryTmr.setText(sdf.format(time_left));
+                retryImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
         }
     }
@@ -271,15 +272,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     }
 
 
-    public void updateBonus() {
-        grenadeTxt.setText(String.valueOf(settings.getInt(TankActivity.GRENADE,3)));
-        helmetTxt.setText(String.valueOf(settings.getInt(TankActivity.SHIELD,3)));
-        clockTxt.setText(String.valueOf(settings.getInt(TankActivity.CLOCK,3)));
-        shovelTxt.setText(String.valueOf(settings.getInt(TankActivity.SHOVEL,3)));
-        tankTxt.setText(String.valueOf(settings.getInt(TankActivity.TANK,3)));
-        starTxt.setText(String.valueOf(settings.getInt(TankActivity.STAR,3)));
-        gunTxt.setText(String.valueOf(settings.getInt(TankActivity.GUN,3)));
-        boatTxt.setText(String.valueOf(settings.getInt(TankActivity.BOAT,3)));
+    public void updateStore() {
         goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,3)));
         retryTxt.setText(String.valueOf(settings.getInt(TankActivity.RETRY_COUNT,5)));
     }
@@ -585,8 +578,9 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             SharedPreferences.Editor editor = settings.edit();
                             if(purchaseDialog instanceof TankPurchaseDialog) {
                                 int goldCount = settings.getInt(TankActivity.GOLD, 0);
-                                ((TankPurchaseDialog) purchaseDialog).goldCountTxt.setText(String.format("x%s", goldCount + 1));
-                                editor.putInt(TankActivity.GOLD, goldCount + 1);
+                                int amount = Integer.parseInt((TankMenuActivity.this.getResources().getString(R.string.vidGold).replace("x", "")));
+                                ((TankPurchaseDialog) purchaseDialog).goldTxt.setText(String.format("%s", goldCount + amount));
+                                editor.putInt(TankActivity.GOLD, goldCount + amount);
                                 editor.apply();
                                 SoundManager.playSound(Sounds.TANK.EARN_GOLD);
                             }

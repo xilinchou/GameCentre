@@ -2,13 +2,9 @@ package com.gamecentre.classicgames.tank;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,7 +21,6 @@ import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.MessageRegister;
 
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListener, ServiceListener{
 
@@ -36,10 +31,10 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
     TankView mTankView;
 
     public Button videoBtn2;
-    public TankTextView videoBtn, gameBuy153, gameBuy303;
-    public ImageView  gameBuy152, gameBuy302;
+    public TankTextView videoBtn, gameBuy33, gameBuy63;
+    public ImageView gameBuy32, gameBuy62;
     public TankTextView gameCounter, gameCountTxt, closeBtn;
-    LinearLayout gameBuy15, gameBuy30;
+    LinearLayout gameBuy3, gameBuy6;
     SharedPreferences settings;
     int tanks, games,golds;
     long time_left, life_time;
@@ -99,24 +94,24 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
         videoBtn = (TankTextView) findViewById(R.id.videoGameBtn);
         videoBtn2 = (Button) findViewById(R.id.videoGameBtn2);
 
-        gameBuy15 = (LinearLayout) findViewById(R.id.gameBuy15);
-        gameBuy152 = (ImageView) findViewById(R.id.gameBuy152);
-        gameBuy153 = (TankTextView) findViewById(R.id.gameBuy153);
+        gameBuy3 = (LinearLayout) findViewById(R.id.gameBuy3);
+        gameBuy32 = (ImageView) findViewById(R.id.gameBuy32);
+        gameBuy33 = (TankTextView) findViewById(R.id.gameBuy33);
 
-        gameBuy30 = (LinearLayout) findViewById(R.id.gameBuy30);
-        gameBuy302 = (ImageView) findViewById(R.id.gameBuy302);
-        gameBuy303 = (TankTextView) findViewById(R.id.gameBuy303);
+        gameBuy6 = (LinearLayout) findViewById(R.id.gameBuy6);
+        gameBuy62 = (ImageView) findViewById(R.id.gameBuy62);
+        gameBuy63 = (TankTextView) findViewById(R.id.gameBuy63);
 
         videoBtn.setOnTouchListener(this);
         videoBtn2.setOnTouchListener(this);
 
-        gameBuy15.setOnTouchListener(this);
-        gameBuy152.setOnTouchListener(this);
-        gameBuy152.setOnTouchListener(this);
+        gameBuy3.setOnTouchListener(this);
+        gameBuy32.setOnTouchListener(this);
+        gameBuy32.setOnTouchListener(this);
 
-        gameBuy30.setOnTouchListener(this);
-        gameBuy302.setOnTouchListener(this);
-        gameBuy302.setOnTouchListener(this);
+        gameBuy6.setOnTouchListener(this);
+        gameBuy62.setOnTouchListener(this);
+        gameBuy62.setOnTouchListener(this);
 
         closeBtn = (TankTextView) findViewById(R.id.closeGameBuyBtn);
         closeBtn.setOnTouchListener(this);
@@ -158,11 +153,17 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
 
     }
 
-    public void onServiceMessageReceived(int games, long time_left) {
+    public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(opened){
             Log.d("SERVICE MESSAGE D", String.valueOf(games) + " " + time_left);
             SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-            gameCounter.setText(sdf.format(time_left));
+            if(h6){
+                gameCounter.setText("");
+            }
+            else{
+                gameCounter.setText(sdf.format(time_left));
+            }
+
             gameCountTxt.setText(String.valueOf(games));
         }
     }
@@ -186,8 +187,8 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     ((TankMenuActivity) activity).showRewardedVideo(this);
                 }
             }
-            else if (id == R.id.gameBuy15 || id == R.id.gameBuy152 || id == R.id.gameBuy153) {
-                int cost = Integer.parseInt(activity.getResources().getString(R.string.game15Cost).replace("x", ""));
+            else if (id == R.id.gameBuy3 || id == R.id.gameBuy32 || id == R.id.gameBuy33) {
+                int cost = Integer.parseInt(activity.getResources().getString(R.string.game3_gold).replace("x", ""));
                 if (golds >= cost) {
                     int amnt = Integer.parseInt(activity.getResources().getString(R.string.game15Amnt).replace("+", ""));
                     golds = settings.getInt(TankActivity.GOLD, 0);
@@ -205,8 +206,18 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     ((TankActivity) activity).openStore(this);
                 }
             }
-            else if (id == R.id.gameBuy30 || id == R.id.gameBuy302 || id == R.id.gameBuy303) {
-                // TODO
+            else if (id == R.id.gameBuy6 || id == R.id.gameBuy62 || id == R.id.gameBuy63) {
+                int cost = Integer.parseInt(activity.getResources().getString(R.string.game6h_gold).replace("x", ""));
+                if (golds >= cost) {
+                    golds -= cost;
+                    gameCountTxt.setText(String.valueOf(CONST.Tank.MAX_GAME_COUNT));
+                    long time_6h = System.currentTimeMillis() + CONST.Tank.LIFE_DURATION_6HRS;
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt(TankActivity.GOLD, golds);
+                    editor.putLong(TankActivity.LIFE_TIME_6H, time_6h);
+                    editor.putInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
+                    editor.commit();
+                }
             }
             else if (id == R.id.closeGameBuyBtn) {
                 dismiss();

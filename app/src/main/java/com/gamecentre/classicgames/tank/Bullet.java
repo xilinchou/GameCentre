@@ -22,7 +22,7 @@ public class Bullet extends GameObjects {
     private final Sprite dsprite;
     private int frame;
     private int frame_delay;
-    private final float DEFAULT_SPEED = TankView.tile_dim*12f/TankView.FPS;
+    private final float DEFAULT_SPEED = TankView.tile_dim*15f/TankView.FPS;
     private int fromPlayer;
     public boolean explode = true;
     private float speed = 1;

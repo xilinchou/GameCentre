@@ -2,6 +2,7 @@ package com.gamecentre.classicgames.tank;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -68,7 +69,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
     public TankTextView p2ACount, p2BCount, p2CCount, p2DCount, p2Count;
-    public ImageView enemyCountImg,gameStars, giftBtn;
+    public ImageView enemyCountImg,gameStars, giftBtn, gameImg;
 
     private long lastGiftTime = 0;
 
@@ -211,10 +212,13 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         }
                         if(retries > 0){
                             //TODO
-//                            --retries;
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putInt(RETRY_COUNT, retries);
-                            editor.commit();
+                            long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
+                            if(game6h < System.currentTimeMillis()) {
+                                --retries;
+                                SharedPreferences.Editor editor = settings.edit();
+                                editor.putInt(RETRY_COUNT, retries);
+                                editor.commit();
+                            }
                             mTankView.retryStage();
                         }
                         else {
@@ -323,6 +327,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         p2Count = findViewById(R.id.totalCountP2);
 
         gameStars = findViewById(R.id.gameStars);
+        gameImg = findViewById(R.id.retryGameImg);
 
 
         SoundManager.getInstance();
@@ -381,16 +386,22 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     }
 
 
-    public void onServiceMessageReceived(int games, long time_left) {
+    public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(mTankView.showingScore) {
             SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-            Log.d("SERVICE MESSAGE:SCORES", String.valueOf(games) + " " + time_left);
             retryCount.setText(String.valueOf(games));
-            if(games >= CONST.Tank.MAX_GAME_COUNT) {
+            if(games >= CONST.Tank.MAX_GAME_COUNT && !h6) {
                 retryGameTmr.setText("");
+                gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
-            else {
+            else if(h6) {
+                Log.d("SERVICE MESSAGE MENU", String.valueOf(games) + " " + time_left + " true");
                 retryGameTmr.setText(sdf.format(time_left));
+                gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.game6h,null));
+            }
+            else{
+                retryGameTmr.setText(sdf.format(time_left));
+                gameImg.setBackground(ResourcesCompat.getDrawable(this.getResources(),R.drawable.retry_img,null));
             }
         }
     }
@@ -887,8 +898,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                             SharedPreferences.Editor editor = settings.edit();
                             if(purchaseDialog instanceof TankPurchaseDialog) {
                                 int goldCount = settings.getInt(TankActivity.GOLD, 0);
-                                ((TankPurchaseDialog) purchaseDialog).goldCountTxt.setText(String.format("x%s", goldCount + 1));
-                                editor.putInt(TankActivity.GOLD, goldCount + 1);
+                                int amount = Integer.parseInt((TankActivity.this.getResources().getString(R.string.vidGold).replace("x", "")));
+                                ((TankPurchaseDialog) purchaseDialog).goldTxt.setText(String.format("x%s", goldCount + amount));
+                                editor.putInt(TankActivity.GOLD, goldCount + amount);
                                 editor.apply();
                                 SoundManager.playSound(Sounds.TANK.EARN_GOLD);
                             }

@@ -44,9 +44,9 @@ public class MessageRegister {
         wdListener.onWifiDilogClosed();
     }
 
-    public void registerServiceMessage(int games, long life_time) {
+    public void registerServiceMessage(int games, long life_time, boolean h6) {
         for(ServiceListener l:srvListener) {
-            l.onServiceMessageReceived(games, life_time);
+            l.onServiceMessageReceived(games, life_time, h6);
         }
     }
 }

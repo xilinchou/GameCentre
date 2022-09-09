@@ -30,17 +30,17 @@ public class TimerBroadcastService extends Service {
             long currentTime = System.currentTimeMillis();
 
             long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
-            if(game6h > 0 && game6h > currentTime) {
+            if(game6h > 0 && game6h > currentTime) { //6 hours has not elasped
                 life_time = game6h - currentTime;
                 games = CONST.Tank.MAX_GAME_COUNT;
             }
             else {
-                life_time = settings.getLong(TankActivity.LIFE_TIME, 0);
+                life_time = settings.getLong(TankActivity.LIFE_TIME, 0); // time to next lift when not in 6h mode
                 games = settings.getInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
             }
 
-//            Log.d("SERVICE","alive " + games + " " + life_time);
 
+            // Not in 6h mode and games should be less that max_game_count
             if(life_time != 0 && games < CONST.Tank.MAX_GAME_COUNT) {
                 currentTime = System.currentTimeMillis();
                 time_left = (CONST.Tank.LIFE_DURATION_MINS * 60000) - ((currentTime - life_time) % (CONST.Tank.LIFE_DURATION_MINS * 60000));
@@ -53,10 +53,18 @@ public class TimerBroadcastService extends Service {
                     editor.commit();
                 }
 //                Log.d("SERVICE","sending message");
-                MessageRegister.getInstance().registerServiceMessage(games,time_left);
+                Log.d("SERVICE","alive false " + games + " " + life_time);
+                MessageRegister.getInstance().registerServiceMessage(games,time_left,false);
             }
             else {
-                MessageRegister.getInstance().registerServiceMessage(games,0);
+                if(game6h > currentTime) {
+                    Log.d("SERVICE","alive true " + games + " " + life_time);
+                    MessageRegister.getInstance().registerServiceMessage(games, time_left, true);
+                }
+                else {
+                    Log.d("SERVICE","alive false" + games + " " + life_time);
+                    MessageRegister.getInstance().registerServiceMessage(games,time_left,false);
+                }
             }
 
             timerHandler.postDelayed(this, 1000);
