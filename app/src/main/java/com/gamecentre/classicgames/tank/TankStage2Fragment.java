@@ -162,7 +162,7 @@ public class TankStage2Fragment extends Fragment implements View.OnTouchListener
                         int level = selected + 1;
 
                         if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
-
+                            //TODO Change to dialog
                             Toast toast = Toast.makeText(activity.getApplicationContext(),
                                     "Wait for player 1 to select stage!",
                                     Toast.LENGTH_SHORT);
@@ -182,6 +182,7 @@ public class TankStage2Fragment extends Fragment implements View.OnTouchListener
                                 WifiDirectManager.getInstance().sendMessage(model);
                             }
                             else{
+                                //TODO Change to dialog
                                 Toast toast = Toast.makeText(activity.getApplicationContext(),
                                         "Player 2 not ready!",
                                         Toast.LENGTH_SHORT);

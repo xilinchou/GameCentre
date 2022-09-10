@@ -33,6 +33,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -56,19 +58,23 @@ import java.util.TimeZone;
 
 public class TankMenuActivity extends AppCompatActivity implements WifiDialogListener, ServiceListener, RemoteMessageListener {
 
-    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, retryTmr;
+    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, retryTmr, adCoinTxt;
     ImageView shopImg, retryImg;
     boolean firstTime = true;
 
     TankTextView inviteTxt;
     private AdView mAdView;
     private InterstitialAd interstitialAd;
+    private RewardedInterstitialAd mRewardedInterstitialAd;
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
 
     private RewardedAd mRewardedAd;
     private static final String RAD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+    private static final String RIAD_UNIT_ID = "ca-app-pub-3940256099942544/5354046379";
     boolean isLoading;
+    boolean isLoadingIntAds;
     public static boolean GOT_REWARD = false;
+    public static boolean GOT_IREWARD = false;
 
     private boolean opened = false;
 
@@ -107,6 +113,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         retryImg = findViewById(R.id.gameImg);
         retryTxt = findViewById(R.id.retryTxt);
         retryTmr = findViewById(R.id.menuRetryTmrTxt);
+        adCoinTxt = findViewById(R.id.adCoinTxt);
 
         updateStore();
 
@@ -128,8 +135,9 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        loadAd();
+//        loadAd();
         loadRewardedAd();
+        loadRewardedInterstitialAd();
 
 
 
@@ -283,6 +291,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
     public void updateStore() {
         goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,3)));
         retryTxt.setText(String.valueOf(settings.getInt(TankActivity.RETRY_COUNT,5)));
+        adCoinTxt.setText(String.valueOf(settings.getInt(TankActivity.AD_COIN,0)));
     }
 
     protected void setListeners () {
@@ -306,6 +315,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                                     (!WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted)) {
                                 openStages(v, true);
                             } else {
+                                //TODO Change toast to dialog
                                 Toast toast = Toast.makeText(TankMenuActivity.this.getApplicationContext(),
                                         "Invite a player first",
                                         Toast.LENGTH_SHORT);
@@ -363,7 +373,8 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                     @Override
                     public void onClick(View view) {
 
-                        showInterstitial();
+//                        showInterstitial();
+                        showRewardedInterstitialAd();
 
 //                        openPlayerSearchView();
                     }
@@ -451,7 +462,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         // an ad is loaded.
                         TankMenuActivity.this.interstitialAd = interstitialAd;
                         Log.i("Interstitial Ad", "onAdLoaded");
-                        Toast.makeText(TankMenuActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(TankMenuActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
                         interstitialAd.setFullScreenContentCallback(
                                 new FullScreenContentCallback() {
                                     @Override
@@ -492,9 +503,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                                 String.format(
                                         "domain: %s, code: %d, message: %s",
                                         loadAdError.getDomain(), loadAdError.getCode(), loadAdError.getMessage());
-                        Toast.makeText(
-                                TankMenuActivity.this, "onAdFailedToLoad() with error: " + error, Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(TankMenuActivity.this, "onAdFailedToLoad() with error: " + error, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -504,9 +513,164 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         if (interstitialAd != null) {
             interstitialAd.show(this);
         } else {
-            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
             openPlayerSearchView();
         }
+    }
+
+
+    void loadRewardedInterstitialAd() {
+        if (mRewardedInterstitialAd == null) {
+            isLoadingIntAds = true;
+
+            AdRequest adRequest = new AdRequest.Builder().build();
+            // Use the test ad unit ID to load an ad.
+            RewardedInterstitialAd.load(
+                    TankMenuActivity.this,
+                    RIAD_UNIT_ID,
+                    adRequest,
+                    new RewardedInterstitialAdLoadCallback() {
+                        @Override
+                        public void onAdLoaded(RewardedInterstitialAd ad) {
+                            Log.d("Rewarded InterstitialAD", "onAdLoaded");
+
+                            mRewardedInterstitialAd = ad;
+                            isLoadingIntAds = false;
+//                            Toast.makeText(TankActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(LoadAdError loadAdError) {
+                            Log.d("Rewarded InterstitialAD", "onAdFailedToLoad: " + loadAdError.getMessage());
+
+                            // Handle the error.
+                            mRewardedInterstitialAd = null;
+                            isLoadingIntAds = false;
+//                            Toast.makeText(TankActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void introduceVideoAd(int rewardAmount, String rewardType) {
+        AdDialogFragment dialog = AdDialogFragment.newInstance(rewardAmount, rewardType);
+        dialog.setAdDialogInteractionListener(
+                new AdDialogFragment.AdDialogInteractionListener() {
+                    @Override
+                    public void onShowAd() {
+                        Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is starting.");
+
+                        showRewardedVideoIAD();
+                    }
+
+                    @Override
+                    public void onCancelAd() {
+                        Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad was skipped before it starts.");
+                    }
+                });
+        dialog.show(getSupportFragmentManager(), "AdDialogFragment");
+    }
+
+    private void showRewardedInterstitialAd() {
+        if (mRewardedInterstitialAd == null) {
+            Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is not ready.");
+            openPlayerSearchView();
+            return;
+        }
+
+//        RewardItem rewardItem = mRewardedInterstitialAd.getRewardItem();
+//        int rewardAmount = rewardItem.getAmount();
+//        String rewardType = rewardItem.getType();
+
+        Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is ready.");
+//        introduceVideoAd(2, "ADS Coins");
+        showRewardedVideoIAD();
+    }
+
+    private void showRewardedVideoIAD() {
+
+        if (mRewardedInterstitialAd == null) {
+            Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad wasn't ready yet.");
+            return;
+        }
+
+        mRewardedInterstitialAd.setFullScreenContentCallback(
+                new FullScreenContentCallback() {
+                    @Override
+                    public void onAdClicked() {
+                        // Called when a click is recorded for an ad.
+                        Log.d("Rewarded InterstitialAD", "Ad was clicked.");
+                        GOT_IREWARD = true;
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        // Called when an impression is recorded for an ad.
+                        Log.d("Rewarded InterstitialAD", "Ad recorded an impression.");
+                    }
+
+                    /** Called when ad showed the full screen content. */
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        Log.d("Rewarded InterstitialAD", "onAdShowedFullScreenContent");
+                        GOT_IREWARD = false;
+
+//                        Toast.makeText(TankMenuActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                    }
+
+                    /** Called when the ad failed to show full screen content. */
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        Log.d("Rewarded InterstitialAD", "onAdFailedToShowFullScreenContent: " + adError.getMessage());
+                        GOT_IREWARD = false;
+                                // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        mRewardedInterstitialAd = null;
+                        loadRewardedInterstitialAd();
+                        openPlayerSearchView();
+
+//                        Toast.makeText(
+//                                        TankActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                    }
+
+                    /** Called when full screen content is dismissed. */
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        mRewardedInterstitialAd = null;
+                        Log.d("Rewarded InterstitialAD", "onAdDismissedFullScreenContent");
+//                        Toast.makeText(TankMenuActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                        // Preload the next rewarded interstitial ad.
+                        loadRewardedInterstitialAd();
+                        if(GOT_IREWARD) {
+                            int adcoin = settings.getInt(TankActivity.AD_COIN,0);
+                            adcoin += 2;
+                            adCoinTxt.setText(String.valueOf(adcoin));
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putInt(TankActivity.AD_COIN,adcoin);
+                            editor.apply();
+                            SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                        }
+                        openPlayerSearchView();
+                    }
+                });
+
+        Activity activityContext = TankMenuActivity.this;
+        mRewardedInterstitialAd.show(
+                activityContext,
+                new OnUserEarnedRewardListener() {
+                    @Override
+                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                        // Handle the reward.
+                        Log.d("Rewarded InterstitialAD", "The user earned the reward.");
+                        GOT_IREWARD = true;
+//                        addCoins(rewardItem.getAmount());
+                    }
+                });
     }
 
 
@@ -526,7 +690,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             Log.d("Rewarded Ads", loadAdError.getMessage());
                             mRewardedAd = null;
                             TankMenuActivity.this.isLoading = false;
-                            Toast.makeText(TankMenuActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(TankMenuActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
@@ -534,7 +698,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             TankMenuActivity.this.mRewardedAd = rewardedAd;
                             Log.d("Rewarded Ads", "onAdLoaded");
                             TankMenuActivity.this.isLoading = false;
-                            Toast.makeText(TankMenuActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(TankMenuActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
                         }
                     });
         }
@@ -554,8 +718,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                     public void onAdShowedFullScreenContent() {
                         // Called when ad is shown.
                         Log.d("Rewarded Ads", "onAdShowedFullScreenContent");
-                        Toast.makeText(TankMenuActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(TankMenuActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT).show();
                         GOT_REWARD = false;
                     }
 
@@ -567,9 +730,9 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         // don't show the ad a second time.
                         mRewardedAd = null;
                         GOT_REWARD = false;
-                        Toast.makeText(
-                                TankMenuActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(
+//                                TankMenuActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
                     }
 
                     @Override
@@ -579,8 +742,8 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         // don't show the ad a second time.
                         mRewardedAd = null;
                         Log.d("Rewarded Ads", "onAdDismissedFullScreenContent");
-                        Toast.makeText(TankMenuActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(TankMenuActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
                         // Preload the next rewarded ad.
                         if(GOT_REWARD) {
                             SharedPreferences.Editor editor = settings.edit();

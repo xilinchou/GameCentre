@@ -46,6 +46,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,7 +61,7 @@ import java.util.TimerTask;
 
 public class TankActivity extends AppCompatActivity implements View.OnTouchListener, ServiceListener {
 
-    public Button upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, bmbBtn, menuBtn, nxtBtn;
+    public Button upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, bmbBtn, menuBtn, nxtBtn, retryBtn;
     public LinearLayout enemyCount, bonusFrame, pauseControl;
     public ImageView P1StatusImg, P2StatusImg, StageFlag;
     public TextView P1StatusTxt, P2StatusTxt, StageTxt, enemyCountTxt;
@@ -98,6 +100,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             LIFE_TIME_6H = "LIFE_TIME_6H",
 
             GOLD_LEVEL = "GOLD_LEVEL",
+            AD_COIN = "AD_COIN",
 
             LAST_DAY = "LAST_DAY",
             CONSECUTIVE_DAYS = "CONSECUTIVE_DAYS",
@@ -118,10 +121,14 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     private AdView mAdView;
     public InterstitialAd mInterstitialAd;
     private RewardedAd mRewardedAd;
+    private RewardedInterstitialAd mRewardedInterstitialAd;
     private static final String IAD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712";
     private static final String RAD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+    private static final String RIAD_UNIT_ID = "ca-app-pub-3940256099942544/5354046379";
     boolean isLoading;
+    boolean isLoadingIntAds;
     public static boolean GOT_REWARD = false;
+    public static boolean GOT_IREWARD = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -146,6 +153,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         loadInterstitialAd();
         loadRewardedAd();
+        loadRewardedInterstitialAd();
 
         mTankView = findViewById(R.id.tankView);
 
@@ -176,6 +184,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         menuBtn = findViewById(R.id.menuBtn);
         nxtBtn = findViewById(R.id.nxtBtn);
+        retryBtn = findViewById(R.id.retryBtn);
+
         pauseBtn = findViewById(R.id.pauseBtn);
         gameTimeView = findViewById(R.id.gameTime);
         enemyCount = findViewById(R.id.enemyCount);
@@ -205,6 +215,20 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+//                    int retries = settings.getInt(TankActivity.RETRY_COUNT,3);
+                    if (TankView.stageComplete) {
+                        TankView.mNewRound = true;
+                        TankView.level++;
+                    }
+                }
+                return true;
+            }
+        });
+
+        retryBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
                     int retries = settings.getInt(TankActivity.RETRY_COUNT,3);
                     if (TankView.gameover) {
                         if(retries == CONST.Tank.MAX_GAME_COUNT) {
@@ -226,9 +250,10 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         else {
                             openGamePurchse();
                         }
-                    } else if (TankView.stageComplete) {
+                    }
+                    else if (TankView.stageComplete) {
                         TankView.mNewRound = true;
-                        TankView.level++;
+//                        TankView.level++;
                     }
                 }
                 return true;
@@ -330,6 +355,13 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         gameStars = findViewById(R.id.gameStars);
         gameImg = findViewById(R.id.retryGameImg);
+
+        scoreView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
 
 
         SoundManager.getInstance();
@@ -750,7 +782,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         // an ad is loaded.
                         TankActivity.this.mInterstitialAd = interstitialAd;
                         Log.i("Interstitial Ad", "onAdLoaded");
-                        Toast.makeText(TankActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(TankActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
                         interstitialAd.setFullScreenContentCallback(
                                 new FullScreenContentCallback() {
                                     @Override
@@ -803,9 +835,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                                 String.format(
                                         "domain: %s, code: %d, message: %s",
                                         loadAdError.getDomain(), loadAdError.getCode(), loadAdError.getMessage());
-                        Toast.makeText(
-                                TankActivity.this, "onAdFailedToLoad() with error: " + error, Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(
+//                                TankActivity.this, "onAdFailedToLoad() with error: " + error, Toast.LENGTH_SHORT)
+//                                .show();
                     }
                 });
     }
@@ -815,7 +847,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         if (mInterstitialAd != null) {
             mInterstitialAd.show(this);
         } else {
-            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
             if(TankView.EVENT != TankView.PAUSE) {
                 mTankView.resumeNoAds();
             }
@@ -840,7 +872,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                             Log.d("Rewarded Ads", loadAdError.getMessage());
                             mRewardedAd = null;
                             TankActivity.this.isLoading = false;
-                            Toast.makeText(TankActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(TankActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
@@ -848,15 +880,169 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                             TankActivity.this.mRewardedAd = rewardedAd;
                             Log.d("Rewarded Ads", "onAdLoaded");
                             TankActivity.this.isLoading = false;
-                            Toast.makeText(TankActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(TankActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
                         }
                     });
         }
     }
 
-//    public void showRewardedVideo(Dialog purchaseDialog) {
-//
-//    }
+
+    public void loadRewardedInterstitialAd() {
+        if (mRewardedInterstitialAd == null) {
+            isLoadingIntAds = true;
+
+            AdRequest adRequest = new AdRequest.Builder().build();
+            // Use the test ad unit ID to load an ad.
+            RewardedInterstitialAd.load(
+                    TankActivity.this,
+                    RIAD_UNIT_ID,
+                    adRequest,
+                    new RewardedInterstitialAdLoadCallback() {
+                        @Override
+                        public void onAdLoaded(RewardedInterstitialAd ad) {
+                            Log.d("Rewarded InterstitialAD", "onAdLoaded");
+
+                            mRewardedInterstitialAd = ad;
+                            isLoadingIntAds = false;
+//                            Toast.makeText(TankActivity.this, "onAdLoaded", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(LoadAdError loadAdError) {
+                            Log.d("Rewarded InterstitialAD", "onAdFailedToLoad: " + loadAdError.getMessage());
+
+                            // Handle the error.
+                            mRewardedInterstitialAd = null;
+                            isLoadingIntAds = false;
+//                            Toast.makeText(TankActivity.this, "onAdFailedToLoad", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void introduceVideoAd(int rewardAmount, String rewardType) {
+        AdDialogFragment dialog = AdDialogFragment.newInstance(rewardAmount, rewardType);
+        dialog.setAdDialogInteractionListener(
+                new AdDialogFragment.AdDialogInteractionListener() {
+                    @Override
+                    public void onShowAd() {
+                        Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is starting.");
+
+                        showRewardedVideoIAD();
+                    }
+
+                    @Override
+                    public void onCancelAd() {
+                        Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad was skipped before it starts.");
+                    }
+                });
+        dialog.show(getSupportFragmentManager(), "AdDialogFragment");
+    }
+
+    public void showRewardedInterstitialAd() {
+        if (mRewardedInterstitialAd != null) {
+//            RewardItem rewardItem = mRewardedInterstitialAd.getRewardItem();
+//            int rewardAmount = rewardItem.getAmount();
+//            String rewardType = rewardItem.getType();
+
+            Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is ready.");
+//        introduceVideoAd(2, "ADS Coins");
+            showRewardedVideoIAD();
+        }
+        else {
+            Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is not ready.");
+//            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
+            if(TankView.EVENT != TankView.PAUSE) {
+                mTankView.resumeNoAds();
+            }
+        }
+
+
+    }
+
+
+    private void showRewardedVideoIAD() {
+
+        mRewardedInterstitialAd.setFullScreenContentCallback(
+                new FullScreenContentCallback() {
+                    @Override
+                    public void onAdClicked() {
+                        // Called when a click is recorded for an ad.
+                        Log.d("Rewarded InterstitialAD", "Ad was clicked.");
+                        GOT_IREWARD = true;
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        // Called when an impression is recorded for an ad.
+                        Log.d("Rewarded InterstitialAD", "Ad recorded an impression.");
+                        GOT_IREWARD = true;
+                    }
+
+
+                    /** Called when ad showed the full screen content. */
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        Log.d("Rewarded InterstitialAD", "onAdShowedFullScreenContent");
+                        GOT_IREWARD = false;
+
+//                        Toast.makeText(TankActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                    }
+
+                    /** Called when the ad failed to show full screen content. */
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        Log.d("Rewarded InterstitialAD", "onAdFailedToShowFullScreenContent: " + adError.getMessage());
+                        GOT_IREWARD = false;
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        mRewardedInterstitialAd = null;
+                        loadRewardedInterstitialAd();
+
+//                        Toast.makeText(
+//                                        TankActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                    }
+
+                    /** Called when full screen content is dismissed. */
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        mRewardedInterstitialAd = null;
+                        Log.d("Rewarded InterstitialAD", "onAdDismissedFullScreenContent");
+//                        Toast.makeText(TankActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
+                        // Preload the next rewarded interstitial ad.
+                        loadRewardedInterstitialAd();
+                        if(GOT_IREWARD) {
+                            int adcoin = settings.getInt(TankActivity.AD_COIN,0);
+                            adcoin += 2;
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putInt(TankActivity.AD_COIN,adcoin);
+                            editor.apply();
+                            SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                        }
+                        if(TankView.EVENT != TankView.PAUSE) {
+                            mTankView.resumeNoAds();
+                        }
+                    }
+                });
+
+        Activity activityContext = TankActivity.this;
+        mRewardedInterstitialAd.show(
+                activityContext,
+                new OnUserEarnedRewardListener() {
+                    @Override
+                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                        // Handle the reward.
+                        Log.d("Rewarded InterstitialAD", "The user earned the reward.");
+//                        addCoins(rewardItem.getAmount());
+                        GOT_IREWARD = true;
+                    }
+                });
+    }
 
 
     public void showRewardedVideo(Dialog purchaseDialog) {
@@ -875,8 +1061,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                     public void onAdShowedFullScreenContent() {
                         // Called when ad is shown.
                         Log.d("Rewarded Ads", "onAdShowedFullScreenContent");
-                        Toast.makeText(TankActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(TankActivity.this, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
                         GOT_REWARD = false;
                     }
 
@@ -888,9 +1074,9 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         // don't show the ad a second time.
                         mRewardedAd = null;
                         GOT_REWARD = false;
-                        Toast.makeText(
-                                TankActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(
+//                                TankActivity.this, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
                     }
 
                     @Override
@@ -900,8 +1086,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                         // don't show the ad a second time.
                         mRewardedAd = null;
                         Log.d("Rewarded Ads", "onAdDismissedFullScreenContent");
-                        Toast.makeText(TankActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
-                                .show();
+//                        Toast.makeText(TankActivity.this, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT)
+//                                .show();
                         // Preload the next rewarded ad.
                         if(GOT_REWARD) {
                             SharedPreferences.Editor editor = settings.edit();

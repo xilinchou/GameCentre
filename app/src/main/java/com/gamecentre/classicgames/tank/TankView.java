@@ -108,6 +108,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     /** Flag that marks this view as initialized */
     private boolean mInitialized = false;
+    private boolean should_end = false;
     private boolean round_started = false;
 
     protected boolean updatingRemote = false;
@@ -314,7 +315,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     Thread tRemoteHandler = new Thread() {
         @Override
         public void run(){
-            while (true){
+            while (!should_end){
                 //we can't update the UI from here so we'll signal our handler and it will do it for us.
 //                mRemoteUpdateHandler.sendMessage(null);
                 if (gameModel != null && !gameModel.isEmpty() && !drawing && !updatingGame) {
@@ -926,7 +927,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     currentObj[i] = false;
             }
         }
-
+        ((TankActivity) context).updateBonusStack();
         GameStartTime = System.currentTimeMillis();
         ((TankActivity)context).start_timer();
     }
@@ -1833,9 +1834,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             pauseNoAds();
             TankView.EVENT = TankView.END_GAME;
             if(((TankActivity)context).mInterstitialAd == null) {
-                ((TankActivity) context).loadInterstitialAd();
+//                ((TankActivity) context).loadInterstitialAd();
+                ((TankActivity) context).loadRewardedInterstitialAd();
             }
-            ((TankActivity) context).showInterstitialAd();
+//            ((TankActivity) context).showInterstitialAd();
+            ((TankActivity) context).showRewardedInterstitialAd();
             ((TankActivity)context).endGame();
         }
 
@@ -1844,9 +1847,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             TankView.EVENT = TankView.STAGE_COMPLETE;
             sendPlayerInfo(STAGE_COMPLETE);
             if(((TankActivity)context).mInterstitialAd == null) {
-                ((TankActivity) context).loadInterstitialAd();
+//                ((TankActivity) context).loadInterstitialAd();
+                ((TankActivity) context).loadRewardedInterstitialAd();
             }
-            ((TankActivity) context).showInterstitialAd();
+//            ((TankActivity) context).showInterstitialAd();
+            ((TankActivity) context).showRewardedInterstitialAd();
             doStageComplete();
         }
         else if((((!twoPlayers && P1.lives <= 0) || (twoPlayers && P1.lives <= 0 && P2.lives <= 0)) || (eagle != null && eagle.isDestroyed()) || notifyGameOver) && !gameover) {
@@ -1856,9 +1861,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 TankView.EVENT = TankView.GAME_OVER;
                 sendPlayerInfo(GAME_OVER);
                 if (((TankActivity) context).mInterstitialAd == null) {
-                    ((TankActivity) context).loadInterstitialAd();
+//                    ((TankActivity) context).loadInterstitialAd();
+                    ((TankActivity) context).loadRewardedInterstitialAd();
                 }
-                ((TankActivity) context).showInterstitialAd();
+//                ((TankActivity) context).showInterstitialAd();
+                ((TankActivity) context).showRewardedInterstitialAd();
                 doGameOver();
             }
 
@@ -1876,9 +1883,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     TankView.EVENT = TankView.GAME_OVER;
                     sendPlayerInfo(GAME_OVER);
                     if (((TankActivity) context).mInterstitialAd == null) {
-                        ((TankActivity) context).loadInterstitialAd();
+//                        ((TankActivity) context).loadInterstitialAd();
+                        ((TankActivity) context).loadRewardedInterstitialAd();
                     }
-                    ((TankActivity) context).showInterstitialAd();
+//                    ((TankActivity) context).showInterstitialAd();
+                    ((TankActivity) context).showRewardedInterstitialAd();
                     doGameOver();
                 }
             }
@@ -2102,7 +2111,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
 
         ((TankActivity)context).saveObjectives(objectives);
-        ((TankActivity) context).nxtBtn.setText(R.string.retryTxt);
+//        ((TankActivity) context).nxtBtn.setText(R.string.retryTxt);
         P1.stopShooting();
         P1.stopMoving();
         gameover = true;
@@ -2147,6 +2156,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             levelStars.set(level-1,numStars);
             ((TankActivity)context).saveStars(levelStars);
         }
+
+        ((TankActivity)context).nxtBtn.setAlpha(0.2f);
     }
 
     public void doStageComplete() {
@@ -2199,7 +2210,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
 
         ((TankActivity)context).saveObjectives(objectives);
-        ((TankActivity) context).nxtBtn.setText(R.string.nextTxt);
+//        ((TankActivity) context).nxtBtn.setText(R.string.nextTxt);
         P1.stopShooting();
         P1.stopMoving();
         stageComplete = true;
@@ -2245,6 +2256,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(!twoPlayers) {
             saveNewStage(level + 1);
         }
+
+        ((TankActivity)context).nxtBtn.setAlpha(1);
     }
 
     private void getRemoteUpdate() {
@@ -2920,8 +2933,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         ((TankActivity)context).disableControls();
         ((TankActivity) context).openPauseDialog(this);
         TankView.EVENT = TankView.PAUSE;
-        ((TankActivity) context).loadInterstitialAd();
-        ((TankActivity) context).showInterstitialAd();
+//        ((TankActivity) context).loadInterstitialAd();
+//        ((TankActivity) context).showInterstitialAd();
+        ((TankActivity) context).loadRewardedInterstitialAd();
+        ((TankActivity) context).showRewardedInterstitialAd();
     }
 
     public void _pause() {
@@ -2934,8 +2949,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 enablePause(false);
                 ((TankActivity)context).disableControls();
                 TankView.EVENT = TankView.PAUSE;
-                ((TankActivity) context).loadInterstitialAd();
-                ((TankActivity) context).showInterstitialAd();
+//                ((TankActivity) context).loadInterstitialAd();
+//                ((TankActivity) context).showInterstitialAd();
+                ((TankActivity) context).loadRewardedInterstitialAd();
+                ((TankActivity) context).showRewardedInterstitialAd();
             }
         });
 
@@ -3005,9 +3022,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
      * Release all resource locks.
      */
     public void release() {
+        should_end = true;
         mContinue = false;
         mEndGame = true;
-        SoundManager.cleanup();
+
+//        SoundManager.cleanup();
         showingScore = false;
         mInitialized = false;
         drawStarted = false;

@@ -29,7 +29,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
     int goldCount;
 //    TankTextView goldCountTxt;
 
-    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt;
+    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, adCoinTxt;
 
 
     private static String TOTAL_GOLD = "TOTAL GOLD";
@@ -138,6 +138,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         boatTxt = findViewById(R.id.boatCountTxt);
         goldTxt = findViewById(R.id.goldCountTxt);
         retryTxt = findViewById(R.id.retryTxt);
+        adCoinTxt = findViewById(R.id.adCoinTxt);
 
         updateBonus();
     }
@@ -154,6 +155,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         boatTxt.setText(String.valueOf(settings.getInt(TankActivity.BOAT,3)));
         goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,3)));
         retryTxt.setText(String.valueOf(settings.getInt(TankActivity.RETRY_COUNT,5)));
+        adCoinTxt.setText(String.valueOf(settings.getInt(TankActivity.AD_COIN,0)));
     }
 
 
@@ -280,7 +282,8 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 editor.putInt(TankActivity.GOLD, goldCount);
                 editor.putLong(TankActivity.LIFE_TIME_6H, time_6h);
                 editor.putInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
-                editor.commit();
+                editor.apply();
+                SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             }else {
                 // TODO Not enough gold
                 Log.d("PURCHASE TANKGRENADE", "Not enough gold");
@@ -289,7 +292,28 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
 
         }
         else if (id == R.id.buy_goldAd || id == R.id.goldAd2 || id == R.id.goldAd3 || id == R.id.goldAd4){
+            cost = Integer.parseInt(activity.getResources().getString(R.string.adCoin).replace("x", ""));
+            int coinCount = settings.getInt(TankActivity.AD_COIN,0);
+            if (cost <= coinCount) {
+                int amount = Integer.parseInt((activity.getResources().getString(R.string.adGold_count).replace("x", "")));
+                coinCount -= cost;
+                goldCount += amount;
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(TankActivity.GOLD, goldCount);
+                editor.putInt(TankActivity.AD_COIN, coinCount);
+                editor.apply();
+                SoundManager.playSound(Sounds.TANK.BUY_ITEM);
 
+                if (dialog instanceof TankEndGameDialog) {
+                        ((TankEndGameDialog) this.dialog).setGoldCount();
+                } else if (activity instanceof TankMenuActivity) {
+                    ((TankMenuActivity) activity).adCoinTxt.setText(String.format("%s", coinCount));
+                    ((TankMenuActivity) activity).goldTxt.setText(String.format("%s", goldCount));
+                }
+            }else {
+                // TODO Not enough gold
+                Log.d("PURCHASE TANKGRENADE", "Not enough gold");
+            }
         }
         else if (id == R.id.buy_gold || id == R.id.gold2 || id == R.id.gold3){
 
