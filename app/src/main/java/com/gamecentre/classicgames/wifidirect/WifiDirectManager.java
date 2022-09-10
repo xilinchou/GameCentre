@@ -25,6 +25,8 @@ import com.gamecentre.classicgames.connection.ClientSenderThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.connection.ServerSenderThread;
 import com.gamecentre.classicgames.model.Game;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.ClientHandler;
 import com.gamecentre.classicgames.utils.ServerHandler;
 
@@ -164,6 +166,7 @@ public class WifiDirectManager implements WifiP2pManager.ConnectionInfoListener,
         Log.d("Group owner: ",hostAddress);
 //        TextView conState = (TextView)activity.findViewById(R.id.connStatus);
         if(conStateView != null) {
+            SoundManager.playSound(Sounds.TANK.CONNECT);
             conStateView.setText("Connected");
         }
 

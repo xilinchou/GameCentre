@@ -41,6 +41,8 @@ public class Player extends Tank{
     public int bulletIntercept = 0;
     public ArrayList<Long> killTime = new ArrayList<>();
     public int bonusID = -10;
+    private boolean stop_moving = true;
+    private boolean stop_shooting = true;
 
 
 
@@ -80,7 +82,7 @@ public class Player extends Tank{
 
     public void move() {
 //        Log.d("MOTION", String.valueOf(moving) + " " + collision + " " + direction);
-        if(respawn || destroyed) {
+        if(respawn || destroyed || stop_moving) {
             return;
         }
 
@@ -156,6 +158,9 @@ public class Player extends Tank{
     }
 
     public void move(int dir) {
+        if(stop_moving) {
+            return;
+        }
         if(iceTmr > 0) {
             newDirection = dir;
             moving = true;
@@ -214,9 +219,29 @@ public class Player extends Tank{
         moving = false;
     }
 
+    public void startMoving() {
+        moving = true;
+    }
+
+    public void disableMove() {
+        stop_moving = true;
+    }
+
+    public void enableMove() {
+        stop_moving = false;
+    }
+
+    public void disableFire() {
+        stop_shooting = true;
+    }
+
+    public void enableFire() {
+        stop_shooting = false;
+    }
+
     public void fire() {
 //        Log.d("Tile", tile_x+" "+tile_y);
-        if(!shooting || respawn || isDestroyed()) {
+        if(!shooting|| stop_shooting || respawn || isDestroyed()) {
             return;
         }
         if(bullets.size() == MaxBullet) {

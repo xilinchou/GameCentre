@@ -32,6 +32,8 @@ import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.model.Game;
 import com.gamecentre.classicgames.model.TankGameModel;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.CVTR;
 import com.gamecentre.classicgames.utils.MessageRegister;
@@ -102,6 +104,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
         rootView.findViewById(R.id.construction_title).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 switchStage();
                 return true;
             }
@@ -197,6 +200,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
 
                         if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
                             //TODO Change to dialog
+                            SoundManager.playSound(Sounds.TANK.CLICK2);
                             Toast toast = Toast.makeText(activity.getApplicationContext(),
                                     "Wait for player 1 to select stage!",
                                     Toast.LENGTH_SHORT);
@@ -210,6 +214,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
                         }
                         else if (twoPlayers && WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) {
                             if(p2Ready) {
+                                SoundManager.playSound(Sounds.TANK.CLICK);
                                 TankGameModel model = new TankGameModel();
                                 model.mlevelInfo = true;
                                 model.mlevel = level;
@@ -217,6 +222,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
                             }
                             else{
                                 //TODO Change to dialog
+                                SoundManager.playSound(Sounds.TANK.CLICK2);
                                 Toast toast = Toast.makeText(activity.getApplicationContext(),
                                         "Player 2 not ready!",
                                         Toast.LENGTH_SHORT);
@@ -242,10 +248,11 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
                             }
                             editor.apply();
                         }
-
+                        SoundManager.playSound(Sounds.TANK.CLICK);
                         ((TankMenuActivity) activity).startGame(twoPlayers);
                     }
                     else {
+                        SoundManager.playSound(Sounds.TANK.CLICK2);
                         openGamePurchse();
                     }
                 }
@@ -273,6 +280,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     selfDismiss = true;
                     if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
 
@@ -293,6 +301,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
     @Override
     public boolean onTouch(View v, MotionEvent m) {
         if(m.getAction() == MotionEvent.ACTION_DOWN) {
+            SoundManager.playSound(Sounds.TANK.CLICK);
             int level = (int) (v.getTag());
             int completed = getCompleted(level);
             completedTxt.setText(String.format(Locale.ENGLISH,"CHALLENGES %d/%d", completed, TankView.NUM_OBJECTIVES));

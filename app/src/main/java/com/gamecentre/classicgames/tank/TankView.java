@@ -1,5 +1,6 @@
 package com.gamecentre.classicgames.tank;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -603,29 +604,37 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
 
         ViewGroup.LayoutParams navLayout = ((TankActivity)context).navView.getLayoutParams();
-        navLayout.width = bDim;
-        navLayout.height = bDim;
-        ((TankActivity)context).navView.layout(bmDim,dimH-bmDim,bDim,bDim);
+        int navDim = (int)(Math.min((dimW - dim)*0.9/2,dimH-bDim)*0.95);
+//        navLayout.width = bDim;
+//        navLayout.height = bDim;
+        navLayout.width = navDim;
+        navLayout.height = navDim;
+        ((TankActivity)context).navView.layout(bmDim,dimH-navDim,navDim,navDim);
 
         RelativeLayout.LayoutParams btnLayout = (RelativeLayout.LayoutParams)((TankActivity)context).lftBtn.getLayoutParams();
-        btnLayout.width = (int)(bDim*0.4);
-        btnLayout.height = (int)(bDim*0.4);
+        btnLayout.width = (int)(navDim*0.4);
+        btnLayout.height = (int)(navDim*0.4);
         ((TankActivity)context).lftBtn.setLayoutParams(btnLayout);
 
         btnLayout = (RelativeLayout.LayoutParams)((TankActivity)context).upBtn.getLayoutParams();
-        btnLayout.width = (int)(bDim*0.4);
-        btnLayout.height = (int)(bDim*0.4);
+        btnLayout.width = (int)(navDim*0.4);
+        btnLayout.height = (int)(navDim*0.4);
         ((TankActivity)context).upBtn.setLayoutParams(btnLayout);
 
         btnLayout = (RelativeLayout.LayoutParams)((TankActivity)context).rtBtn.getLayoutParams();
-        btnLayout.width = (int)(bDim*0.4);
-        btnLayout.height = (int)(bDim*0.4);
+        btnLayout.width = (int)(navDim*0.4);
+        btnLayout.height = (int)(navDim*0.4);
         ((TankActivity)context).rtBtn.setLayoutParams(btnLayout);
 
         btnLayout = (RelativeLayout.LayoutParams)((TankActivity)context).dwnBtn.getLayoutParams();
-        btnLayout.width = (int)(bDim*0.4);
-        btnLayout.height = (int)(bDim*0.4);
+        btnLayout.width = (int)(navDim*0.4);
+        btnLayout.height = (int)(navDim*0.4);
         ((TankActivity)context).dwnBtn.setLayoutParams(btnLayout);
+
+//        btnLayout = (RelativeLayout.LayoutParams)((TankActivity)context).stick.getLayoutParams();
+//        btnLayout.width = (int)(bDim*0.35);
+//        btnLayout.height = (int)(bDim*0.35);
+//        ((TankActivity)context).stick.setLayoutParams(btnLayout);
 
         // Shoot button
 
@@ -930,6 +939,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         ((TankActivity) context).updateBonusStack();
         GameStartTime = System.currentTimeMillis();
         ((TankActivity)context).start_timer();
+        P1.enableMove();
+        P1.enableFire();
     }
 
     /**
@@ -2112,8 +2123,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         ((TankActivity)context).saveObjectives(objectives);
 //        ((TankActivity) context).nxtBtn.setText(R.string.retryTxt);
-        P1.stopShooting();
-        P1.stopMoving();
+        P1.disableFire();
+        P1.disableMove();
         gameover = true;
         enemyFrame = 0;
         ((TankActivity)context).disableControls();
@@ -2761,69 +2772,69 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     @Override
     public void onButtonPressed(View v, MotionEvent m) {
-
-            switch (v.getId()) {
-                case R.id.upBtn:
-                    if(m.getX() < 0) {
-                        P1.move(CONST.Direction.LEFT);
-                    }
-                    else if(m.getX() > ((TankActivity)context).upBtn.getWidth()) {
-                        P1.move(CONST.Direction.RIGHT);
-                    }
-                    else if(m.getY() > ((TankActivity)context).upBtn.getHeight()) {
-                        P1.move(CONST.Direction.DOWN);
-                    }
-                    else {
-                        P1.move(CONST.Direction.UP);
-                    }
-                    break;
-                case R.id.downBtn:
-                    if(m.getX() < 0) {
-                        P1.move(CONST.Direction.LEFT);
-                    }
-                    else if(m.getX() > ((TankActivity)context).dwnBtn.getWidth()) {
-                        P1.move(CONST.Direction.RIGHT);
-                    }
-                    else if(m.getY() < 0) {
-                        P1.move(CONST.Direction.UP);
-                    }
-                    else {
-                        P1.move(CONST.Direction.DOWN);
-                    }
-                    break;
-                case R.id.leftBtn:
-                    if(m.getY() < 0) {
-                        P1.move(CONST.Direction.UP);
-                    }
-                    else if(m.getY() > ((TankActivity)context).lftBtn.getHeight()) {
-                        P1.move(CONST.Direction.DOWN);
-                    }
-                    else if(m.getX() > ((TankActivity)context).lftBtn.getWidth()) {
-                        P1.move(CONST.Direction.RIGHT);
-                    }
-                    else {
-                        P1.move(CONST.Direction.LEFT);
-                    }
-                    break;
-                case R.id.rightBtn:
-                    if(m.getY() < 0) {
-                        P1.move(CONST.Direction.UP);
-                    }
-                    else if(m.getY() > ((TankActivity)context).rtBtn.getHeight()) {
-                        P1.move(CONST.Direction.DOWN);
-                    }
-                    else if(m.getX() < 0) {
-                        P1.move(CONST.Direction.LEFT);
-                    }
-                    else {
-                        P1.move(CONST.Direction.RIGHT);
-                    }
-                    break;
-                case R.id.shootBtn:
-                    P1.startShooting();
-                    break;
-            }
+        Log.d("Button Pressed", "Strick move");
+//        if (v.getId() == R.id.navStick) {
+//            if (m.getX() < 0) {
+//                P1.move(CONST.Direction.LEFT);
+//            } else if (m.getX() > ((TankActivity) context).stick.getWidth()) {
+//                P1.move(CONST.Direction.RIGHT);
+//            } else if (m.getY() > ((TankActivity) context).stick.getHeight()) {
+//                P1.move(CONST.Direction.DOWN);
+//            } else if(m.getY() < ((TankActivity) context).stick.getHeight()) {
+//                P1.move(CONST.Direction.UP);
+//            }
 //        }
+
+        if(v.getId() == R.id.upBtn) {
+            if (m.getX() < 0) {
+                P1.move(CONST.Direction.LEFT);
+            } else if (m.getX() > ((TankActivity) context).upBtn.getWidth()) {
+                P1.move(CONST.Direction.RIGHT);
+            } else if (m.getY() > ((TankActivity) context).upBtn.getHeight()) {
+                P1.move(CONST.Direction.DOWN);
+            } else {
+                P1.move(CONST.Direction.UP);
+            }
+        }
+
+        else  if (v.getId() == R.id.downBtn) {
+            if (m.getX() < 0) {
+                P1.move(CONST.Direction.LEFT);
+            } else if (m.getX() > ((TankActivity) context).dwnBtn.getWidth()) {
+                P1.move(CONST.Direction.RIGHT);
+            } else if (m.getY() < 0) {
+                P1.move(CONST.Direction.UP);
+            } else {
+                P1.move(CONST.Direction.DOWN);
+            }
+        }
+        else  if (v.getId() == R.id.leftBtn) {
+            if (m.getY() < 0) {
+                P1.move(CONST.Direction.UP);
+            } else if (m.getY() > ((TankActivity) context).lftBtn.getHeight()) {
+                P1.move(CONST.Direction.DOWN);
+            } else if (m.getX() > ((TankActivity) context).lftBtn.getWidth()) {
+                P1.move(CONST.Direction.RIGHT);
+            } else {
+                P1.move(CONST.Direction.LEFT);
+            }
+        }
+
+        else  if (v.getId() == R.id.rightBtn) {
+            if (m.getY() < 0) {
+                P1.move(CONST.Direction.UP);
+            } else if (m.getY() > ((TankActivity) context).rtBtn.getHeight()) {
+                P1.move(CONST.Direction.DOWN);
+            } else if (m.getX() < 0) {
+                P1.move(CONST.Direction.LEFT);
+            } else {
+                P1.move(CONST.Direction.RIGHT);
+            }
+        }
+        else  if (v.getId() == R.id.shootBtn) {
+            P1.startShooting();
+        }
+
         if(m.getAction() == MotionEvent.ACTION_UP) {
             if(v.getId()== R.id.shootBtn) {
                 P1.stopShooting();

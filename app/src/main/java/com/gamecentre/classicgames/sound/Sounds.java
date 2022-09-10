@@ -29,6 +29,10 @@ public class Sounds {
         public static final int FIND_GOLD = 16;
         public static final int BOMB = 17;
         public static final int BOMB2 = 18;
+        public static final int CLICK = 19;
+        public static final int CLICK2 = 20;
+        public static final int CLICK3 = 21;
+        public static final int CONNECT = 22;
     }
 
 }

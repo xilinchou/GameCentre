@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 
 import java.util.Locale;
 
@@ -152,6 +154,7 @@ public class TankPauseGameDialog extends Dialog implements View.OnTouchListener{
     public boolean onTouch(View v, MotionEvent m) {
 
         if(m.getAction() == MotionEvent.ACTION_DOWN){
+            SoundManager.playSound(Sounds.TANK.CLICK);
             SharedPreferences.Editor editor;
             int id = v.getId();
             if (id == R.id.continueBtn || id == R.id.pauseCloseBtn) {

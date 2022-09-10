@@ -145,6 +145,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     openStore();
                 }
                 return false;
@@ -300,6 +301,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                     @Override
                     public boolean onTouch(View v, MotionEvent m) {
                         if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            SoundManager.playSound(Sounds.TANK.CLICK);
                             openStages(v, false);
                         }
                         return true;
@@ -313,9 +315,11 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         if(m.getAction() == MotionEvent.ACTION_DOWN) {
                             if ((WifiDirectManager.getInstance().isServer() && ServerConnectionThread.serverStarted) ||
                                     (!WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted)) {
+                                SoundManager.playSound(Sounds.TANK.CLICK);
                                 openStages(v, true);
                             } else {
                                 //TODO Change toast to dialog
+                                SoundManager.playSound(Sounds.TANK.CLICK2);
                                 Toast toast = Toast.makeText(TankMenuActivity.this.getApplicationContext(),
                                         "Invite a player first",
                                         Toast.LENGTH_SHORT);
@@ -336,6 +340,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                     @Override
                     public boolean onTouch(View v, MotionEvent m) {
                         if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            SoundManager.playSound(Sounds.TANK.CLICK);
                             Log.d("Construction", "Opening fragment");
                             FragmentManager fragmentManager = getSupportFragmentManager();
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -352,6 +357,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                     @Override
                     public boolean onTouch(View v, MotionEvent m) {
                         if(m.getAction() == MotionEvent.ACTION_DOWN) {
+                            SoundManager.playSound(Sounds.TANK.CLICK);
                             Intent i = new Intent(TankMenuActivity.this, TankTypeActivity.class);
                             TankMenuActivity.this.startActivity(i);
                             TankMenuActivity.this.finish();
@@ -372,11 +378,10 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        SoundManager.playSound(Sounds.TANK.CLICK);
 
 //                        showInterstitial();
                         showRewardedInterstitialAd();
-
-//                        openPlayerSearchView();
                     }
                 });
     }

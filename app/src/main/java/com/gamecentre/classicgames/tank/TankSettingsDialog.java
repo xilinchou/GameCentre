@@ -14,6 +14,8 @@ import android.widget.CheckBox;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 
 public class TankSettingsDialog extends Dialog implements android.view.View.OnClickListener{
     CheckBox soundCheck;
@@ -74,6 +76,7 @@ public class TankSettingsDialog extends Dialog implements android.view.View.OnCl
 
     @Override
     public void onClick(View v) {
+        SoundManager.playSound(Sounds.TANK.CLICK);
         int id = v.getId();
         if (id == R.id.saveBtn) {
             SharedPreferences.Editor editor = settings.edit();

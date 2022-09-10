@@ -13,6 +13,8 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
 
 @SuppressLint("ClickableViewAccessibility")
@@ -37,6 +39,7 @@ public class TankTypeActivity extends AppCompatActivity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        SoundManager.playSound(Sounds.TANK.CLICK);
                         openSettings(view);
                     }
                 });
@@ -84,7 +87,10 @@ public class TankTypeActivity extends AppCompatActivity {
 
         startService(new Intent(TankTypeActivity.this, TimerBroadcastService.class));
 
+        loadSounds();
         loadSoundSettings();
+
+
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -93,14 +99,17 @@ public class TankTypeActivity extends AppCompatActivity {
             Intent i = new Intent(TankTypeActivity.this, TankMenuActivity.class);
             int id = view.getId();
             if (id == R.id.classic || id == R.id.classic_lo) {
+                SoundManager.playSound(Sounds.TANK.CLICK3);
                 i.putExtra(TankTypeActivity.TANK_TYPE, "CLASSIC");
                 startActivity(i);
                 finish();
             }
             else if (id == R.id.arcade || id == R.id.arcade_lo) {
-                i.putExtra(TankTypeActivity.TANK_TYPE, "CAMPAIGN");
-                startActivity(i);
-                finish();
+                //TODO
+//                SoundManager.playSound(Sounds.TANK.CLICK3);
+//                i.putExtra(TankTypeActivity.TANK_TYPE, "CAMPAIGN");
+//                startActivity(i);
+//                finish();
             }
 //            else if (id == R.id.construct) {
 //                //TODO
@@ -127,5 +136,37 @@ public class TankTypeActivity extends AppCompatActivity {
         editor.putBoolean(TankMenuActivity.PREF_MUTED, sound);
         editor.putBoolean(TankMenuActivity.PREF_VIBRATE,vibrate);
         editor.apply();
+
+        SoundManager.enableSound(sound);
+    }
+
+    private void loadSounds() {
+        SoundManager.getInstance();
+        SoundManager.initSounds(this);
+        int[] sounds = {
+                R.raw.tnkbackground,
+                R.raw.tnkbonus,
+                R.raw.tnkbrick,
+                R.raw.tnkexplosion,
+                R.raw.tnkfire,
+                R.raw.tnkgameover,
+                R.raw.tnkgamestart,
+                R.raw.tnkscore,
+                R.raw.tnksteel,
+                R.raw.tnkpowerup,
+                R.raw.tnkpause,
+                R.raw.tnkearn_gold,
+                R.raw.tnkbuy_item,
+                R.raw.tnk1up,
+                R.raw.tnkslide,
+                R.raw.tnkfindgold,
+                R.raw.tnkbomb,
+                R.raw.tnkdropbomb,
+                R.raw.tnkclick,
+                R.raw.tnkclick2,
+                R.raw.tnkclick3,
+                R.raw.tnkconnect,
+        };
+        SoundManager.loadSounds(sounds);
     }
 }

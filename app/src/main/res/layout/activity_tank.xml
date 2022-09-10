@@ -439,7 +439,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:orientation="vertical"
-        android:background="@drawable/bghud7">
+        android:background="@drawable/bghud71">
 
         <LinearLayout
             android:id="@+id/bonusBank"
@@ -791,6 +791,26 @@
             android:background="@drawable/up_btn"
             android:tag="up" />
 
+
+
+<!--        <Button-->
+<!--            android:id="@+id/navStickView"-->
+<!--            android:layout_width="45dp"-->
+<!--            android:layout_height="45dp"-->
+<!--            android:layout_centerInParent="true"-->
+<!--            android:background="@drawable/navstick"/>-->
+
+<!--        <Button-->
+<!--            android:id="@+id/navStick"-->
+<!--            android:layout_width="45dp"-->
+<!--            android:layout_height="45dp"-->
+<!--            android:layout_centerInParent="true"-->
+<!--            android:background="@drawable/navstick"-->
+<!--            android:alpha="0"/>-->
+
+
+
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -902,17 +922,17 @@
             android:layout_alignParentBottom="true"
             android:layout_marginStart="30dp"
             android:layout_marginBottom="30dp"
-            android:background="@drawable/menu_btn"/>
+            android:background="@drawable/menu_btn" />
 
         <Button
             android:id="@+id/retryBtn"
             android:layout_width="80dp"
             android:layout_height="30dp"
-            android:layout_toStartOf="@+id/nxtBtn"
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="30dp"
-            android:background="@drawable/retry_btn"/>
+            android:layout_toStartOf="@+id/nxtBtn"
+            android:background="@drawable/retry_btn" />
 
         <Button
             android:id="@+id/nxtBtn"
@@ -922,7 +942,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
-            android:background="@drawable/next_btn"/>
+            android:background="@drawable/next_btn" />
 
         <LinearLayout
             android:layout_width="300dp"

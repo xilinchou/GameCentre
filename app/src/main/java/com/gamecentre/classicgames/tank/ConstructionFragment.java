@@ -22,6 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.wifidirect.WifiDialog;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 import com.google.gson.Gson;
@@ -153,6 +155,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     openSaveDialog();
                 }
                 return true;
@@ -163,6 +166,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     openLoadDialog();
                 }
                 return true;
@@ -184,6 +188,7 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                     Log.d("Fragment","Closing fragment");
                     if (fragmentManager.getBackStackEntryCount() > 0) {
@@ -318,20 +323,6 @@ public class ConstructionFragment extends Fragment implements View.OnTouchListen
                         }
                     }
                 }
-//                else if(view.getId() == R.id.undo) {
-//                    int pointer = redoPointer - 1;
-//                    pointer %= REDO_SIZE;
-//                    int[] stack = redoStack.get(pointer);
-//                    if(stack[0] != -1 && stack[1] != -1)
-//
-//                    return true;
-//                }
-//                else if(view.getId() == R.id.redo) {
-//                    return true;
-//                }
-//                else if(view.getId() == R.id.clear) {
-//                    return true;
-//                }
 
                 ((RelativeLayout)stone.getParent()).setBackgroundColor(Color.TRANSPARENT);
                 ((RelativeLayout)brick.getParent()).setBackgroundColor(Color.TRANSPARENT);

@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
 import com.gamecentre.classicgames.utils.MessageRegister;
 
@@ -190,6 +192,7 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
             else if (id == R.id.gameBuy3 || id == R.id.gameBuy32 || id == R.id.gameBuy33) {
                 int cost = Integer.parseInt(activity.getResources().getString(R.string.game3_gold).replace("x", ""));
                 if (golds >= cost) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     int amnt = Integer.parseInt(activity.getResources().getString(R.string.game15Amnt).replace("+", ""));
                     golds = settings.getInt(TankActivity.GOLD, 0);
                     games = settings.getInt(TankActivity.RETRY_COUNT, 0);
@@ -203,12 +206,14 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     editor.putInt(TankActivity.RETRY_COUNT, games);
                     editor.commit();
                 } else if (activity instanceof TankActivity) {
+                    SoundManager.playSound(Sounds.TANK.CLICK2);
                     ((TankActivity) activity).openStore(this);
                 }
             }
             else if (id == R.id.gameBuy6 || id == R.id.gameBuy62 || id == R.id.gameBuy63) {
                 int cost = Integer.parseInt(activity.getResources().getString(R.string.game6h_gold).replace("x", ""));
                 if (golds >= cost) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     golds -= cost;
                     gameCountTxt.setText(String.valueOf(CONST.Tank.MAX_GAME_COUNT));
                     long time_6h = System.currentTimeMillis() + CONST.Tank.LIFE_DURATION_6HRS;
@@ -218,8 +223,13 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     editor.putInt(TankActivity.RETRY_COUNT, CONST.Tank.MAX_GAME_COUNT);
                     editor.commit();
                 }
+                else if (activity instanceof TankActivity) {
+                    SoundManager.playSound(Sounds.TANK.CLICK2);
+                    ((TankActivity) activity).openStore(this);
+                }
             }
             else if (id == R.id.closeGameBuyBtn) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 dismiss();
             }
         }

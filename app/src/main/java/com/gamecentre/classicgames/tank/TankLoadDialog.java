@@ -21,6 +21,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -102,19 +104,28 @@ public class TankLoadDialog extends Dialog implements View.OnTouchListener{
         int id = v.getId();
         if (id == R.id.loadName) {
             if(stageName != null) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 stage = loadStage(stageName);
                 fragment.updateStage(stage);
                 dismiss();
+            }
+            else {
+                SoundManager.playSound(Sounds.TANK.CLICK2);
             }
         }
 
         if (id == R.id.delName) {
             if(stageName != null) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 deleteStage(stageName);
+            }
+            else {
+                SoundManager.playSound(Sounds.TANK.CLICK2);
             }
         }
 
         if (id == R.id.closeLoad) {
+            SoundManager.playSound(Sounds.TANK.CLICK);
             dismiss();
         }
         return true;

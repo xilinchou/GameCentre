@@ -7,12 +7,16 @@ import androidx.core.content.res.ResourcesCompat;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -61,7 +65,8 @@ import java.util.TimerTask;
 
 public class TankActivity extends AppCompatActivity implements View.OnTouchListener, ServiceListener {
 
-    public Button upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, bmbBtn, menuBtn, nxtBtn, retryBtn;
+    public Button stick, upBtn, dwnBtn, rtBtn, lftBtn, shtBtn, bmbBtn, menuBtn, nxtBtn, retryBtn;
+    public Button stickView;
     public LinearLayout enemyCount, bonusFrame, pauseControl;
     public ImageView P1StatusImg, P2StatusImg, StageFlag;
     public TextView P1StatusTxt, P2StatusTxt, StageTxt, enemyCountTxt;
@@ -130,6 +135,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public static boolean GOT_REWARD = false;
     public static boolean GOT_IREWARD = false;
 
+    RelativeLayout.LayoutParams layoutParams;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +188,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn = findViewById(R.id.downBtn);
         rtBtn = findViewById(R.id.rightBtn);
         lftBtn = findViewById(R.id.leftBtn);
+//        stick = findViewById(R.id.navStick);
+//        stickView = findViewById(R.id.navStickView);
 
         menuBtn = findViewById(R.id.menuBtn);
         nxtBtn = findViewById(R.id.nxtBtn);
@@ -197,6 +206,78 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dwnBtn.setOnTouchListener(this);
         rtBtn.setOnTouchListener(this);
         lftBtn.setOnTouchListener(this);
+//        stick.setOnTouchListener(this);
+//        stickView.setOnTouchListener(this);
+
+//        ImageView stickView = new ImageView(this);
+//        stickView.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.navstick));
+//        stickView.setTag("StickView");
+
+//        stickView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                    ClipData data = ClipData.newPlainText("", "");
+//                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(stickView);
+//
+//                    stickView.startDrag(data, shadowBuilder, stickView, 0);
+//                    v.setAlpha(0);
+//                }
+//                else if (event.getAction() == MotionEvent.ACTION_UP){
+//                    v.setAlpha(1);
+//                }
+//                return false;
+//            }
+//        });
+//
+//        stickView.setOnDragListener(new View.OnDragListener() {
+//            @Override
+//            public boolean onDrag(View v, DragEvent event) {
+//                String msg = "Drag and Drop";
+//                switch(event.getAction()) {
+//                    case DragEvent.ACTION_DRAG_STARTED:
+//                        layoutParams = (RelativeLayout.LayoutParams)v.getLayoutParams();
+//                        Log.d(msg, "Action is DragEvent.ACTION_DRAG_STARTED");
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENTERED:
+//                        Log.d(msg, "Action is DragEvent.ACTION_DRAG_ENTERED");
+//                        int x_cord = (int) event.getX();
+//                        int y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_EXITED :
+//                        Log.d(msg, "Action is DragEvent.ACTION_DRAG_EXITED");
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//                        layoutParams.leftMargin = x_cord;
+//                        layoutParams.topMargin = y_cord;
+//                        v.setLayoutParams(layoutParams);
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_LOCATION  :
+//                        Log.d(msg, "Action is DragEvent.ACTION_DRAG_LOCATION");
+//                        x_cord = (int) event.getX();
+//                        y_cord = (int) event.getY();
+//                        break;
+//
+//                    case DragEvent.ACTION_DRAG_ENDED   :
+//                        Log.d(msg, "Action is DragEvent.ACTION_DRAG_ENDED");
+//                        v.setAlpha(1);
+//                        // Do nothing
+//                        break;
+//
+//                    case DragEvent.ACTION_DROP:
+//                        Log.d(msg, "ACTION_DROP event");
+//
+//                        // Do nothing
+//                        break;
+//                    default: break;
+//                }
+//
+//                return false;
+//            }
+//        });
 
         menuBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -362,31 +443,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                 return true;
             }
         });
-
-
-        SoundManager.getInstance();
-        SoundManager.initSounds(this);
-        int[] sounds = {
-                R.raw.tnkbackground,
-                R.raw.tnkbonus,
-                R.raw.tnkbrick,
-                R.raw.tnkexplosion,
-                R.raw.tnkfire,
-                R.raw.tnkgameover,
-                R.raw.tnkgamestart,
-                R.raw.tnkscore,
-                R.raw.tnksteel,
-                R.raw.tnkpowerup,
-                R.raw.tnkpause,
-                R.raw.tnkearn_gold,
-                R.raw.tnkbuy_item,
-                R.raw.tnk1up,
-                R.raw.tnkslide,
-                R.raw.tnkfindgold,
-                R.raw.tnkbomb,
-                R.raw.tnkdropbomb,
-        };
-        SoundManager.loadSounds(sounds);
 
         MessageRegister.getInstance().setServiceListener(this);
 

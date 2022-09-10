@@ -16,6 +16,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -81,23 +83,27 @@ public class TankSaveDialog extends Dialog implements View.OnClickListener{
 
             String saveName = saveTextField.getText().toString();
             if(saveName.equals("")) {
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 saveNotify.setText("Name cannot be empty!");
                 return;
             }
 
             if(savedNames.contains(saveName) && saveButton.getText().toString().equals("OVERWRITE")) {
 //                saveStageNames(savedNames);
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 Log.d("SAVING", "Agreed to overwrite");
                 saveStage(saveName,stage);
                 dismiss();
             }
 
             else if(savedNames.contains(saveName)) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 saveNotify.setText("Name already exists");
                 saveButton.setText("OVERWRITE");
             }
 
             else if(!savedNames.contains(saveName)) {
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 savedNames.add(saveName);
                 saveStageNames(savedNames);
                 saveStage(saveName,stage);
@@ -108,6 +114,7 @@ public class TankSaveDialog extends Dialog implements View.OnClickListener{
 
         }
         else if (id == R.id.cancelBtn) {
+            SoundManager.playSound(Sounds.TANK.CLICK);
             saveButton.setText("SAVE");
             dismiss();
         }

@@ -183,6 +183,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             } else {
                 // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE STARBOAT", "Not enough gold");
             }
         }
@@ -205,6 +206,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             } else {
                 // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE CLOCKSHOVEL", "Not enough gold");
             }
         }
@@ -227,6 +229,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             } else {
                 // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE GUNHELMET", "Not enough gold");
             }
         }
@@ -249,6 +252,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             } else {
                 // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE TANKGRENADE", "Not enough gold");
             }
         }
@@ -268,6 +272,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             } else {
                 // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE TANKGRENADE", "Not enough gold");
             }
 
@@ -286,7 +291,8 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
             }else {
                 // TODO Not enough gold
-                Log.d("PURCHASE TANKGRENADE", "Not enough gold");
+                SoundManager.playSound(Sounds.TANK.CLICK2);
+                Log.d("PURCHASE GAME6H", "Not enough gold");
             }
 
 
@@ -311,8 +317,9 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                     ((TankMenuActivity) activity).goldTxt.setText(String.format("%s", goldCount));
                 }
             }else {
-                // TODO Not enough gold
-                Log.d("PURCHASE TANKGRENADE", "Not enough gold");
+                // TODO Not enough adcoin
+                SoundManager.playSound(Sounds.TANK.CLICK2);
+                Log.d("PURCHASE GOLD", "Not enough adcoin");
             }
         }
         else if (id == R.id.buy_gold || id == R.id.gold2 || id == R.id.gold3){
@@ -333,6 +340,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
             }
         }
         else if (id == R.id.buyCancelBtn) {
+            SoundManager.playSound(Sounds.TANK.CLICK);
             if (activity instanceof TankActivity) {
                 ((TankActivity) activity).updateBonusStack();
                 mTankView.resumeNoAds();

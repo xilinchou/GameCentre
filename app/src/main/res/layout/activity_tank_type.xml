@@ -91,6 +91,16 @@
                                     android:textColor="@color/white"
                                     android:textSize="30sp"
                                     android:textStyle="bold" />
+
+                                <com.gamecentre.classicgames.tank.TankTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentBottom="true"
+                                    android:text="Coming soon!"
+                                    android:textColor="@color/green"
+                                    android:textSize="15sp"
+                                    android:layout_marginBottom="20dp"
+                                    android:layout_centerHorizontal="true"/>
                             </RelativeLayout>
 
                         </androidx.cardview.widget.CardView>

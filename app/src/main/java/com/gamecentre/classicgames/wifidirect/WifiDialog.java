@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
 import com.gamecentre.classicgames.pingpong.PingPongActivity;
+import com.gamecentre.classicgames.sound.SoundManager;
+import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.MessageRegister;
 
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
                 String peerName = (String) ((TextView) view).getText();
                 WifiP2pDevice device = WifiDirectManager.getInstance().getDevice(peerName);
                 if (device != null) {
+                    SoundManager.playSound(Sounds.TANK.CLICK);
                     conState.setText("Connecting");
                     WifiDirectManager.getInstance().connect(conState);
                 }
@@ -80,6 +83,7 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.searchBtn:
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 WifiDirectManager.getInstance().cancelDisconnect();
                 Log.d("Player Search", "Searching for players");
                 TextView conState = findViewById(R.id.connStatus);
@@ -87,6 +91,7 @@ public class WifiDialog extends Dialog implements android.view.View.OnClickListe
                 WifiDirectManager.getInstance().discoverPeers();
                 break;
             case R.id.wifiClose:
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 MessageRegister.getInstance().registerWifiDialog();
                 dismiss();
                 break;
