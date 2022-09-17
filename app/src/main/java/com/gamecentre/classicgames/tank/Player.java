@@ -19,6 +19,7 @@ public class Player extends Tank{
     protected int frame;
     protected int frame_delay;
     public int lives = 3;
+    private int mines = 3;
     protected int reloadTmr = (int)(0.1*TankView.FPS);
     protected int reload_time = 0;
     protected int MaxBullet = 1;
@@ -313,6 +314,18 @@ public class Player extends Tank{
         });
     }
 
+
+    public void updateMineView() {
+        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Player.this.player == 1) {
+                    ((TankActivity) (TankView.getInstance().getTankViewContext())).bmbText.setText(String.valueOf(Player.this.mines));
+                }
+            }
+        });
+    }
+
     public boolean isAlive() {
         return lives > 0;
     }
@@ -456,6 +469,24 @@ public class Player extends Tank{
             armour = 3;
             level = 1;
         }
+    }
+
+    public void applyMine() {
+        ++mines;
+        updateMineView();
+    }
+
+    public void dropBomb() {
+        if(mines <= 0 || lives <= 0) {
+            return;
+        }
+        super.dropBomb();
+        --mines;
+        updateMineView();
+    }
+
+    public int getMines() {
+        return mines;
     }
 
     public int collidsWithBonus(Bonus b) {

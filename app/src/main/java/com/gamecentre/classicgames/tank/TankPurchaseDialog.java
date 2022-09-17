@@ -29,7 +29,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
     int goldCount;
 //    TankTextView goldCountTxt;
 
-    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, goldTxt, retryTxt, adCoinTxt;
+    TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, mineTxt, goldTxt, retryTxt, adCoinTxt;
 
 
     private static String TOTAL_GOLD = "TOTAL GOLD";
@@ -101,6 +101,12 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         findViewById(R.id.tankgrenade3).setOnClickListener(this);
         findViewById(R.id.tankgrenade4).setOnClickListener(this);
 
+        findViewById(R.id.buy_mine).setOnClickListener(this);
+        findViewById(R.id.mine1).setOnClickListener(this);
+        findViewById(R.id.mine2).setOnClickListener(this);
+        findViewById(R.id.mine3).setOnClickListener(this);
+        findViewById(R.id.mine4).setOnClickListener(this);
+
         findViewById(R.id.buy_game).setOnClickListener(this);
         findViewById(R.id.game2).setOnClickListener(this);
         findViewById(R.id.game3).setOnClickListener(this);
@@ -136,6 +142,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         starTxt = findViewById(R.id.starCountTxt);
         gunTxt = findViewById(R.id.gunCountTxt);
         boatTxt = findViewById(R.id.boatCountTxt);
+        mineTxt = findViewById(R.id.mineTxt);
         goldTxt = findViewById(R.id.goldCountTxt);
         retryTxt = findViewById(R.id.retryTxt);
         adCoinTxt = findViewById(R.id.adCoinTxt);
@@ -153,6 +160,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         starTxt.setText(String.valueOf(settings.getInt(TankActivity.STAR,3)));
         gunTxt.setText(String.valueOf(settings.getInt(TankActivity.GUN,3)));
         boatTxt.setText(String.valueOf(settings.getInt(TankActivity.BOAT,3)));
+        mineTxt.setText(String.valueOf(settings.getInt(TankActivity.MINE,3)));
         goldTxt.setText(String.valueOf(settings.getInt(TankActivity.GOLD,3)));
         retryTxt.setText(String.valueOf(settings.getInt(TankActivity.RETRY_COUNT,5)));
         adCoinTxt.setText(String.valueOf(settings.getInt(TankActivity.AD_COIN,0)));
@@ -254,6 +262,26 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 // TODO Not enough gold
                 SoundManager.playSound(Sounds.TANK.CLICK2);
                 Log.d("PURCHASE TANKGRENADE", "Not enough gold");
+            }
+        }
+        else if (id == R.id.buy_mine || id == R.id.mine1 || id == R.id.mine2 || id == R.id.mine3 || id == R.id.mine4) {
+            cost = Integer.parseInt((activity.getResources().getString(R.string.mine_gold).replace("x", "")));
+            if (cost <= goldCount) {
+                int mine = settings.getInt(TankActivity.MINE, 0);
+
+                int amount = Integer.parseInt((activity.getResources().getString(R.string.mine_count).replace("x", "")));
+                mine += amount;
+                goldCount -= cost;
+                goldTxt.setText(String.format("%s", goldCount));
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(TankActivity.MINE, mine);
+                editor.putInt(TankActivity.GOLD, goldCount);
+                editor.apply();
+                SoundManager.playSound(Sounds.TANK.BUY_ITEM);
+            } else {
+                // TODO Not enough gold
+                SoundManager.playSound(Sounds.TANK.CLICK2);
+                Log.d("PURCHASE MINE", "Not enough gold");
             }
         }
         else if (id == R.id.buy_game || id == R.id.game2 || id == R.id.game3 || id == R.id.game4){

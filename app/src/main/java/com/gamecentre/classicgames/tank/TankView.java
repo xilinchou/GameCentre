@@ -873,6 +873,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             loadLevel(level);
         }
         ((TankActivity)context).StageTxt.setText(String.valueOf(level));
+        ((TankActivity)context).bmbText.setText(String.valueOf(P1.getMines()));
 
         closingCurtain = true;
         openingCurtain = false;
@@ -1808,7 +1809,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(gold.isAvailable() && P1.collides_with(gold)) {
             currentObj[6] = true;
             P1.stageScore += 800;
-            ((TankActivity)context).updateGold(1);
+//            ((TankActivity)context).updateGold(1);
             gold.setTaken();
             TankView.GOLD_LEVEL = level;
             ((TankActivity)context).saveInt(TankActivity.GOLD_LEVEL,level);
@@ -1913,7 +1914,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                         ((TankActivity) context).loadRewardedInterstitialAd();
                     }
 //                    ((TankActivity) context).showInterstitialAd();
-                    ((TankActivity) context).showRewardedInterstitialAd();
+                    ((TankActivity) context).showRewardedInterstitialAd(false);
                     doGameOver();
                 }
             }
@@ -1928,7 +1929,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     ((TankActivity) context).loadRewardedInterstitialAd();
                 }
 //                ((TankActivity) context).showInterstitialAd();
-                ((TankActivity) context).showRewardedInterstitialAd();
+                ((TankActivity) context).showRewardedInterstitialAd(false);
             }
         }
 
@@ -2742,6 +2743,9 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         else if(tag.equals(TankActivity.SHIELD)) {
             P1.applyShield();
         }
+        else if(tag.equals(TankActivity.MINE)) {
+            P1.applyMine();
+        }
     }
 
 
@@ -2994,6 +2998,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             }
 
             else if(v.getId()== R.id.bombBtn) {
+                ((TankActivity)context).bmbBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.mine30_btn,null));
                 P1.dropBomb();
             }
 
@@ -3008,6 +3013,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //                P1.fire();
             }
             else if(v.getId() == R.id.bombBtn) {
+                ((TankActivity)context).bmbBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.mine31_btn,null));
                 P1.activateBomb();
             }
         }
@@ -3101,7 +3107,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //        ((TankActivity) context).loadInterstitialAd();
 //        ((TankActivity) context).showInterstitialAd();
         ((TankActivity) context).loadRewardedInterstitialAd();
-        ((TankActivity) context).showRewardedInterstitialAd();
+        ((TankActivity) context).showRewardedInterstitialAd(true);
     }
 
     public void _pause() {
@@ -3117,7 +3123,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 //                ((TankActivity) context).loadInterstitialAd();
 //                ((TankActivity) context).showInterstitialAd();
                 ((TankActivity) context).loadRewardedInterstitialAd();
-                ((TankActivity) context).showRewardedInterstitialAd();
+                ((TankActivity) context).showRewardedInterstitialAd(true);
             }
         });
 

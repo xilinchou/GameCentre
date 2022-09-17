@@ -73,7 +73,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
     public TankTextView curtainTxt,gameOverTxt;
 
     public RelativeLayout scoreView,gameView,navView, shootAlign, bombAlign;
-    public TankTextView retryCount, retryGameTmr, hiScore, stageScore, p1Score, p2Score;
+    public TankTextView bmbText, retryCount, retryGameTmr, hiScore, stageScore, p1Score, p2Score;
     public TankTextView p1AScore, p1BScore, p1CScore, p1DScore;
     public TankTextView p2AScore, p2BScore, p2CScore, p2DScore;
     public TankTextView p1ACount, p1BCount, p1CCount, p1DCount, p1Count;
@@ -98,6 +98,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
             BOAT = "BOAT",
             STAR = "STAR",
             SHIELD = "SHIELD",
+            MINE = "MINE",
             GOLD = "GOLD",
 
             RETRY_COUNT = "RETRY_COUNT",
@@ -181,6 +182,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         navView = findViewById(R.id.navView);
         shootAlign = findViewById(R.id.shootAlign);
         bombAlign = findViewById(R.id.bombAlign);
+        bmbText = findViewById(R.id.bmbTxt);
 
         shtBtn = findViewById(R.id.shootBtn);
         bmbBtn = findViewById(R.id.bombBtn);
@@ -531,11 +533,11 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
         SharedPreferences.Editor editor = settings.edit();
 
-        TankView.GOLD_LEVEL = settings.getInt(TankActivity.GOLD_LEVEL,0);
-        Log.d("SAVED GOLD_LEVEL", String.valueOf(TankView.GOLD_LEVEL));
-        if(TankView.GOLD_LEVEL == 0) {
-            editor.putInt(TankActivity.GOLD_LEVEL,0);
-        }
+//        TankView.GOLD_LEVEL = settings.getInt(TankActivity.GOLD_LEVEL,0);
+//        Log.d("SAVED GOLD_LEVEL", String.valueOf(TankView.GOLD_LEVEL));
+//        if(TankView.GOLD_LEVEL == 0) {
+//            editor.putInt(TankActivity.GOLD_LEVEL,0);
+//        }
 
         LinearLayout bonusBank = findViewById(R.id.bonusBank);
         int numRow = bonusBank.getChildCount();
@@ -741,19 +743,19 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
 
 
-    public void updateGold(int addition) {
-        int count = settings.getInt(TankActivity.GOLD,0);
-        count += addition;
-        if(count < 0) {
-            count = 0;
-        }
-
-        TankTextView txtView = findViewById(R.id.goldCount);
-        txtView.setText(count > 0 ? String.valueOf(count) : "+");
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt(TankActivity.GOLD,count);
-        editor.apply();
-    }
+//    public void updateGold(int addition) {
+//        int count = settings.getInt(TankActivity.GOLD,0);
+//        count += addition;
+//        if(count < 0) {
+//            count = 0;
+//        }
+//
+//        TankTextView txtView = findViewById(R.id.goldCount);
+//        txtView.setText(count > 0 ? String.valueOf(count) : "+");
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putInt(TankActivity.GOLD,count);
+//        editor.apply();
+//    }
 
     public void enableControls() {
         shtBtn.setEnabled(true);
@@ -988,7 +990,6 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                     @Override
                     public void onShowAd() {
                         Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is starting.");
-
                         showRewardedVideoIAD();
                     }
 
@@ -1000,15 +1001,19 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         dialog.show(getSupportFragmentManager(), "AdDialogFragment");
     }
 
-    public void showRewardedInterstitialAd() {
+    public void showRewardedInterstitialAd(boolean cancel) {
         if (mRewardedInterstitialAd != null) {
 //            RewardItem rewardItem = mRewardedInterstitialAd.getRewardItem();
 //            int rewardAmount = rewardItem.getAmount();
 //            String rewardType = rewardItem.getType();
 
             Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is ready.");
-//        introduceVideoAd(2, "ADS Coins");
-            showRewardedVideoIAD();
+            if(cancel) {
+                introduceVideoAd(2, "Ad coins");
+            }
+            else {
+                showRewardedVideoIAD();
+            }
         }
         else {
             Log.d("Rewarded InterstitialAD", "The rewarded interstitial ad is not ready.");

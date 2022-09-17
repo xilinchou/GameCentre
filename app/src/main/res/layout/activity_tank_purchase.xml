@@ -174,7 +174,7 @@
             android:orientation="vertical"
             android:gravity="center"
             android:layout_marginTop="25dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginStart="30dp">
 
             <LinearLayout
@@ -397,6 +397,34 @@
 
                 <com.gamecentre.classicgames.tank.TankTextView
                     android:id="@+id/boatCountTxt"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="10"
+                    android:textColor="@color/white"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bonus_mine" />
+
+                <com.gamecentre.classicgames.tank.TankTextView
+                    android:id="@+id/mineTxt"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="5dp"
@@ -812,6 +840,108 @@
                                     android:layout_centerHorizontal="true"
                                     android:gravity="center"
                                     android:text="@string/tankgrenade_count"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/white"
+                                    android:textSize="11sp" />
+
+                            </RelativeLayout>
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginEnd="10dp"
+                        app:cardCornerRadius="10dp">
+
+
+                        <LinearLayout
+                            android:id="@+id/buy_mine"
+                            android:layout_width="120dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginBottom="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/bghud6"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:id="@+id/mine1"
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:gravity="center"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="10dp"
+                                android:layout_weight="0.4">
+
+                                <ImageView
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="0.3"
+                                    android:layout_marginStart="10dp"
+                                    android:layout_marginEnd="5dp"/>
+
+                                <ImageView
+                                    android:id="@+id/mine2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="10dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:background="@drawable/bonus_mine"/>
+
+                                <ImageView
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="0.3"
+                                    android:layout_marginStart="10dp"
+                                    android:layout_marginEnd="5dp"/>
+
+                            </LinearLayout>
+
+                            <RelativeLayout
+                                android:id="@+id/mine3"
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+
+                                <ImageView
+                                    android:id="@+id/mine4"
+                                    android:layout_width="50dp"
+                                    android:layout_height="35dp"
+                                    android:layout_alignParentBottom="true"
+                                    android:layout_centerInParent="true"
+                                    android:layout_marginBottom="10dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/gold_bar2" />
+
+                                <com.gamecentre.classicgames.tank.TankTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentRight="true"
+                                    android:layout_alignParentBottom="true"
+                                    android:layout_marginBottom="10dp"
+                                    android:layout_marginEnd="10dp"
+                                    android:gravity="center"
+                                    android:text="@string/mine_gold"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/white"
+                                    android:textSize="12sp" />
+
+                                <com.gamecentre.classicgames.tank.TankTextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentTop="true"
+                                    android:layout_centerHorizontal="true"
+                                    android:gravity="center"
+                                    android:text="@string/mine_count"
                                     android:textAlignment="center"
                                     android:textColor="@color/white"
                                     android:textSize="11sp" />

@@ -2,16 +2,23 @@ package com.gamecentre.classicgames.tank;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.utils.CVTR;
 
 /**
  * A dialog fragment to inform the users about an upcoming interstitial video ad and let the user
@@ -72,7 +79,9 @@ public class AdDialogFragment extends DialogFragment {
         // Inflate and set the layout for the dialog.
         // Pass null as the parent view because its going in the dialog layout.
         View view = requireActivity().getLayoutInflater().inflate(R.layout.dialog_ad, null);
+//        view.setBackground(ResourcesCompat.getDrawable(getResources(),R.drawable.dialog_bg,null));
         builder.setView(view);
+
 
         Bundle args = getArguments();
         int rewardAmount = -1;
@@ -93,9 +102,23 @@ public class AdDialogFragment extends DialogFragment {
                         getDialog().cancel();
                     }
                 });
+//        builder.getContext().getTheme().applyStyle(R.style.MyAlertDialog,true);
         Dialog dialog = builder.create();
         createTimer(COUNTER_TIME, view);
         return dialog;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+        params.width = (int)CVTR.toDp(350);//ViewGroup.LayoutParams.WRAP_CONTENT;
+        params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        getDialog().getWindow().setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.dialog_bg,null));
+//        View v = getDialog().getWindow().getDecorView();
+//        v.setBackgroundResource(android.R.color.transparent);
     }
 
     /**

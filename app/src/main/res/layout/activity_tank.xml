@@ -696,7 +696,7 @@
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/gold"
+                    android:id="@+id/mine"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -704,22 +704,22 @@
                     android:layout_marginBottom="2dp"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
-                    android:background="@drawable/gold_stack"
-                    android:tag="GOLD">
+                    android:background="@drawable/bonus_mine"
+                    android:tag="MINE">
 
                     <com.gamecentre.classicgames.tank.TankTextView
-                        android:id="@+id/goldCount"
+                        android:id="@+id/mineCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="5dp"
                         android:layout_marginTop="5dp"
-                        android:textAlignment="viewStart"
-                        android:text="10"
-                        android:textSize="9sp"
+                        android:layout_marginEnd="5dp"
                         android:alpha="1"
-                        android:textColor="@color/white"/>
+                        android:text="10"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/white"
+                        android:textSize="9sp" />
                 </RelativeLayout>
 
             </LinearLayout>
@@ -825,10 +825,21 @@
             android:id="@+id/bombBtn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.5"
-            android:background="@drawable/bomb_btn"
+            android:alpha="1"
+            android:background="@drawable/mine30_btn"
             android:tag="shoot" />
 
+        <com.gamecentre.classicgames.tank.TankTextView
+            android:id="@+id/bmbTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:translationZ="10dp"
+            android:text="3"/>
 
     </RelativeLayout>
 
