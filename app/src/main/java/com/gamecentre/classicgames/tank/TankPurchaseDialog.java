@@ -343,7 +343,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
             SoundManager.playSound(Sounds.TANK.CLICK);
             if (activity instanceof TankActivity) {
                 ((TankActivity) activity).updateBonusStack();
-                mTankView.resumeNoAds();
+//                ((TankActivity) activity).getTankView().resumeNoAds();
             } else if (activity instanceof TankMenuActivity) {
                 ((TankMenuActivity) activity).updateStore();
             }

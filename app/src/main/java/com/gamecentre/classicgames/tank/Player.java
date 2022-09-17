@@ -296,7 +296,10 @@ public class Player extends Tank{
             ((TankActivity) (TankView.getInstance().getTankViewContext())).disableGift();
         }
 
+        updateLifeView();
+    }
 
+    public void updateLifeView() {
         ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -308,7 +311,6 @@ public class Player extends Tank{
 
             }
         });
-
     }
 
     public boolean isAlive() {
@@ -384,19 +386,26 @@ public class Player extends Tank{
 
     public void applyTank() {
         ++lives;
-        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(lives > 1) {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).enableGift();
-                }
-                if (Player.this.type == ObjectType.ST_PLAYER_1) {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
-                } else {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
-                }
-            }
-        });
+        if(lives > 1) {
+            ((TankActivity) (TankView.getInstance().getTankViewContext())).enableGift();
+        }
+
+        updateLifeView();
+//        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(lives > 1) {
+//                    ((TankActivity) (TankView.getInstance().getTankViewContext())).enableGift();
+//                }
+//
+//                updateLifeView();
+////                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+////                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+////                } else {
+////                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+////                }
+//            }
+//        });
 
     }
 
@@ -571,18 +580,18 @@ public class Player extends Tank{
         y = TankView.HEIGHT - h;
         frame = 0;
 
-        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (Player.this.type == ObjectType.ST_PLAYER_1) {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
-                } else {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
-                }
-            }
-        });
+        updateLifeView();
 
-
+//        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+//                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+//                } else {
+//                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+//                }
+//            }
+//        });
 
         changeDirection(direction);
     }
@@ -601,16 +610,19 @@ public class Player extends Tank{
         }
         y = TankView.HEIGHT - h;
         frame = 0;
-        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (Player.this.type == ObjectType.ST_PLAYER_1) {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
-                } else {
-                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
-                }
-            }
-        });
+
+        updateLifeView();
+
+//        ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (Player.this.type == ObjectType.ST_PLAYER_1) {
+//                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+//                } else {
+//                    ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+//                }
+//            }
+//        });
         changeDirection(direction);
     }
 
@@ -685,17 +697,20 @@ public class Player extends Tank{
         this.freeze = model.freeze;
         if(model.lives != this.lives){
             this.lives = model.lives;
-            ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (Player.this.type == ObjectType.ST_PLAYER_1) {
-                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
-                    } else {
-                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
-                    }
 
-                }
-            });
+            updateLifeView();
+
+//            ((TankActivity)TankView.context).runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (Player.this.type == ObjectType.ST_PLAYER_1) {
+//                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P1StatusTxt.setText(String.valueOf(Player.this.lives));
+//                    } else {
+//                        ((TankActivity) (TankView.getInstance().getTankViewContext())).P2StatusTxt.setText(String.valueOf(Player.this.lives));
+//                    }
+//
+//                }
+//            });
         }
         this.respawn = model.respawn;
         if(!destroyed && model.tDestroyed) {

@@ -62,7 +62,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private static final String TAG = "TankView";
     private long refSendStartTime = System.currentTimeMillis();
     private long refReceiveStartTime = System.currentTimeMillis();
-    protected static final int FPS = 30;
+    protected static final int FPS = 25;
     public static final float TO_SEC = 1000f/FPS;
     public static boolean CONSTRUCTION = false;
     public static final int
@@ -163,6 +163,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private int new_enemy_time = 0;
     private final int genEnemyTime = 1*FPS;
     private final int MAX_ENEMIES = 6;
+    private final int MAX_HVE = 8;
+    private boolean new_hve = false;
+    private Point hve_pos;
+    private int NUM_HVE, HVE_LIVES;
     private final int[][] eaglePos = {{11,25},{11,24},{11,23},{12,23},{13,23},{14,23},{14,24},{14,25}};
 
     private  Bitmap curtain;
@@ -346,12 +350,14 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         TankView.this.context = context;
         instance = this;
         constructView();
+        mNewRound = true;
     }
 
     public TankView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         instance = this;
         constructView();
+        mNewRound = true;
     }
 
     public static TankView getInstance() {
@@ -579,7 +585,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         ViewGroup.LayoutParams params = TankView.this.getLayoutParams();
 //        int dimH = (int)(((TankActivity)context).gameView.getHeight()*0.95);
-        int dimW = (int)(((TankActivity)context).gameView.getWidth()*0.95);
+        int dimW = (int)(((TankActivity)context).gameView.getWidth()*0.9);
         int dimH = (int)(TankView.this.getHeight()*0.95);
 //        int dimW = (int)(TankView.this.getWidth()*0.95);
         Log.d("LAYOOUT", String.valueOf(dimH) + " " + dimW);
@@ -941,6 +947,13 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         ((TankActivity)context).start_timer();
         P1.enableMove();
         P1.enableFire();
+
+//        level = 30;
+
+        double num_hve = Math.pow(10,level*Math.log10(MAX_HVE)/NUM_LEVELS);
+        NUM_HVE = (int)Math.floor(num_hve+0.5);
+        HVE_LIVES = NUM_HVE;
+        Log.d("HVE: ", String.valueOf(NUM_HVE));
     }
 
     /**
@@ -1036,6 +1049,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             return;
         }
         if(!showingScore) {
+            //First time
             //TODO why is retry count default 3 here?
             int retries = ((TankActivity)context).settings.getInt(TankActivity.RETRY_COUNT,3);
 
@@ -1804,6 +1818,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     public void updateP1Lives(int life) {
         P1.lives += life;
+        P1.updateLifeView();
     }
 
     public void giftLife() {
@@ -1842,41 +1857,41 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         }
         if(notifyEndGame) {
             notifyEndGame = false;
-            pauseNoAds();
+//            pauseNoAds();
             TankView.EVENT = TankView.END_GAME;
-            if(((TankActivity)context).mInterstitialAd == null) {
-//                ((TankActivity) context).loadInterstitialAd();
-                ((TankActivity) context).loadRewardedInterstitialAd();
-            }
-//            ((TankActivity) context).showInterstitialAd();
-            ((TankActivity) context).showRewardedInterstitialAd();
+//            if(((TankActivity)context).mInterstitialAd == null) {
+////                ((TankActivity) context).loadInterstitialAd();
+//                ((TankActivity) context).loadRewardedInterstitialAd();
+//            }
+////            ((TankActivity) context).showInterstitialAd();
+//            ((TankActivity) context).showRewardedInterstitialAd();
             ((TankActivity)context).endGame();
         }
 
         if(((Enemy.lives <= 0 && Enemies.size() <= 0) || notifyStageComplete) && !stageComplete) {
-            pauseNoAds();
+//            pauseNoAds();
             TankView.EVENT = TankView.STAGE_COMPLETE;
             sendPlayerInfo(STAGE_COMPLETE);
-            if(((TankActivity)context).mInterstitialAd == null) {
-//                ((TankActivity) context).loadInterstitialAd();
-                ((TankActivity) context).loadRewardedInterstitialAd();
-            }
-//            ((TankActivity) context).showInterstitialAd();
-            ((TankActivity) context).showRewardedInterstitialAd();
+//            if(((TankActivity)context).mInterstitialAd == null) {
+////                ((TankActivity) context).loadInterstitialAd();
+//                ((TankActivity) context).loadRewardedInterstitialAd();
+//            }
+////            ((TankActivity) context).showInterstitialAd();
+//            ((TankActivity) context).showRewardedInterstitialAd();
             doStageComplete();
         }
         else if((((!twoPlayers && P1.lives <= 0) || (twoPlayers && P1.lives <= 0 && P2.lives <= 0)) || (eagle != null && eagle.isDestroyed()) || notifyGameOver) && !gameover) {
 
             if(eagle != null && eagle.isDestroyed()) {
-                pauseNoAds();
+//                pauseNoAds();
                 TankView.EVENT = TankView.GAME_OVER;
                 sendPlayerInfo(GAME_OVER);
-                if (((TankActivity) context).mInterstitialAd == null) {
-//                    ((TankActivity) context).loadInterstitialAd();
-                    ((TankActivity) context).loadRewardedInterstitialAd();
-                }
-//                ((TankActivity) context).showInterstitialAd();
-                ((TankActivity) context).showRewardedInterstitialAd();
+//                if (((TankActivity) context).mInterstitialAd == null) {
+////                    ((TankActivity) context).loadInterstitialAd();
+//                    ((TankActivity) context).loadRewardedInterstitialAd();
+//                }
+////                ((TankActivity) context).showInterstitialAd();
+//                ((TankActivity) context).showRewardedInterstitialAd();
                 doGameOver();
             }
 
@@ -1903,6 +1918,18 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 }
             }
 
+        }
+
+        if((gameover || stageComplete) && showScoreTmr == 5) {
+            if(!showingScore) {
+                pauseNoAds();
+                if (((TankActivity) context).mInterstitialAd == null) {
+//                    ((TankActivity) context).loadInterstitialAd();
+                    ((TankActivity) context).loadRewardedInterstitialAd();
+                }
+//                ((TankActivity) context).showInterstitialAd();
+                ((TankActivity) context).showRewardedInterstitialAd();
+            }
         }
 
         if((gameover || stageComplete) && showScoreTmr <= 0) {
@@ -1955,6 +1982,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             eagle.protection = 2;
         }
 
+        if(new_hve && HVE.isViewing()){
+            sendToWifi();
+            return;
+        }
+
         if(twoPlayers) {
             levelObjectsUpdate.clear();
             levelBushesUpdate.clear();
@@ -1997,44 +2029,11 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         if(!twoPlayers || WifiDirectManager.getInstance().isServer()) {
             // Get target
-            int min_dist = TankView.HEIGHT + TankView.WIDTH;
-            Rect pRect = P1.getRect();
-            Point targ = new Point();
+
+//            Rect pRect = P1.getRect();
+            Point targ;
             for (Enemy e : Enemies) {
-
-                if (e.type == ObjectType.ST_TANK_A || e.type == ObjectType.ST_TANK_D) {
-                    int dx = (int) (e.x - P1.x);
-                    int dy = (int) (e.y - P1.y);
-                    int dist = dx + dy;
-                    if (dist < min_dist) {
-                        min_dist = dist;
-                        targ.x = (int) (P1.x + P1.w / 2);
-                        targ.y = (int) (P1.y + P1.h / 2);
-                    }
-                }
-                int dx = e.getRect().left - eagle.getRect().left;
-                int dy = e.getRect().top - eagle.getRect().top;
-                int dist = dx + dy;
-                if (dist < min_dist) {
-                    min_dist = dist;
-                    targ.x = (int) (eagle.x + eagle.w / 2);
-                    targ.y = (int) (eagle.y + eagle.h / 2);
-                }
-                if(bonus.isAvailable()) {
-                    float prob = groupProb(0.2f,0.9f);
-                    if(Math.random() < prob) {
-                        Point btarg = new Point();
-                        btarg.x = bonus.x;
-                        btarg.y = bonus.y;
-                        int bdist = bonus.x + bonus.y;
-                        if(bdist < min_dist) {
-                            min_dist = bdist;
-                            targ.x = bonus.x;
-                            targ.y = bonus.y;
-                        }
-                    }
-
-                }
+                targ = getTarget(e);
                 e.setTarget(targ);
             }
 
@@ -2056,6 +2055,50 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         }
 
         sendToWifi();
+    }
+
+
+    private Point getTarget(Enemy e) {
+        int min_dist = TankView.HEIGHT + TankView.WIDTH;
+        Point targ = new Point();
+        if (e.type == ObjectType.ST_TANK_A || e.type == ObjectType.ST_TANK_D) {
+            int dx = (int) (e.x - P1.x);
+            int dy = (int) (e.y - P1.y);
+            int dist = dx + dy;
+            if (dist < min_dist) {
+                min_dist = dist;
+                targ.x = (int) (P1.x + P1.w / 2);
+                targ.y = (int) (P1.y + P1.h / 2);
+            }
+        }
+
+        if(!e.isHVE()) {
+            int dx = e.getRect().left - eagle.getRect().left;
+            int dy = e.getRect().top - eagle.getRect().top;
+            int dist = dx + dy;
+            if (dist < min_dist) {
+                min_dist = dist;
+                targ.x = (int) (eagle.x + eagle.w / 2);
+                targ.y = (int) (eagle.y + eagle.h / 2);
+            }
+        }
+
+        if(bonus.isAvailable()) {
+            float prob = groupProb(0.2f,0.9f);
+            if(Math.random() < prob) {
+                Point btarg = new Point();
+                btarg.x = bonus.x;
+                btarg.y = bonus.y;
+                int bdist = bonus.x + bonus.y;
+                if(bdist < min_dist) {
+                    min_dist = bdist;
+                    targ.x = bonus.x;
+                    targ.y = bonus.y;
+                }
+            }
+
+        }
+        return targ;
     }
 
     private int getCompletedObjectives(int level) {
@@ -2609,12 +2652,43 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
             }
 
             if(Enemies.size() < MAX_ENEMIES && Enemy.lives > 0) {
-                Enemy enemy = new Enemy(tank_type,group, 0, 0);
+                Enemy enemy;
+                if(Enemy.lives <= 2*NUM_HVE) {
+                    if(Enemy.lives <= HVE_LIVES) {
+                        float v = 0.5f*(float)Math.pow(10,level*Math.log10(2.2)/NUM_LEVELS);
+                        float vb = 0.8f*(float)Math.pow(10,level*Math.log10(1.75)/NUM_LEVELS);
+                        enemy = new HVE(0, 0,v,vb);
+                        --HVE_LIVES;
+                        new_hve = true;
+                    }
+                    else {
+                        float pHVE = (float)(Math.random());
+                        if(pHVE < 0.5) {
+                            float v = 0.5f*(float)Math.pow(10,level*Math.log10(2.2)/NUM_LEVELS);
+                            float vb = 0.8f*(float)Math.pow(10,level*Math.log10(1.75)/NUM_LEVELS);
+                            enemy = new HVE(0, 0, v, vb);
+                            --HVE_LIVES;
+                            new_hve = true;
+                        }
+                        else {
+                            enemy = new Enemy(tank_type, group, 0, 0);
+                            new_hve = false;
+                        }
+                    }
+                }
+                else {
+                    enemy = new Enemy(tank_type, group, 0, 0);
+                    new_hve = false;
+                }
+
                 int p = (int) (Math.random() * 3) % 3;
 //                int px = p * 6*enemy.w;
 //                px = (px > TankView.WIDTH - enemy.w) ? (int) (TankView.WIDTH - enemy.w) : px;
                 enemy.x = p * 6*enemy.w;
                 enemy.y = 0;
+                if(new_hve) {
+                    ((HVE)enemy).getView(P1);
+                }
                 if(Math.random() < 0.2) {
                     enemy.hasBonus = true;
                 }
@@ -2770,9 +2844,54 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         gameModel.add(message);
     }
 
+    private void buttonPressed(int dir) {
+        switch (dir) {
+            case CONST.Direction.UP: {
+                ((TankActivity)context).upBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.up31_btn,null));
+
+                ((TankActivity)context).dwnBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.down30_btn,null));
+                ((TankActivity)context).lftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.left30_btn,null));
+                ((TankActivity)context).rtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.right30_btn,null));
+                break;
+            }
+            case CONST.Direction.DOWN: {
+                ((TankActivity)context).dwnBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.down31_btn,null));
+
+                ((TankActivity)context).upBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.up30_btn,null));
+                ((TankActivity)context).lftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.left30_btn,null));
+                ((TankActivity)context).rtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.right30_btn,null));
+                break;
+            }
+            case CONST.Direction.LEFT: {
+                ((TankActivity)context).lftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.left31_btn,null));
+
+                ((TankActivity)context).upBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.up30_btn,null));
+                ((TankActivity)context).dwnBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.down30_btn,null));
+                ((TankActivity)context).rtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.right30_btn,null));
+                break;
+            }
+            case CONST.Direction.RIGHT: {
+                ((TankActivity)context).rtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.right31_btn,null));
+
+                ((TankActivity)context).upBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.up30_btn,null));
+                ((TankActivity)context).lftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.left30_btn,null));
+                ((TankActivity)context).dwnBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.down30_btn,null));
+                break;
+            }
+            default: {
+                ((TankActivity)context).rtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.right30_btn,null));
+                ((TankActivity)context).upBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.up30_btn,null));
+                ((TankActivity)context).lftBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.left30_btn,null));
+                ((TankActivity)context).dwnBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.down30_btn,null));
+                break;
+            }
+        }
+    }
+
     @Override
     public void onButtonPressed(View v, MotionEvent m) {
         Log.d("Button Pressed", "Strick move");
+
 //        if (v.getId() == R.id.navStick) {
 //            if (m.getX() < 0) {
 //                P1.move(CONST.Direction.LEFT);
@@ -2788,47 +2907,80 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if(v.getId() == R.id.upBtn) {
             if (m.getX() < 0) {
                 P1.move(CONST.Direction.LEFT);
+                buttonPressed(CONST.Direction.LEFT);
             } else if (m.getX() > ((TankActivity) context).upBtn.getWidth()) {
                 P1.move(CONST.Direction.RIGHT);
+                buttonPressed(CONST.Direction.RIGHT);
             } else if (m.getY() > ((TankActivity) context).upBtn.getHeight()) {
                 P1.move(CONST.Direction.DOWN);
+                buttonPressed(CONST.Direction.DOWN);
             } else {
                 P1.move(CONST.Direction.UP);
+                buttonPressed(CONST.Direction.UP);
+            }
+
+            if(m.getAction() == MotionEvent.ACTION_UP) {
+                buttonPressed(-1);
             }
         }
 
         else  if (v.getId() == R.id.downBtn) {
             if (m.getX() < 0) {
                 P1.move(CONST.Direction.LEFT);
+                buttonPressed(CONST.Direction.LEFT);
             } else if (m.getX() > ((TankActivity) context).dwnBtn.getWidth()) {
                 P1.move(CONST.Direction.RIGHT);
+                buttonPressed(CONST.Direction.RIGHT);
             } else if (m.getY() < 0) {
                 P1.move(CONST.Direction.UP);
+                buttonPressed(CONST.Direction.UP);
             } else {
                 P1.move(CONST.Direction.DOWN);
+                buttonPressed(CONST.Direction.DOWN);
+            }
+
+            if(m.getAction() == MotionEvent.ACTION_UP) {
+                buttonPressed(-1);
             }
         }
+
         else  if (v.getId() == R.id.leftBtn) {
             if (m.getY() < 0) {
                 P1.move(CONST.Direction.UP);
+                buttonPressed(CONST.Direction.UP);
             } else if (m.getY() > ((TankActivity) context).lftBtn.getHeight()) {
                 P1.move(CONST.Direction.DOWN);
+                buttonPressed(CONST.Direction.DOWN);
             } else if (m.getX() > ((TankActivity) context).lftBtn.getWidth()) {
                 P1.move(CONST.Direction.RIGHT);
+                buttonPressed(CONST.Direction.RIGHT);
             } else {
                 P1.move(CONST.Direction.LEFT);
+                buttonPressed(CONST.Direction.LEFT);
+            }
+
+            if(m.getAction() == MotionEvent.ACTION_UP) {
+                buttonPressed(-1);
             }
         }
 
         else  if (v.getId() == R.id.rightBtn) {
             if (m.getY() < 0) {
                 P1.move(CONST.Direction.UP);
+                buttonPressed(CONST.Direction.UP);
             } else if (m.getY() > ((TankActivity) context).rtBtn.getHeight()) {
                 P1.move(CONST.Direction.DOWN);
+                buttonPressed(CONST.Direction.DOWN);
             } else if (m.getX() < 0) {
                 P1.move(CONST.Direction.LEFT);
+                buttonPressed(CONST.Direction.LEFT);
             } else {
                 P1.move(CONST.Direction.RIGHT);
+                buttonPressed(CONST.Direction.RIGHT);
+            }
+
+            if(m.getAction() == MotionEvent.ACTION_UP) {
+                buttonPressed(-1);
             }
         }
         else  if (v.getId() == R.id.shootBtn) {
@@ -2837,6 +2989,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         if(m.getAction() == MotionEvent.ACTION_UP) {
             if(v.getId()== R.id.shootBtn) {
+                ((TankActivity)context).shtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.shoot30_btn,null));
                 P1.stopShooting();
             }
 
@@ -2850,6 +3003,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         }
         if(m.getAction() == MotionEvent.ACTION_DOWN) {
             if(v.getId() == R.id.shootBtn) {
+                ((TankActivity)context).shtBtn.setBackground(ResourcesCompat.getDrawable(context.getResources(),R.drawable.shoot31_btn,null));
                 TankView.vibrate();
 //                P1.fire();
             }

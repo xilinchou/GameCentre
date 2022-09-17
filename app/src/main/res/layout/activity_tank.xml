@@ -757,8 +757,8 @@
             android:layout_height="60dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:alpha="0.5"
-            android:background="@drawable/left_btn"
+            android:alpha="1"
+            android:background="@drawable/left30_btn"
             android:tag="left" />
 
         <Button
@@ -767,8 +767,8 @@
             android:layout_height="60dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:alpha="0.5"
-            android:background="@drawable/right_btn"
+            android:alpha="1"
+            android:background="@drawable/right30_btn"
             android:tag="right" />
 
         <Button
@@ -777,8 +777,8 @@
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:alpha="0.5"
-            android:background="@drawable/down_btn"
+            android:alpha="1"
+            android:background="@drawable/down30_btn"
             android:tag="down" />
 
         <Button
@@ -787,8 +787,8 @@
             android:layout_height="60dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:alpha="0.5"
-            android:background="@drawable/up_btn"
+            android:alpha="1"
+            android:background="@drawable/up30_btn"
             android:tag="up" />
 
 
@@ -851,8 +851,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            android:alpha="0.5"
-            android:background="@drawable/shoot_btn"
+            android:alpha="1"
+            android:background="@drawable/shoot30_btn"
             android:tag="shoot" />
     </RelativeLayout>
 

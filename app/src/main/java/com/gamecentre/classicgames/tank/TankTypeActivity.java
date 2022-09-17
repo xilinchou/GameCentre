@@ -99,14 +99,14 @@ public class TankTypeActivity extends AppCompatActivity {
             Intent i = new Intent(TankTypeActivity.this, TankMenuActivity.class);
             int id = view.getId();
             if (id == R.id.classic || id == R.id.classic_lo) {
-                SoundManager.playSound(Sounds.TANK.CLICK3);
+                SoundManager.playSound(Sounds.TANK.CLICK);
                 i.putExtra(TankTypeActivity.TANK_TYPE, "CLASSIC");
                 startActivity(i);
                 finish();
             }
             else if (id == R.id.arcade || id == R.id.arcade_lo) {
                 //TODO
-//                SoundManager.playSound(Sounds.TANK.CLICK3);
+//                SoundManager.playSound(Sounds.TANK.CLICK);
 //                i.putExtra(TankTypeActivity.TANK_TYPE, "CAMPAIGN");
 //                startActivity(i);
 //                finish();

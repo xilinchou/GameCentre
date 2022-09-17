@@ -6,6 +6,7 @@ public enum ObjectType {
     ST_TANK_B,
     ST_TANK_C,
     ST_TANK_D,
+    ST_TANK_E,
 
     ST_PLAYER_1,
     ST_PLAYER_2,

@@ -88,6 +88,10 @@ public class TankEndGameDialog extends Dialog implements View.OnTouchListener{
         });
     }
 
+    public TankView getTankView() {
+        return this.mTankView;
+    }
+
     public void setGoldCount() {
         golds = settings.getInt(TankActivity.GOLD,0);
         goldCountTxt.setText(String.format(Locale.US,"x%d",golds));

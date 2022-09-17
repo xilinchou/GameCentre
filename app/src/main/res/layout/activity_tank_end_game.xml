@@ -231,8 +231,8 @@
 
                     <ImageView
                         android:id="@+id/goldBtn2"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:background="@drawable/gold_bar" />
 
                     <com.gamecentre.classicgames.tank.TankTextView
@@ -240,7 +240,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/playOnGoldCost"
                         android:textColor="@color/white"
-                        android:textSize="10sp" />
+                        android:textSize="8sp" />
 
                 </LinearLayout>
 

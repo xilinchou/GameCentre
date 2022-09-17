@@ -194,8 +194,9 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     int games = settings.getInt(TankActivity.RETRY_COUNT,0);
+                    long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
 
-                    if(games > 0){
+                    if(games > 0 || game6h > System.currentTimeMillis()){
                         int level = selected + 1;
 
                         if (twoPlayers && !WifiDirectManager.getInstance().isServer() && ClientConnectionThread.serverStarted) {
@@ -238,7 +239,7 @@ public class TankStageFragment extends Fragment implements View.OnTouchListener,
 
                         TankView.level = level;
                         //TODO
-                        long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
+//                        long game6h = settings.getLong(TankActivity.LIFE_TIME_6H,0);
                         if(game6h < System.currentTimeMillis()) {
                             --games;
                             SharedPreferences.Editor editor = settings.edit();

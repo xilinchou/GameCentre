@@ -16,25 +16,26 @@ import java.util.ArrayList;
 public class Enemy extends Tank{
 
     public int sx,sy;
-    private Point target;
-    private int change_dir_time;
-    private int dir_time;
-    private boolean freeze = false, shield, boat;
-    private  int freezeTmr, shieldTmr, boatTmr;
+    protected Point target;
+    protected int change_dir_time;
+    protected int dir_time;
+    protected boolean freeze = false, shield, boat;
+    protected   int freezeTmr, shieldTmr, boatTmr;
     private static int MaxLives = 20;
     public static int lives = MaxLives;
-    private  float bulletSpeed = 1;
+    protected float bulletSpeed = 1;
     protected int reloadTmr = (int)(0.2*TankView.TO_SEC);
     protected int reload_time = 0;
     public boolean hasBonus = false;
     private boolean breakWall = false;
-    private int lifeFrame = 0;
-    private String killScore;
-    private boolean killed = false;
+    protected int lifeFrame = 0;
+    protected String killScore;
+    protected boolean killed = false;
     public  int id;
     private static int nxtId = 0;
     private ArrayList<Bullet> dbullets;
     int bombID = -1;
+    protected boolean hve = false;
 
 
 
@@ -82,6 +83,10 @@ public class Enemy extends Tank{
     public Enemy(ObjectType type, int group, int x, int y) {
         this(type, x, y);
         this.group = group;
+    }
+
+    public boolean isHVE() {
+        return hve;
     }
 
     public void setTarget(Point targ) {
@@ -150,7 +155,7 @@ public class Enemy extends Tank{
         }
     }
 
-    private void setStopPoint(int move_time, int direction) {
+    protected void setStopPoint(int move_time, int direction) {
 
         switch (direction) {
             case CONST.Direction.UP:
@@ -180,7 +185,7 @@ public class Enemy extends Tank{
         }
     }
 
-    private float prob(float min, float max) {
+    protected float prob(float min, float max) {
         return (max-min)*TankView.level/TankView.NUM_LEVELS + min;
     }
 
@@ -613,7 +618,7 @@ public class Enemy extends Tank{
             }
             canvas.drawBitmap(spbitmap[frame],x,y,null);
             if(frame_delay <= 0) {
-                frame++;// = (frame + 1) % spsprite.frame_count;
+                frame++;
                 frame_delay = spsprite.frame_time;
             }
             else{

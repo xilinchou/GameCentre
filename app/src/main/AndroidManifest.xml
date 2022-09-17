@@ -58,8 +58,7 @@
             android:name=".tank.TankActivity"
             android:exported="false"
             android:hardwareAccelerated="true"
-            android:screenOrientation="landscape"
-            android:noHistory="true"/>
+            android:screenOrientation="landscape"/>
         <activity
             android:name=".pingpong.Pong"
             android:exported="false"

@@ -449,6 +449,10 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
         first_start = true;
     }
 
+    public TankView getTankView() {
+        return this.mTankView;
+    }
+
     public void start_timer() {
         updateTimer = new Timer("update");
         updateTimer.scheduleAtFixedRate(new TimerTask() {
@@ -613,6 +617,7 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
 
 
     public void openGamePurchse() {
+
         TankPurchaseGameDialog wd = new TankPurchaseGameDialog(this, mTankView);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(wd.getWindow().getAttributes());
