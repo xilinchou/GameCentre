@@ -237,7 +237,7 @@
                             android:id="@+id/gameBuy33"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/game15Cost"
+                            android:text="@string/game3_gold"
                             android:textColor="@color/white"
                             android:textSize="10sp" />
 

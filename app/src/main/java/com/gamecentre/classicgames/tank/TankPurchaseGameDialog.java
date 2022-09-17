@@ -209,6 +209,10 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                     SoundManager.playSound(Sounds.TANK.CLICK2);
                     ((TankActivity) activity).openStore(this);
                 }
+                else{
+                    SoundManager.playSound(Sounds.TANK.CLICK2);
+                    ((TankMenuActivity) activity).openStore();
+                }
             }
             else if (id == R.id.gameBuy6 || id == R.id.gameBuy62 || id == R.id.gameBuy63) {
                 int cost = Integer.parseInt(activity.getResources().getString(R.string.game6h_gold).replace("x", ""));
@@ -226,6 +230,10 @@ public class TankPurchaseGameDialog extends Dialog implements View.OnTouchListen
                 else if (activity instanceof TankActivity) {
                     SoundManager.playSound(Sounds.TANK.CLICK2);
                     ((TankActivity) activity).openStore(this);
+                }
+                else{
+                    SoundManager.playSound(Sounds.TANK.CLICK2);
+                    ((TankMenuActivity) activity).openStore();
                 }
             }
             else if (id == R.id.closeGameBuyBtn) {

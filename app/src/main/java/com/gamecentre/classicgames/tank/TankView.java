@@ -3058,6 +3058,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
     public void interrupt() {
         sendPlayerInfo(PAUSE);
+//        TankView.EVENT = TankView.PAUSE;
         enablePause(false);
         ((TankActivity)context).disableControls();
         mCurrentState = TankView.State.Stopped;
