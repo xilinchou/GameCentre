@@ -1089,6 +1089,8 @@ public class TankActivity extends AppCompatActivity implements View.OnTouchListe
                             editor.putInt(TankActivity.AD_COIN,adcoin);
                             editor.apply();
                             SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            String msg = String.format(Locale.ENGLISH, "Got %s Ad coins", TankActivity.this.getResources().getString(R.string.adCoin_bonus));
+                            Toast.makeText(TankActivity.this, msg, Toast.LENGTH_SHORT).show();
                         }
                         if(TankView.EVENT != TankView.PAUSE) {
                             mTankView.resumeNoAds();

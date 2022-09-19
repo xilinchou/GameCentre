@@ -1602,25 +1602,32 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 }
             }
 
+            if(p.bomb.destroyObj((p))) {
+                p.collideBomb(p.bomb.id);
+            }
+
             for (Enemy e : Enemies) {
                 if(p.bomb.destroyObj(e)) {
                     if(e.collideBomb(p.bomb.id)) {
                         ++p.totalKills;
                         if (e.type == ObjectType.ST_TANK_A) {
                             ++p.kills[0];
-                            p.stageScore += 100;
+                            p.stageScore += e.getKillScore();
                             p.killTime.add(((TankActivity) context).playtime);
                         } else if (e.type == ObjectType.ST_TANK_B) {
                             ++p.kills[1];
-                            p.stageScore += 200;
+                            p.stageScore += e.getKillScore();
                             p.killTime.add(((TankActivity) context).playtime);
                         } else if (e.type == ObjectType.ST_TANK_C) {
                             ++p.kills[2];
-                            p.stageScore += 300;
+                            p.stageScore += e.getKillScore();
                             p.killTime.add(((TankActivity) context).playtime);
                         } else if (e.type == ObjectType.ST_TANK_D) {
+                            if(e.isHVE() && !e.isDestroyed()) {
+                                continue;
+                            }
                             ++p.kills[3];
-                            p.stageScore += 400;
+                            p.stageScore += e.getKillScore();
                             p.killTime.add(((TankActivity) context).playtime);
                         }
                     }
@@ -1754,6 +1761,15 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         switch(resp) {
             case 0:
                 for(int i = 0; i < Enemies.size(); i++) {
+                    if(Enemies.get(i).isHVE()) {
+                        if(((HVE)Enemies.get(i)).getShiled() > 0) {
+                            int hveShield = ((HVE)Enemies.get(i)).reduceShiled(1);
+                            if(hveShield > 0 ) {
+                                continue;
+                            }
+                        }
+                    }
+                    Log.d("BOMB","BOMBED " + Enemies.get(i).isHVE());
                     Enemies.get(i).setDestroyed();
                     Enemies.get(i).svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
                 }
@@ -1909,12 +1925,17 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                     pauseNoAds();
                     TankView.EVENT = TankView.GAME_OVER;
                     sendPlayerInfo(GAME_OVER);
-                    if (((TankActivity) context).mInterstitialAd == null) {
+                    if(CheckAdd.getInstance().transition()) {
+                        if (((TankActivity) context).mInterstitialAd == null) {
 //                        ((TankActivity) context).loadInterstitialAd();
-                        ((TankActivity) context).loadRewardedInterstitialAd();
-                    }
+                            ((TankActivity) context).loadRewardedInterstitialAd();
+                        }
 //                    ((TankActivity) context).showInterstitialAd();
-                    ((TankActivity) context).showRewardedInterstitialAd(false);
+                        ((TankActivity) context).showRewardedInterstitialAd(false);
+                    }
+                    else {
+                        resumeNoAds();
+                    }
                     doGameOver();
                 }
             }
@@ -1924,12 +1945,17 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         if((gameover || stageComplete) && showScoreTmr == 5) {
             if(!showingScore) {
                 pauseNoAds();
-                if (((TankActivity) context).mInterstitialAd == null) {
+                if(CheckAdd.getInstance().transition()) {
+                    if (((TankActivity) context).mInterstitialAd == null) {
 //                    ((TankActivity) context).loadInterstitialAd();
-                    ((TankActivity) context).loadRewardedInterstitialAd();
-                }
+                        ((TankActivity) context).loadRewardedInterstitialAd();
+                    }
 //                ((TankActivity) context).showInterstitialAd();
-                ((TankActivity) context).showRewardedInterstitialAd(false);
+                    ((TankActivity) context).showRewardedInterstitialAd(false);
+                }
+                else {
+                    resumeNoAds();
+                }
             }
         }
 
@@ -2712,6 +2738,14 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         if(tag.equals(TankActivity.GRENADE)) {
             for(Enemy e:Enemies) {
+                if(e.isHVE()) {
+                    if(((HVE)e).getShiled() > 0) {
+                        int hveShield = ((HVE)e).reduceShiled(1);
+                        if(hveShield > 0 ) {
+                            continue;
+                        }
+                    }
+                }
                 e.setDestroyed();
                 e.svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
             }
@@ -3107,8 +3141,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         TankView.EVENT = TankView.PAUSE;
 //        ((TankActivity) context).loadInterstitialAd();
 //        ((TankActivity) context).showInterstitialAd();
-        ((TankActivity) context).loadRewardedInterstitialAd();
-        ((TankActivity) context).showRewardedInterstitialAd(true);
+        if(CheckAdd.getInstance().click()) {
+            ((TankActivity) context).loadRewardedInterstitialAd();
+            ((TankActivity) context).showRewardedInterstitialAd(true);
+        }
     }
 
     public void _pause() {
@@ -3123,8 +3159,10 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
                 TankView.EVENT = TankView.PAUSE;
 //                ((TankActivity) context).loadInterstitialAd();
 //                ((TankActivity) context).showInterstitialAd();
-                ((TankActivity) context).loadRewardedInterstitialAd();
-                ((TankActivity) context).showRewardedInterstitialAd(true);
+                if(CheckAdd.getInstance().click()) {
+                    ((TankActivity) context).loadRewardedInterstitialAd();
+                    ((TankActivity) context).showRewardedInterstitialAd(true);
+                }
             }
         });
 

@@ -9,13 +9,15 @@ import android.util.Log;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.wifidirect.WifiDirectManager;
 
 import java.util.ArrayList;
 
 public class HVE extends Enemy{
 
     private  int frame_time = 7;
-    private int boostShield = 20;
+    private final int MAX_LIFE = 20;
+    private int boostShield = MAX_LIFE;
     private ArrayList<Point> hView;
     private boolean spawned = false;
     int view_frame_delay;
@@ -23,6 +25,9 @@ public class HVE extends Enemy{
     int view_frame;
     Paint vPaint;
     private static boolean viewing = false;
+    private boolean bombed = false;
+    int dframe = 0;
+    int dframe_delay;
 
     public HVE(int x, int y, float v, float vb) {
         super(ObjectType.ST_TANK_D, 1, x, y );
@@ -36,6 +41,7 @@ public class HVE extends Enemy{
         view_frame = 0;
         vPaint = new Paint();
         vPaint.setColor(Color.GREEN);
+        killScore = "600";
 
     }
 
@@ -95,6 +101,12 @@ public class HVE extends Enemy{
         }
     }
 
+//    public void setDestroyed() {
+//        super.setDestroyed();
+//        dframe = 0;
+//        dframe_delay = dsprite.frame_time;
+//    }
+
     public boolean collidsWithBullet(Bullet bullet) {
         if(isDestroyed() || respawn) {
             return false;
@@ -123,6 +135,40 @@ public class HVE extends Enemy{
             }
         }
         return false;
+    }
+
+    /**
+     * Registers the bomb to ensures that the explosion kills enemy only
+     * the first time
+     * @param id - id of the bomb
+     * @return returns true if this is the first encounter with the explosion, false otherwise
+     */
+    public boolean collideBomb(int id) {
+        if(id == bombID){
+            return false;
+        }
+        bombID = id;
+        boostShield -= 5;
+        if(boostShield <= 0) {
+            svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+            setDestroyed();
+        }
+        return true;
+    }
+
+    public int getShiled() {
+        return boostShield;
+    }
+
+    public int reduceShiled(int amount) {
+        boostShield -= amount;
+        if(boostShield > 0) {
+            bombed = true;
+            dframe = 0;
+            dframe_delay = dsprite.frame_time;
+            SoundManager.playSound(Sounds.TANK.EXPLOSION, 1.5f,1);
+        }
+        return boostShield;
     }
 
     public void getView(Player p) {
@@ -167,18 +213,20 @@ public class HVE extends Enemy{
         else if(!destroyed) {
 
             frame %= sprite.frame_count;
-//            Log.d("DRAWE", sprite.frame_count+" "+typeVal+" "+frame);
+            int l = (int)(((float)boostShield/MAX_LIFE)*w);
+            canvas.drawLine(x,y-(h/8),x+l, y-h/8,vPaint);
             canvas.drawBitmap(TankView.tankBitmap.get(sprite.frame_count * typeVal + frame).get(4*lifeFrame+direction),x,y,null);
             if(frame_delay <= 0) {
                 int mod = (int)Math.ceil(boostShield/4);
                 frame = (frame + 1) % sprite.frame_count;
                 frame_delay = frame_time;//sprite.frame_time;
-                if(mod <= 1) {
-                    lifeFrame = 1;
-                }
-                else {
-                    lifeFrame = (lifeFrame + 1) % mod;
-                }
+                lifeFrame = (lifeFrame + 1) % 5;
+//                if(mod <= 1) {
+//                    lifeFrame = 1;
+//                }
+//                else {
+//                    lifeFrame = (lifeFrame + 1) % mod;
+//                }
             }
             else{
                 --frame_delay;
@@ -214,8 +262,24 @@ public class HVE extends Enemy{
                     viewing = false;
                 }
             }
+
+            if(bombed) {
+                if (dframe < dsprite.frame_count) {
+                    canvas.drawBitmap(dbitmap[dframe], x - (int) (w / 2), y - (int) (h / 2), null);
+                    if(dframe_delay <= 0) {
+                        dframe = dframe + 1;
+                        dframe_delay = dsprite.frame_time;
+                    }
+                    else{
+                        --dframe_delay;
+                    }
+                } else if (dframe == dsprite.frame_count) {
+                    bombed = false;
+//                respawn();
+                }
+            }
         }
-        else if(!recycle) {
+        else if(!recycle || bombed) {
             if (frame < dsprite.frame_count) {
                 canvas.drawBitmap(dbitmap[frame], x - (int) (w / 2), y - (int) (h / 2), null);
                 if(killed){

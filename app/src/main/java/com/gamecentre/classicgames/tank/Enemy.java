@@ -85,6 +85,10 @@ public class Enemy extends Tank{
         this.group = group;
     }
 
+    public int getKillScore() {
+        return Integer.parseInt(killScore);
+    }
+
     public boolean isHVE() {
         return hve;
     }
@@ -434,6 +438,12 @@ public class Enemy extends Tank{
         return false;
     }
 
+    /**
+     * Registers the bomb to ensures that the explosion kills enemy only
+     * the first time
+     * @param id - id of the bomb
+     * @return returns true if this is the first encounter with the explosion, false otherwise
+     */
     public boolean collideBomb(int id) {
         if(id == bombID){
             return false;

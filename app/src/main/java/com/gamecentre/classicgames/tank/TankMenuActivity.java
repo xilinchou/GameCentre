@@ -542,7 +542,9 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                         SoundManager.playSound(Sounds.TANK.CLICK);
 
 //                        showInterstitial();
-                        showRewardedInterstitialAd(true);
+//                        if(CheckAdd.getInstance().click()) {
+                            showRewardedInterstitialAd(false);
+//                        }
                     }
                 });
     }
@@ -825,6 +827,8 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
                             editor.putInt(TankActivity.AD_COIN,adcoin);
                             editor.apply();
                             SoundManager.playSound(Sounds.TANK.EARN_GOLD);
+                            String msg = String.format(Locale.ENGLISH, "Got %s Ad coins", TankMenuActivity.this.getResources().getString(R.string.adCoin_bonus));
+                            Toast.makeText(TankMenuActivity.this, msg, Toast.LENGTH_SHORT).show();
                         }
                         openPlayerSearchView();
                     }

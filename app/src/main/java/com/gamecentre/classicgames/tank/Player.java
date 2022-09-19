@@ -44,6 +44,7 @@ public class Player extends Tank{
     public int bonusID = -10;
     private boolean stop_moving = true;
     private boolean stop_shooting = true;
+    int bombID = -1;
 
 
 
@@ -487,6 +488,22 @@ public class Player extends Tank{
 
     public int getMines() {
         return mines;
+    }
+
+    /**
+     * Registers the bomb to ensures that the explosion kills enemy only
+     * the first time
+     * @param id - id of the bomb
+     * @return returns true if this is the first encounter with the explosion, false otherwise
+     */
+    public boolean collideBomb(int id) {
+        if(id == bombID){
+            return false;
+        }
+        bombID = id;
+        svrKill = TankView.twoPlayers && WifiDirectManager.getInstance().isServer();
+        setDestroyed();
+        return true;
     }
 
     public int collidsWithBonus(Bonus b) {

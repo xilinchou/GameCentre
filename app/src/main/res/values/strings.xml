@@ -62,6 +62,7 @@
     <string name="game6h_gold">x30</string>
     <string name="adCoin">x20</string>
     <string name="vidGold">5</string>
+    <string name="adCoin_bonus">2</string>
 
 
     <string name="starboat_count">x2</string>
