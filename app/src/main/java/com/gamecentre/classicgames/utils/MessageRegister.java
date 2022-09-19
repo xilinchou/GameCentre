@@ -15,6 +15,7 @@ public class MessageRegister {
     private ButtonListener btnListener;
     private WifiDialogListener wdListener;
     private ArrayList<ServiceListener> srvListener = new ArrayList<>();
+    private TransanctionListener transListener;
 
     public static MessageRegister getInstance() {
         return instance;
@@ -30,6 +31,10 @@ public class MessageRegister {
 
     public void setServiceListener(ServiceListener l) {
         srvListener.add(l);
+    }
+
+    public void setTransListener(TransanctionListener l) {
+        transListener = l;
     }
 
 
@@ -48,5 +53,9 @@ public class MessageRegister {
         for(ServiceListener l:srvListener) {
             l.onServiceMessageReceived(games, life_time, h6);
         }
+    }
+
+    public void registerTransactionListener() {
+        transListener.onPurchaseSuccessful();
     }
 }

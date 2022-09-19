@@ -10,15 +10,19 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.billing.TransactionManager;
 import com.gamecentre.classicgames.sound.SoundManager;
 import com.gamecentre.classicgames.sound.Sounds;
 import com.gamecentre.classicgames.utils.CONST;
+import com.gamecentre.classicgames.utils.MessageRegister;
+import com.gamecentre.classicgames.utils.TransanctionListener;
 
-public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
+public class TankPurchaseDialog extends Dialog implements View.OnClickListener, TransanctionListener {
     TankView mTankView;
 
     public AppCompatActivity activity;
@@ -71,6 +75,8 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
 
         setContentView(R.layout.activity_tank_purchase);
         setCancelable(false);
+
+        MessageRegister.getInstance().setTransListener(this);
 
         watchBtn = findViewById(R.id.watchBtn);
         cancelBtn = findViewById(R.id.buyCancelBtn);
@@ -185,7 +191,7 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
                 goldTxt.setText(String.format("%s", goldCount));
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt(TankActivity.STAR, star);
-                editor.putInt(TankActivity.STAR, boat);
+                editor.putInt(TankActivity.BOAT, boat);
                 editor.putInt(TankActivity.GOLD, goldCount);
                 editor.apply();
                 SoundManager.playSound(Sounds.TANK.BUY_ITEM);
@@ -351,6 +357,8 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
             }
         }
         else if (id == R.id.buy_gold || id == R.id.gold2 || id == R.id.gold3){
+//            ((TankMenuActivity) activity).makePurchase();
+            TransactionManager.getInstnce().makePurchase(activity);
 
         }
 //                else if (id == R.id.stashTxt) {
@@ -381,6 +389,23 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener{
         }
         updateBonus();
     }
+
+    @Override
+    public void onPurchaseSuccessful() {
+        Log.d("PURCHASE", "Purchase successful listener");
+        Toast.makeText(this.activity, "Purchase successful listener", Toast.LENGTH_SHORT).show();
+        int goldCount = settings.getInt(TankActivity.GOLD,0);
+        goldCount += 200;
+        goldTxt.setText(String.format("%s", goldCount));
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(TankActivity.GOLD, goldCount);
+        editor.apply();
+        SoundManager.playSound(Sounds.TANK.BUY_ITEM);
+//        ((TankMenuActivity) activity).consumePurchase();
+        TransactionManager.getInstnce().consumePurchase();
+
+    }
+
 
 //    @Override
 //    public void onClick(View view) {

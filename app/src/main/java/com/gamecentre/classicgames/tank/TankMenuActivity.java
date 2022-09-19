@@ -18,6 +18,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.gamecentre.classicgames.R;
+import com.gamecentre.classicgames.billing.TransactionManager;
 import com.gamecentre.classicgames.connection.ClientConnectionThread;
 import com.gamecentre.classicgames.connection.ServerConnectionThread;
 import com.gamecentre.classicgames.model.Game;
@@ -119,7 +120,7 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_tank_menu);
-        billingSetup();
+        TransactionManager.getInstnce().billingSetup(this);
         MessageRegister.getInstance().setMsgListener(this);
         settings = getSharedPreferences("TankSettings", 0);
 
@@ -190,143 +191,6 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         MessageRegister.getInstance().setServiceListener(this);
         opened = true;
     }
-
-    private void billingSetup() {
-
-        billingClient = BillingClient.newBuilder(this)
-                .setListener(purchasesUpdatedListener)
-                .enablePendingPurchases()
-                .build();
-
-        billingClient.startConnection(new BillingClientStateListener() {
-
-            @Override
-            public void onBillingSetupFinished(
-                    @NonNull BillingResult billingResult) {
-
-                if (billingResult.getResponseCode() ==
-                        BillingClient.BillingResponseCode.OK) {
-                    Log.i(TAG, "OnBillingSetupFinish connected");
-                    queryProduct();
-                } else {
-                    Log.i(TAG, "OnBillingSetupFinish failed");
-                }
-            }
-
-            @Override
-            public void onBillingServiceDisconnected() {
-                Log.i(TAG, "OnBillingSetupFinish connection lost");
-            }
-        });
-    }
-
-    private final PurchasesUpdatedListener purchasesUpdatedListener = new PurchasesUpdatedListener() {
-        @Override
-        public void onPurchasesUpdated(BillingResult billingResult,
-                                       List<Purchase> purchases) {
-
-            if (billingResult.getResponseCode() ==
-                    BillingClient.BillingResponseCode.OK
-                    && purchases != null) {
-                for (Purchase purchase : purchases) {
-                    completePurchase(purchase);
-                }
-            } else if (billingResult.getResponseCode() ==
-                    BillingClient.BillingResponseCode.USER_CANCELED) {
-                Log.i(TAG, "onPurchasesUpdated: Purchase Canceled");
-            } else {
-                Log.i(TAG, "onPurchasesUpdated: Error");
-            }
-        }
-    };
-
-    private void queryProduct() {
-
-        QueryProductDetailsParams queryProductDetailsParams =
-                QueryProductDetailsParams.newBuilder()
-                        .setProductList(
-                                ImmutableList.of(
-                                        QueryProductDetailsParams.Product.newBuilder()
-                                                .setProductId("one_button_click")
-                                                .setProductType(
-                                                        BillingClient.ProductType.INAPP)
-                                                .build()))
-                        .build();
-
-        billingClient.queryProductDetailsAsync(
-                queryProductDetailsParams,
-                new ProductDetailsResponseListener() {
-                    public void onProductDetailsResponse(
-                            @NonNull BillingResult billingResult,
-                            @NonNull List<ProductDetails> productDetailsList) {
-
-                        if (!productDetailsList.isEmpty()) {
-                            productDetails = productDetailsList.get(0);
-                            runOnUiThread(() -> {
-                                //TODO Product is available
-//                                binding.buyButton.setEnabled(true);
-//                                binding.statusText.setText(productDetails.getName());
-                            });
-                        } else {
-                            Log.i(TAG, "onProductDetailsResponse: No products");
-                        }
-                    }
-                }
-        );
-    }
-
-    public void makePurchase(View view) {
-
-        BillingFlowParams billingFlowParams =
-                BillingFlowParams.newBuilder()
-                        .setProductDetailsParamsList(
-                                ImmutableList.of(
-                                        BillingFlowParams.ProductDetailsParams.newBuilder()
-                                                .setProductDetails(productDetails)
-                                                .build()
-                                )
-                        )
-                        .build();
-
-        billingClient.launchBillingFlow(this, billingFlowParams);
-    }
-
-    private void completePurchase(Purchase item) {
-
-        purchase = item;
-
-        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-            runOnUiThread(() -> {
-                //TODO Purchase successful
-//                binding.consumeButton.setEnabled(true);
-//                binding.statusText.setText("Purchase Complete");
-            });
-    }
-
-    //Should be called once purchase is successful
-
-    public void consumePurchase(View view) {
-        ConsumeParams consumeParams =
-                ConsumeParams.newBuilder()
-                        .setPurchaseToken(purchase.getPurchaseToken())
-                        .build();
-
-        ConsumeResponseListener listener = new ConsumeResponseListener() {
-            @Override
-            public void onConsumeResponse(BillingResult billingResult,
-                                          @NonNull String purchaseToken) {
-                if (billingResult.getResponseCode() ==
-                        BillingClient.BillingResponseCode.OK) {
-                    runOnUiThread(() -> {
-//                        binding.consumeButton.setEnabled(false);
-//                        binding.statusText.setText("Purchase consumed");
-                    });
-                }
-            }
-        };
-        billingClient.consumeAsync(consumeParams, listener);
-    }
-
 
 
     protected void onResume() {
