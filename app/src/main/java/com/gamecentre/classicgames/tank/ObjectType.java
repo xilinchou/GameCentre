@@ -50,5 +50,7 @@ public enum ObjectType {
 
     ST_FIRE,
 
+    ST_MINE,
+
     ST_NONE
 }

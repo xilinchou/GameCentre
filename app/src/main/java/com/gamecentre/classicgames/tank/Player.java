@@ -547,6 +547,9 @@ public class Player extends Tank{
                 case Bonus.BOAT:
                     applyBoat();
                     break;
+                case Bonus.MINE:
+                    applyMine();
+                    break;
             }
             if(player != 0) {
                 b.clearBonus();

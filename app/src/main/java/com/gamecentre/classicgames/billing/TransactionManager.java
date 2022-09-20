@@ -117,7 +117,7 @@ public class TransactionManager {
                             activity.runOnUiThread(() -> {
                                 //TODO Product is available
                                 Log.d("QUERY", "Product is available");
-                                Toast.makeText(activity, "Product is available", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(activity, "Product is available", Toast.LENGTH_SHORT).show();
 //                                binding.buyButton.setEnabled(true);
 //                                binding.statusText.setText(productDetails.getName());
                             });
@@ -156,7 +156,7 @@ public class TransactionManager {
             activity.runOnUiThread(() -> {
                 //TODO Purchase successful
                 Log.d("PURCHASE", "Purchase successful");
-                Toast.makeText(this.activity, "Purchase successful", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this.activity, "Purchase successful", Toast.LENGTH_SHORT).show();
                 MessageRegister.getInstance().registerTransactionListener();
 //                binding.consumeButton.setEnabled(true);
 //                binding.statusText.setText("Purchase Complete");

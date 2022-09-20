@@ -32,6 +32,7 @@ public class Bonus extends GameObjects {
     public static final int STAR = 5;
     public static final int GUN = 6;
     public static final int BOAT = 7;
+    public static final int MINE = 8;
     public static boolean available = false;
     public static int id = 0;
 
@@ -47,6 +48,7 @@ public class Bonus extends GameObjects {
             Bitmap bm = Bitmap.createBitmap(TankView.graphics, sprite.x, sprite.y+(i*sprite.h), sprite.w, sprite.h);
             bitmaps.add(bm);
         }
+        bitmaps.add(TankView.mineBitmap);
     }
 
     public void setBonus() {
@@ -63,7 +65,7 @@ public class Bonus extends GameObjects {
         this.y = (int)(Math.random()*TankView.HEIGHT- bitmaps.get(0).getHeight());
         id++;
         SoundManager.playSound(Sounds.TANK.POWERUP);
-        if(bonus >= 0 && bonus <= 7) {
+        if(bonus >= 0 && bonus <= 8) {
             bonusBm = bitmaps.get(bonus);
             on = true;
             available = true;
@@ -177,11 +179,14 @@ public class Bonus extends GameObjects {
         else if(p < 0.83) {
             return 5;
         }
-        else if(p < 0.9) {
+        else if(p < 0.875) {
             return 6;
         }
-        else {
+        else if(p < 0.975){
             return 7;
+        }
+        else {
+            return 8;
         }
     }
 
@@ -244,7 +249,7 @@ public class Bonus extends GameObjects {
         if(!available) {
             return;
         }
-        if(bonus >= 0 && bonus <= 7) {
+        if(bonus >= 0 && bonus <= 8) {
             if(blinkTmr > 0) {
                 --blinkTmr;
             }

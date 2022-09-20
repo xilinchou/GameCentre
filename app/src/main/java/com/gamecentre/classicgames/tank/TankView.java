@@ -144,6 +144,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
     private Player P2, P1;
     private Eagle eagle;
     public static ArrayList<Bitmap> bombBitmap;
+    public static Bitmap mineBitmap;
     public static Sprite bombSprite;
     public static Bitmap[][] fireBitmap;
     public static Sprite fireSprite;
@@ -433,6 +434,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
 
         SpriteObjects.getInstance().insert(ObjectType.ST_FIRE, 0, 0, 16, 16, 4, 1, true);
 
+        SpriteObjects.getInstance().insert(ObjectType.ST_MINE, 0, 0, 32, 32, 4, 1, true);
+
 
 
     }
@@ -680,6 +683,7 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         graphics = BitmapFactory.decodeResource(context.getResources(), R.drawable.tanktexture);
         Bitmap bombBm = BitmapFactory.decodeResource(context.getResources(), R.drawable.bomb);
         Bitmap fireBm = BitmapFactory.decodeResource(context.getResources(), R.drawable.fire);
+        mineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bonus_mine);
 
         Bitmap test = Bitmap.createBitmap(graphics,0,0,32,32);
         int h = test.getHeight();
@@ -704,6 +708,8 @@ public class TankView extends View implements RemoteMessageListener, ButtonListe
         for(int i = 0; i < 3; i++) {
             bombBitmap.add(Bitmap.createBitmap(bombBm,i*bombSprite.w, 0, bombSprite.w, bombSprite.h));
         }
+
+        mineBitmap = Bitmap.createScaledBitmap(mineBitmap,(int)(RESIZE*mineBitmap.getWidth()/SCALE),(int)(RESIZE*mineBitmap.getHeight()/SCALE),false);
 
         fireBm = Bitmap.createScaledBitmap(fireBm,(int)(RESIZE*fireBm.getWidth()/SCALE),(int)(RESIZE*fireBm.getHeight()/SCALE),false);
         fireSprite = SpriteObjects.getInstance().getData(ObjectType.ST_FIRE);
