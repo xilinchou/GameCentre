@@ -35,7 +35,6 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener, 
 
     TankTextView grenadeTxt, helmetTxt, clockTxt, shovelTxt, tankTxt,starTxt, gunTxt, boatTxt, mineTxt, goldTxt, retryTxt, adCoinTxt;
 
-
     private static String TOTAL_GOLD = "TOTAL GOLD";
 
     public TankPurchaseDialog(AppCompatActivity a, TankView mTankView) {
@@ -57,9 +56,6 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener, 
         this.mTankView = null;
         this.dialog = d;
     }
-
-
-
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -155,7 +151,6 @@ public class TankPurchaseDialog extends Dialog implements View.OnClickListener, 
 
         updateBonus();
     }
-
 
     public void updateBonus() {
         grenadeTxt.setText(String.valueOf(settings.getInt(TankActivity.GRENADE,3)));

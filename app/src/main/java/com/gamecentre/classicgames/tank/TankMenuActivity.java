@@ -124,14 +124,6 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         MessageRegister.getInstance().setMsgListener(this);
         settings = getSharedPreferences("TankSettings", 0);
 
-//        grenadeTxt = findViewById(R.id.grenadeCountTxt);
-//        helmetTxt = findViewById(R.id.shieldCountTxt);
-//        clockTxt = findViewById(R.id.clockCountTxt);
-//        shovelTxt = findViewById(R.id.shovelCountTxt);
-//        tankTxt = findViewById(R.id.tankCountTxt);
-//        starTxt = findViewById(R.id.starCountTxt);
-//        gunTxt = findViewById(R.id.gunCountTxt);
-//        boatTxt = findViewById(R.id.boatCountTxt);
         goldTxt = findViewById(R.id.goldCountTxt);
         shopImg = findViewById(R.id.shop);
         retryImg = findViewById(R.id.gameImg);
@@ -198,12 +190,12 @@ public class TankMenuActivity extends AppCompatActivity implements WifiDialogLis
         opened = true;
     }
 
+
     @Override
     protected void onDestroy() {
         opened = false;
         super.onDestroy();
     }
-
 
     public void onServiceMessageReceived(int games, long time_left, boolean h6) {
         if(opened){
